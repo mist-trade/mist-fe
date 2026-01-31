@@ -66,8 +66,6 @@ function KPanel(props: KPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
 
-  console.log("mergeK 数据:", mergeK);
-
   const setOption = () => {
     // 准备数据
     const dates = k.map((item) => {
@@ -82,35 +80,153 @@ function KPanel(props: KPanelProps) {
     ]);
     const volumes = k.map((item) => item.amount);
 
-    // 准备 mergeK 矩形数据
+    // 计算 K 线数据的最小值和最大值，用于 y 轴自适应
+    const prices = k.flatMap(item => [item.highest, item.lowest, item.open, item.close]);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const priceRange = maxPrice - minPrice;
+
+    // 准备 mergeK 矩形数据 - 标记哪些K线属于合并K线
+    const mergedKIndices = new Set<number>();
     const mergeKRects = mergeK.map((merge) => {
       const startTime = new Date(merge.startTime);
       const endTime = new Date(merge.endTime);
       
       const startIndex = k.findIndex((item) => {
         const kTime = new Date(item.time);
-        return kTime.toDateString() === startTime.toDateString();
+        return kTime.getTime() === startTime.getTime();
       });
       
       const endIndex = k.findIndex((item) => {
         const kTime = new Date(item.time);
-        return kTime.toDateString() === endTime.toDateString();
+        return kTime.getTime() === endTime.getTime();
       });
       
       if (startIndex === -1 || endIndex === -1) {
         return null;
       }
       
-      return {
-        startIndex,
-        endIndex,
-        highest: merge.highest,
-        lowest: merge.lowest,
-        trend: merge.trend,
-      };
+      // 只标记真正的合并K线（包含多个原始K线）
+      // 如果是合并K线（包含多个原始K线），才添加到集合中
+      if (endIndex > startIndex) {
+        for (let i = startIndex; i <= endIndex; i++) {
+          mergedKIndices.add(i);
+        }
+        return {
+          startIndex,
+          endIndex,
+          highest: merge.highest,
+          lowest: merge.lowest,
+          trend: merge.trend,
+        };
+      }
+      
+      return null;
     }).filter((item) => item !== null);
 
-    // 创建 custom series 绘制 mergeK 矩形
+    // 创建 custom series 绘制 mergeK 的虚线边框
+    // 这里只会在被合并的K线上绘制虚线框
+    const mergeKBorderSeries = {
+      name: "mergeK-border",
+      type: "custom" as const,
+      renderItem: (params: { dataIndex: number }, api) => {
+        const kIndex = params.dataIndex;
+        
+        // 只渲染属于合并K线的索引，并且需要是合并K线（而不是单根K线）
+        if (!mergedKIndices.has(kIndex)) {
+          return null;
+        }
+        
+        // 检查这个K线是否属于一个真正的合并范围（而不是单根K线）
+        const isInMergeRange = mergeKRects.some(rect => 
+          rect && kIndex >= rect.startIndex && kIndex <= rect.endIndex
+        );
+        
+        if (!isInMergeRange) {
+          return null;
+        }
+        
+        const item = k[kIndex];
+        const open = item.open;
+        const close = item.close;
+        const lowest = item.lowest;
+        const highest = item.highest;
+        
+        // 获取坐标点
+        const highPoint = api.coord([kIndex, highest]);
+        const lowPoint = api.coord([kIndex, lowest]);
+        const openPoint = api.coord([kIndex, open]);
+        const closePoint = api.coord([kIndex, close]);
+        
+        // 获取 K 线柱子的宽度
+        const sizeResult = api.size?.([1, 0]) || 20;
+        const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
+        const halfBarWidth = barWidth * 0.4;
+        
+        const isUp = close > open;
+        const color = isUp ? "#ef5350" : "#26a69a";
+        
+        // K 线实体矩形的边框
+        const rectTop = Math.min(openPoint[1], closePoint[1]);
+        const rectHeight = Math.abs(openPoint[1] - closePoint[1]) || 1;
+        
+        return {
+          type: "group",
+          children: [
+            // 上影线虚线
+            {
+              type: "line",
+              shape: {
+                x1: highPoint[0],
+                y1: highPoint[1],
+                x2: highPoint[0],
+                y2: rectTop,
+              },
+              style: {
+                stroke: color,
+                lineWidth: 1.5,
+                lineDash: [3, 3],
+              },
+            },
+            // 下影线虚线
+            {
+              type: "line",
+              shape: {
+                x1: lowPoint[0],
+                y1: lowPoint[1],
+                x2: lowPoint[0],
+                y2: rectTop + rectHeight,
+              },
+              style: {
+                stroke: color,
+                lineWidth: 1.5,
+                lineDash: [3, 3],
+              },
+            },
+            // 矩形虚线边框
+            {
+              type: "rect",
+              shape: {
+                x: highPoint[0] - halfBarWidth,
+                y: rectTop,
+                width: barWidth * 0.8,
+                height: rectHeight,
+              },
+              style: {
+                fill: "transparent",
+                stroke: color,
+                lineWidth: 1.5,
+                lineDash: [3, 3],
+              },
+            },
+          ],
+          z: 20,
+        };
+      },
+      data: k.map((_, idx) => idx),
+      z: 20,
+    } as CustomSeriesOption;
+
     const mergeKSeries = {
       name: "mergeK",
       type: "custom" as const,
@@ -118,7 +234,9 @@ function KPanel(props: KPanelProps) {
         const rectIndex = params.dataIndex;
         const rect = mergeKRects[rectIndex];
         
-        if (!rect) return null;
+        if (!rect || rect.startIndex === rect.endIndex) {
+          return null;
+        }
         
         // 获取起始和结束位置的坐标
         const startPoint = api.coord([rect.startIndex, rect.highest]);
@@ -233,6 +351,9 @@ function KPanel(props: KPanelProps) {
       yAxis: [
         {
           scale: true,
+          // 修复 y 轴从 0 开始的问题
+          min: Math.max(0, minPrice - priceRange * 0.05), // 给5%的底部边距
+          max: maxPrice + priceRange * 0.05, // 给5%的顶部边距
           splitArea: {
             show: true,
           },
@@ -245,6 +366,7 @@ function KPanel(props: KPanelProps) {
           axisLine: { show: false },
           axisTick: { show: false },
           splitLine: { show: false },
+          min: 0,
         },
       ],
       dataZoom: [
@@ -275,6 +397,7 @@ function KPanel(props: KPanelProps) {
             borderColor0: "#26a69a",
           },
         },
+        mergeKBorderSeries,
         mergeKSeries,
         {
           name: "成交量",
