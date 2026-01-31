@@ -11,12 +11,12 @@ export default async function K() {
     endDate: "2025-02-21",
   });
 
-  // const mergeK = fetchMergeK(k);
+  const mergeK = fetchMergeK(k);
   const bi = fetchBi(k);
 
   return (
     <Suspense fallback={<KPanelSkeleton />}>
-      <KPanel k={k} bi={bi} />
+      <KPanel k={k} mergeK={mergeK} bi={bi} />
     </Suspense>
   );
 }
