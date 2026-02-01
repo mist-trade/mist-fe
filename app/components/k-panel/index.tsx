@@ -27,7 +27,7 @@ import type { ComposeOption } from "echarts/core";
 import * as echarts from "echarts/core";
 import { LabelLayout, UniversalTransition } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
-import { use, useEffect, useRef } from "react";
+import { use, useCallback, useEffect, useRef } from "react";
 
 echarts.use([
   CandlestickChart,
@@ -63,87 +63,99 @@ interface KPanelProps {
   bi: Promise<IFetchBi[]>;
 }
 
+// 定义合并K线矩形的类型
+interface MergeKRect {
+  startIndex: number;
+  endIndex: number;
+  highest: number;
+  lowest: number;
+  trend: TrendDirection;
+  rectId: number; // 添加唯一的ID用于标识矩形
+}
+
 function KPanel(props: KPanelProps) {
   const k = props.k;
   const mergeK = use(props.mergeK);
   const bi = use(props.bi);
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
+  // 保存合并K线矩形数据
+  const mergeKRectsRef = useRef<MergeKRect[]>([]);
+  // 保存占位符数组
+  const mergeKPlaceholdersRef = useRef<Array<number | null>>([]);
 
-  const setOption = () => {
-    // 准备数据
-    const dates = k.map((item) => {
-      const date = new Date(item.time);
-      return `${date.getMonth() + 1}/${date.getDate()}`;
+  // 计算合并K线矩形的数据
+  const calculateMergeKRects = useCallback(() => {
+    if (k.length === 0 || mergeK.length === 0) return [];
+
+    const mergeKRects: MergeKRect[] = [];
+
+    mergeK.forEach((merge, index) => {
+      const startTime = new Date(merge.startTime);
+      const endTime = new Date(merge.endTime);
+
+      const startIndex = k.findIndex((item) => {
+        const kTime = new Date(item.time);
+        return kTime.getTime() === startTime.getTime();
+      });
+
+      const endIndex = k.findIndex((item) => {
+        const kTime = new Date(item.time);
+        return kTime.getTime() === endTime.getTime();
+      });
+
+      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+        mergeKRects.push({
+          startIndex,
+          endIndex,
+          highest: merge.highest,
+          lowest: merge.lowest,
+          trend: merge.trend,
+          rectId: index, // 使用索引作为ID
+        });
+      }
     });
-    const klineData = k.map((item) => [
-      item.open,
-      item.close,
-      item.lowest,
-      item.highest,
-    ]);
-    const volumes = k.map((item) => item.amount);
 
-    // 计算 K 线数据的最小值和最大值，用于 y 轴自适应
-    const prices = k.flatMap((item) => [
-      item.highest,
-      item.lowest,
-      item.open,
-      item.close,
-    ]);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    const priceRange = maxPrice - minPrice;
+    return mergeKRects;
+  }, [k, mergeK]);
 
-    // 准备 mergeK 矩形数据 - 标记哪些K线属于合并K线
-    const mergedKIndices = new Set<number>();
-    const mergeKRects = mergeK
-      .map((merge) => {
-        const startTime = new Date(merge.startTime);
-        const endTime = new Date(merge.endTime);
+  // 创建占位符数组
+  const createPlaceholders = useCallback(
+    (mergeKRects: MergeKRect[]) => {
+      const placeholders: Array<number | null> = new Array(k.length).fill(null);
 
-        const startIndex = k.findIndex((item) => {
-          const kTime = new Date(item.time);
-          return kTime.getTime() === startTime.getTime();
-        });
+      // 在每个矩形的开始位置放置矩形ID
+      mergeKRects.forEach((rect) => {
+        if (rect.startIndex >= 0 && rect.startIndex < placeholders.length) {
+          placeholders[rect.startIndex] = rect.rectId;
+        }
+      });
 
-        const endIndex = k.findIndex((item) => {
-          const kTime = new Date(item.time);
-          return kTime.getTime() === endTime.getTime();
-        });
+      return placeholders;
+    },
+    [k.length]
+  );
 
-        if (startIndex === -1 || endIndex === -1) {
+  // 创建自定义系列配置
+  const createMergeKSeries = useCallback((): CustomSeriesOption => {
+    return {
+      name: "mergeK",
+      type: "custom",
+      renderItem: (params, api) => {
+        const dataIndex = params.dataIndex;
+        const placeholderValue = mergeKPlaceholdersRef.current[dataIndex];
+
+        // 如果这个位置没有矩形占位符，跳过
+        if (placeholderValue === null) {
           return null;
         }
 
-        // 只标记真正的合并K线（包含多个原始K线）
-        // 如果是合并K线（包含多个原始K线），才添加到集合中
-        if (endIndex > startIndex) {
-          for (let i = startIndex; i <= endIndex; i++) {
-            mergedKIndices.add(i);
-          }
-          return {
-            startIndex,
-            endIndex,
-            highest: merge.highest,
-            lowest: merge.lowest,
-            trend: merge.trend,
-          };
-        }
+        // 根据占位符值找到对应的矩形
+        const rect = mergeKRectsRef.current.find(
+          (r) => r.rectId === placeholderValue
+        );
 
-        return null;
-      })
-      .filter((item) => item !== null);
-
-    // 创建 custom series 绘制 mergeK 的虚线边框
-    const mergeKSeries = {
-      name: "mergeK",
-      type: "custom" as const,
-      renderItem: (params: { dataIndex: number }, api) => {
-        const rectIndex = params.dataIndex;
-        const rect = mergeKRects[rectIndex];
-
-        if (!rect || rect.startIndex === rect.endIndex) {
+        if (!rect) {
           return null;
         }
 
@@ -151,19 +163,24 @@ function KPanel(props: KPanelProps) {
         const startPoint = api.coord([rect.startIndex, rect.highest]);
         const endPoint = api.coord([rect.endIndex, rect.lowest]);
 
+        // 检查坐标是否有效
+        if (!startPoint || !endPoint) {
+          return null;
+        }
+
         // 获取 K 线柱子的宽度信息
-        const sizeResult = api.size?.([1, 0]) || 20;
+        const sizeResult = api.size?.([1, 0]) || [20, 0];
         const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
 
         const halfBarWidth = barWidth * 0.4;
-        // 计算矩形的位置和大小 - 从第一根K线左边缘到最后一根K线右边缘
+        // 计算矩形的位置和大小
         const x = startPoint[0] - halfBarWidth;
         const y = Math.min(startPoint[1], endPoint[1]);
         const width = endPoint[0] - startPoint[0] + barWidth * 0.8;
         const height = Math.abs(startPoint[1] - endPoint[1]);
 
         return {
-          type: "rect" as const,
+          type: "rect",
           shape: {
             x,
             y,
@@ -182,9 +199,43 @@ function KPanel(props: KPanelProps) {
           z: 5,
         };
       },
-      data: mergeKRects.map((_, idx) => idx),
+      // 数据长度与K线数据对齐，使用占位符数组
+      data: mergeKPlaceholdersRef.current,
       z: 5,
-    } as CustomSeriesOption;
+    };
+  }, []);
+
+  const setOption = useCallback(() => {
+    if (!chartRef.current || k.length === 0) return;
+
+    // 计算合并K线矩形数据
+    mergeKRectsRef.current = calculateMergeKRects();
+    // 创建占位符数组
+    mergeKPlaceholdersRef.current = createPlaceholders(mergeKRectsRef.current);
+
+    // 准备数据
+    const dates = k.map((item) => {
+      const date = new Date(item.time);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    });
+    const klineData = k.map((item) => [
+      item.open,
+      item.close,
+      item.lowest,
+      item.highest,
+    ]);
+    const volumes = k.map((item) => item.amount);
+
+    // 计算 K 线数据的最小值和最大值
+    const prices = k.flatMap((item) => [
+      item.highest,
+      item.lowest,
+      item.open,
+      item.close,
+    ]);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const priceRange = maxPrice - minPrice;
 
     const options: ECOption = {
       title: {
@@ -263,9 +314,8 @@ function KPanel(props: KPanelProps) {
       yAxis: [
         {
           scale: true,
-          // 修复 y 轴从 0 开始的问题
-          min: Math.max(0, minPrice - priceRange * 0.05), // 给5%的底部边距
-          max: maxPrice + priceRange * 0.05, // 给5%的顶部边距
+          min: Math.max(0, minPrice - priceRange * 0.05),
+          max: maxPrice + priceRange * 0.05,
           splitArea: {
             show: true,
           },
@@ -309,7 +359,7 @@ function KPanel(props: KPanelProps) {
             borderColor0: "#26a69a",
           },
         },
-        mergeKSeries,
+        createMergeKSeries(),
         {
           name: "成交量",
           type: "bar",
@@ -326,37 +376,28 @@ function KPanel(props: KPanelProps) {
         },
       ],
     };
-    chartRef.current?.setOption(options);
-  };
+
+    chartRef.current.setOption(options, true);
+  }, [k, calculateMergeKRects, createPlaceholders, createMergeKSeries]);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const myCharts = echarts.init(containerRef.current);
-    chartRef.current = myCharts;
+
+    const myChart = echarts.init(containerRef.current);
+    chartRef.current = myChart;
     setOption();
 
     return () => {
       chartRef.current?.dispose();
+      chartRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (chartRef.current && k.length > 0 && mergeK.length > 0) {
       setOption();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [k, mergeK]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      chartRef.current?.resize();
-    };
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  }, [k, mergeK, setOption]);
 
   return (
     <div
