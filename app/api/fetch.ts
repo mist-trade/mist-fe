@@ -37,7 +37,6 @@ export const fetchK = async (data: {
       "Content-Type": "application/json",
     },
   }).then(() => mockKData);
-  // .catch(() => mockKData);
 };
 
 export enum TrendDirection {
