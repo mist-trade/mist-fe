@@ -1,4 +1,6 @@
-import { mockKData } from "./mock";
+// import { mockKData } from "./mock";
+// import { mockKData3002025 } from "./mock-300-2025";
+import { mockCSIData300Real } from "./mock-csi300-real";
 
 export const BASE = "http://127.0.0.1:8008";
 
@@ -30,13 +32,14 @@ export const fetchK = async (data: {
   startDate: string;
   endDate: string;
 }): Promise<IFetchK[]> => {
+  // 其他情况返回原始mock数据
   return fetch(getPath(routes.K), {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
       "Content-Type": "application/json",
     },
-  }).then(() => mockKData);
+  }).then(() => mockCSIData300Real);
 };
 
 export enum TrendDirection {
