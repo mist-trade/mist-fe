@@ -1,6 +1,7 @@
 // import { mockKData } from "./mock";
 // import { mockKData3002025 } from "./mock-300-2025";
-import { mockCSIData300Real } from "./mock-csi300-real";
+// import { mockCSIData300Real } from "./mock-csi300-real";
+import { mockCSI300Data2025Real } from "./mock-csi300-2025-real";
 
 export const BASE = "http://127.0.0.1:8008";
 
@@ -39,7 +40,7 @@ export const fetchK = async (data: {
     headers: {
       "Content-Type": "application/json",
     },
-  }).then(() => mockCSIData300Real);
+  }).then(() => mockCSI300Data2025Real);
 };
 
 export enum TrendDirection {
