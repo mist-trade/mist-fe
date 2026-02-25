@@ -10,14 +10,14 @@ Mist Frontend (mist-fe) - A Next.js application for financial charting and techn
 
 ```bash
 # Development
-npm run dev          # Start development server on http://localhost:3000
+pnpm dev             # Start development server on http://localhost:3000
 
 # Production
-npm run build        # Build for production
-npm run start        # Start production server
+pnpm build           # Build for production
+pnpm start           # Start production server
 
 # Code Quality
-npm run lint         # Run ESLint
+pnpm lint            # Run ESLint
 ```
 
 ## Tech Stack
@@ -49,8 +49,11 @@ app/
 ### Data Flow
 
 1. Server components fetch initial data via `app/api/fetch.ts`
-2. Data flows to `KPanel` client component
-3. ECharts renders K-lines with custom overlays (merge K, trend lines)
+2. **Promises are passed** to `KPanel` client component (not resolved data)
+3. Client uses React 19's `use()` hook to unwrap Promises
+4. ECharts renders K-lines with custom overlays (merge K, trend lines)
+
+**Key Pattern**: Passing unresolved Promises from server to client components enables streaming and progressive rendering. The `use()` hook suspends the component until data is available.
 
 ### Chart Architecture (app/components/k-panel/index.tsx)
 
@@ -80,11 +83,13 @@ const mergeKData = mergeKArray.reduce((acc, item) => {
 **Merge K (合并K)**: Groups consecutive K-lines based on containment relationships to identify trends and reversals.
 
 **Trend Lines (笔)**: Identifies significant price movements with visual overlays. Classified as:
-- Complete (solid lines)
-- Incomplete (dashed lines)
-- Initial (special marking)
+- Complete (`BiType.Complete`) - blue (`#2196f3`)
+- UnComplete (`BiType.UnComplete`) - purple (`#9c27b0`)
+- Initial (`BiType.Initial`) - orange (`#ff9800`)
 
-Color-coded by trend direction and type.
+**Color Scheme**:
+- Up trends: red (`#ef5350`)
+- Down trends: teal (`#26a69a`)
 
 ## Data Structures
 
@@ -105,10 +110,22 @@ interface IMergeK {
   endTime: Date;
   highest: number;
   lowest: number;
-  trend: TrendDirection;  // 'up' | 'down' | 'flat'
+  trend: TrendDirection;  // 'up' | 'down' | 'none'
   mergedCount: number;
   mergedIds: number[];
   mergedData: IFetchK[];
+}
+
+interface IFetchBi {
+  startTime: Date;
+  endTime: Date;
+  highest: number;
+  lowest: number;
+  trend: TrendDirection;
+  type: BiType;  // 'initial' | 'uncomplete' | 'complete'
+  independentCount: number;
+  originIds: number[];
+  originData: IFetchK[];
 }
 ```
 
@@ -123,5 +140,15 @@ interface IMergeK {
 
 - The `/k` route displays the main K-line chart
 - Mock data files in `app/api/` simulate CSI 300 index data for development
+- Active mock file: `mock-csi300-2025-real.ts` (imported in `fetch.ts`)
 - Chart calculations (merge K, trend lines) happen client-side in real-time
-- Recent development focus: fixing chart rendering issues and Chen Theory pattern implementation
+- API calls in `fetch.ts` make HTTP requests but return mock data for development
+
+## API Integration
+
+The backend API (`http://127.0.0.1:8008`) is expected to provide endpoints:
+- `/indicator/k` - K-line data
+- `/chan/merge-k` - Merge K calculations
+- `/chan/bi` - Trend line (Bi) calculations
+
+Currently, the frontend makes fetch requests but resolves with mock data. To connect to a real backend, modify the `.then()` handlers in `fetch.ts` to return actual response data.

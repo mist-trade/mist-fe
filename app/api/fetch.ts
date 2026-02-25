@@ -1,9 +1,7 @@
-// import { mockKData } from "./mock";
-// import { mockKData3002025 } from "./mock-300-2025";
-// import { mockCSIData300Real } from "./mock-csi300-real";
-import { mockCSI300Data2025Real } from "./mock-csi300-2025-real";
+import { getMockData } from "./mock-data";
 
-export const BASE = "http://127.0.0.1:8008";
+export const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8008";
+const TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "10000");
 
 const getPath = (path: string) => `${BASE}${path}`;
 
@@ -33,14 +31,26 @@ export const fetchK = async (data: {
   startDate: string;
   endDate: string;
 }): Promise<IFetchK[]> => {
-  // 其他情况返回原始mock数据
-  return fetch(getPath(routes.K), {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then(() => mockCSI300Data2025Real);
+  try {
+    const response = await fetch(getPath(routes.K), {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(TIMEOUT),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching K data:", error);
+    // Return mock data as fallback
+    return getMockData();
+  }
 };
 
 export enum TrendDirection {
@@ -79,21 +89,45 @@ export interface IFetchBi {
 }
 
 export const fetchMergeK = async (data: IFetchK[]): Promise<IMergeK[]> => {
-  return fetch(getPath(routes.MergeK), {
-    method: "POST",
-    body: JSON.stringify({ k: data }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res.json());
+  try {
+    const response = await fetch(getPath(routes.MergeK), {
+      method: "POST",
+      body: JSON.stringify({ k: data }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(TIMEOUT),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching MergeK data:", error);
+    throw new Error("Failed to fetch MergeK data");
+  }
 };
 
 export const fetchBi = async (data: IFetchK[]): Promise<IFetchBi[]> => {
-  return fetch(getPath(routes.Bi), {
-    method: "POST",
-    body: JSON.stringify({ k: data }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res.json());
+  try {
+    const response = await fetch(getPath(routes.Bi), {
+      method: "POST",
+      body: JSON.stringify({ k: data }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(TIMEOUT),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching Bi data:", error);
+    throw new Error("Failed to fetch Bi data");
+  }
 };
