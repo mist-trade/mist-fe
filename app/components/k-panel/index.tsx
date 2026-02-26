@@ -61,11 +61,11 @@ type ECOption = ComposeOption<
 
 // Re-export types for external use
 export type { KPanelProps } from "./types";
-export type { MergeKRect, BiMappedData, BiStyle } from "./types";
+export type { MergeKRect, BiMappedData, BiStyle, ChannelMappedData } from "./types";
 export type { ECOption };
 
 function KPanel(props: KPanelProps) {
-  const { data, isReady } = useChartData(props.k, props.mergeK, props.bi);
+  const { data, isReady } = useChartData(props.k, props.mergeK, props.bi, props.channel);
   const { setOption } = useChartConfig({
     k: props.k,
     ...(data || {
@@ -73,6 +73,8 @@ function KPanel(props: KPanelProps) {
       biData: [],
       mergeKPlaceholders: [],
       biPlaceholders: [],
+      channelData: [],
+      channelPlaceholders: [],
     }),
   });
   const containerRef = useChartRender({ setOption, isEnabled: isReady });

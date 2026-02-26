@@ -15,8 +15,8 @@ import type {
 } from "echarts/components";
 import type { ComposeOption } from "echarts/core";
 import * as echarts from "echarts/core";
-import type { BiMappedData, MergeKRect } from "../types";
-import { getBiColor, getBiStyle, COLORS } from "../config/chartColors";
+import type { BiMappedData, ChannelMappedData, MergeKRect } from "../types";
+import { getBiColor, getBiStyle, getChannelColor, hexToRgba, COLORS } from "../config/chartColors";
 import {
   GRID_CONFIG,
   DATAZOOM_CONFIG,
@@ -50,6 +50,8 @@ interface UseChartConfigProps {
   biData: BiMappedData[];
   mergeKPlaceholders: Array<number | null>;
   biPlaceholders: Array<number | null>;
+  channelData: ChannelMappedData[];
+  channelPlaceholders: Array<number | null>;
 }
 
 export function useChartConfig({
@@ -58,11 +60,15 @@ export function useChartConfig({
   biData,
   mergeKPlaceholders,
   biPlaceholders,
+  channelData,
+  channelPlaceholders,
 }: UseChartConfigProps) {
   const mergeKRectsRef = useRef<MergeKRect[]>(mergeKRects);
   const biDataRef = useRef<BiMappedData[]>(biData);
   const mergeKPlaceholdersRef = useRef<Array<number | null>>(mergeKPlaceholders);
   const biPlaceholdersRef = useRef<Array<number | null>>(biPlaceholders);
+  const channelDataRef = useRef<ChannelMappedData[]>(channelData);
+  const channelPlaceholdersRef = useRef<Array<number | null>>(channelPlaceholders);
 
   // Update refs using useEffect to avoid accessing refs during render
   useEffect(() => {
@@ -80,6 +86,14 @@ export function useChartConfig({
   useEffect(() => {
     biPlaceholdersRef.current = biPlaceholders;
   }, [biPlaceholders]);
+
+  useEffect(() => {
+    channelDataRef.current = channelData;
+  }, [channelData]);
+
+  useEffect(() => {
+    channelPlaceholdersRef.current = channelPlaceholders;
+  }, [channelPlaceholders]);
 
   // 创建合并k线的数据
   const createMergeKSeries = useCallback((): CustomSeriesOption => {
@@ -202,6 +216,142 @@ export function useChartConfig({
     };
   }, []);
 
+  // 创建中枢的数据
+  const createChannelSeries = useCallback((): CustomSeriesOption => {
+    return {
+      name: "channel",
+      type: "custom",
+      renderItem: (params, api) => {
+        const dataIndex = params.dataIndex;
+        const placeholderValue = channelPlaceholdersRef.current[dataIndex];
+
+        // 如果这个位置没有中枢占位符，跳过
+        if (placeholderValue === null) {
+          return null;
+        }
+
+        // 根据占位符值找到对应的中枢
+        const channel = channelDataRef.current.find(
+          (c) => c.channelId === placeholderValue
+        );
+
+        if (!channel) {
+          return null;
+        }
+
+        // 获取坐标
+        const startPoint = api.coord([channel.startIndex, channel.gg]);
+        const endPoint = api.coord([channel.endIndex, channel.dd]);
+
+        if (!startPoint || !endPoint) {
+          return null;
+        }
+
+        // 获取 K 线柱子的宽度信息
+        const sizeResult = api.size?.([1, 0]) || [20, 0];
+        const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
+        const halfBarWidth = barWidth * 0.4;
+
+        // 计算矩形的位置和大小
+        const x = startPoint[0] - halfBarWidth;
+        const y = Math.min(startPoint[1], endPoint[1]);
+        const width = endPoint[0] - startPoint[0] + barWidth * 0.8;
+        const height = Math.abs(startPoint[1] - endPoint[1]);
+
+        const color = getChannelColor(channel.type);
+        const fillColor = hexToRgba(
+          color,
+          channel.type === "complete" ? 0.15 : 0.08
+        );
+
+        // 获取 zg 和 zd 的 y 坐标
+        const zgY = api.coord([channel.startIndex, channel.zg])?.[1];
+        const zdY = api.coord([channel.startIndex, channel.zd])?.[1];
+        const zgEndY = api.coord([channel.endIndex, channel.zg])?.[1];
+        const zdEndY = api.coord([channel.endIndex, channel.zd])?.[1];
+
+        if (zgY === undefined || zdY === undefined || zgEndY === undefined || zdEndY === undefined) {
+          return null;
+        }
+
+        return {
+          type: "group",
+          children: [
+            // 主填充矩形
+            {
+              type: "rect",
+              shape: {
+                x,
+                y,
+                width,
+                height,
+              },
+              style: {
+                fill: fillColor,
+              },
+              z: 3,
+            },
+            // 上沿线 (zg)
+            {
+              type: "line",
+              shape: {
+                x1: startPoint[0] - halfBarWidth,
+                y1: zgY,
+                x2: endPoint[0] + halfBarWidth,
+                y2: zgEndY,
+              },
+              style: {
+                stroke: color,
+                lineWidth: 2,
+                lineDash: [5, 3],
+                opacity: 0.8,
+              },
+              z: 4,
+            },
+            // 下沿线 (zd)
+            {
+              type: "line",
+              shape: {
+                x1: startPoint[0] - halfBarWidth,
+                y1: zdY,
+                x2: endPoint[0] + halfBarWidth,
+                y2: zdEndY,
+              },
+              style: {
+                stroke: color,
+                lineWidth: 2,
+                lineDash: [5, 3],
+                opacity: 0.8,
+              },
+              z: 4,
+            },
+            // 边框矩形
+            {
+              type: "rect",
+              shape: {
+                x,
+                y,
+                width,
+                height,
+              },
+              style: {
+                fill: "transparent",
+                stroke: color,
+                lineWidth: 1,
+                lineDash: [10, 5],
+                opacity: 0.6,
+              },
+              z: 4,
+            },
+          ],
+        };
+      },
+      data: channelPlaceholdersRef.current,
+      z: 3,
+      silent: false,
+    };
+  }, []);
+
   const setOption = useCallback(
     (chart: echarts.ECharts) => {
       if (!chart || k.length === 0) return;
@@ -283,6 +433,7 @@ export function useChartConfig({
               borderColor0: COLORS.down,
             },
           },
+          createChannelSeries(),
           createMergeKSeries(),
           createBiSeries(),
           {
@@ -305,7 +456,7 @@ export function useChartConfig({
 
       chart.setOption(options, true);
     },
-    [k, createMergeKSeries, createBiSeries]
+    [k, createChannelSeries, createMergeKSeries, createBiSeries]
   );
 
   return { setOption };

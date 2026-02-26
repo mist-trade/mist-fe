@@ -42,7 +42,18 @@
       "Bash(timeout 10 pnpm dev 2>&1 || true)",
       "Bash(pnpm exec tsc --noEmit 2>&1 && echo \"TypeScript compilation successful\")",
       "Bash(pnpm lint 2>&1)",
-      "Bash(pnpm exec jest 2>&1)"
+      "Bash(pnpm exec jest 2>&1)",
+      "Bash(ls:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(./node_modules/.bin/jest --version)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm test:coverage:*)",
+      "Bash(TS_NODE_COMPILER_OPTIONS='{\"\"module\"\":\"\"commonjs\"\"}' pnpm test:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(pnpm ts-node:*)"
     ]
   }
 }

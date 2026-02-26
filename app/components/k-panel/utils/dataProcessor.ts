@@ -1,6 +1,6 @@
 import { TrendDirection } from "@/app/api/fetch";
-import type { IFetchBi, IFetchK, IMergeK } from "@/app/api/fetch";
-import type { BiMappedData, MergeKRect } from "../types";
+import type { IFetchBi, IFetchChannel, IFetchK, IMergeK } from "@/app/api/fetch";
+import type { BiMappedData, ChannelMappedData, MergeKRect } from "../types";
 
 // 计算合并K线矩形的数据
 export const calculateMergeKRects = (
@@ -117,6 +117,81 @@ export const createBiPlaceholders = (
 
     if (midIndex >= 0 && midIndex < placeholders.length) {
       placeholders[midIndex] = biItem.biId;
+    }
+  });
+
+  return placeholders;
+};
+
+// 计算中枢数据
+export const calculateChannelData = (
+  k: IFetchK[],
+  channels: IFetchChannel[],
+  biMappedData: BiMappedData[]
+): ChannelMappedData[] => {
+  if (k.length === 0 || channels.length === 0) {
+    return [];
+  }
+
+  const channelData: ChannelMappedData[] = [];
+
+  channels.forEach((channel, index) => {
+    // 使用 startId/endId 查找 K 线索引
+    const startIndex = k.findIndex((item) => item.id === channel.startId);
+    const endIndex = k.findIndex((item) => item.id === channel.endId);
+
+    // 验证索引有效性
+    if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+      console.warn(`Invalid channel indices: ${startIndex}-${endIndex}, channel startId: ${channel.startId}, endId: ${channel.endId}`);
+      return;
+    }
+
+    // 查找对应的 Bi 数据
+    const channelBiData = channel.bis.map((apiBi) => {
+      const startTime = new Date(apiBi.startTime);
+      const endTime = new Date(apiBi.endTime);
+
+      return biMappedData.find((bi) => {
+        const biStartTime = k[bi.startIndex]?.time;
+        const biEndTime = k[bi.endIndex]?.time;
+        return (
+          biStartTime &&
+          biEndTime &&
+          new Date(biStartTime).getTime() === startTime.getTime() &&
+          new Date(biEndTime).getTime() === endTime.getTime()
+        );
+      });
+    }).filter((bi): bi is BiMappedData => bi !== undefined);
+
+    channelData.push({
+      channelId: index,
+      startIndex,
+      endIndex,
+      zg: channel.zg,
+      zd: channel.zd,
+      gg: channel.gg,
+      dd: channel.dd,
+      trend: channel.trend,
+      type: channel.type,
+      level: channel.level,
+      bis: channelBiData,
+    });
+  });
+
+  return channelData;
+};
+
+// 创建中枢的占位符数组
+export const createChannelPlaceholders = (
+  channelData: ChannelMappedData[],
+  kLength: number
+): Array<number | null> => {
+  const placeholders: Array<number | null> = new Array(kLength).fill(null);
+
+  channelData.forEach((channel) => {
+    // 在起始索引位置放置 channelId（与 MergeK 相同的模式）
+    if (channel.startIndex >= 0 && channel.startIndex < placeholders.length) {
+      placeholders[channel.startIndex] = channel.channelId;
     }
   });
 

@@ -127,7 +127,65 @@ interface IFetchBi {
   originIds: number[];
   originData: IFetchK[];
 }
+
+interface IFetchChannel {
+  zg: number;           // 中枢上沿（中枢最低的高点）
+  zd: number;           // 中枢下沿（中枢最高的低点）
+  gg: number;           // 中枢最高（所有笔的最高点）
+  dd: number;           // 中枢最低（所有笔的最低点）
+  level: ChannelLevel;  // 'bi' | 'duan'
+  type: ChannelType;    // 'complete' | 'uncomplete'
+  startId: number;      // 起始的K线索引
+  endId: number;        // 结束的K线索引
+  trend: TrendDirection;
+  bis: IFetchBi[];      // 组成中枢的笔数组
+}
+
+enum ChannelLevel {
+  Bi = 'bi',      // 笔级别
+  Duan = 'duan',  // 段级别
+}
+
+enum ChannelType {
+  Complete = 'complete',       // 完成中枢
+  UnComplete = 'uncomplete',   // 未完成中枢
+}
 ```
+
+### Chen Theory (缠论) Implementation
+
+**Merge K (合并K)**: Groups consecutive K-lines based on containment relationships to identify trends and reversals.
+
+**Trend Lines (笔)**: Identifies significant price movements with visual overlays. Classified as:
+- Complete (`BiType.Complete`) - blue (`#2196f3`)
+- UnComplete (`BiType.UnComplete`) - purple (`#9c27b0`)
+- Initial (`BiType.Initial`) - orange (`#ff9800`)
+
+**Central Channels (中枢)**: Identifies consolidation zones formed by alternating Bi (笔). A channel requires at least 5 Bi with price overlap. Classified as:
+- Complete - green (`#4caf50`), 15% opacity fill
+- UnComplete - orange (`#ff9800`), 8% opacity fill
+
+**Color Scheme**:
+- Up trends: red (`#ef5350`)
+- Down trends: teal (`#26a69a`)
+- Channel complete: green (`#4caf50`)
+- Channel uncomplete: orange (`#ff9800`)
+
+### Visualization Layers (z-index)
+
+```
+K-line (candlestick):  z=0
+Volume:                z=1
+Channel:               z=3  ← NEW
+Merge K:               z=5
+Bi (trend lines):      z=10
+```
+
+Channels are rendered as multi-layered rectangles with:
+- **Fill rectangle**: Shows overall channel range (dd to gg)
+- **Upper edge line (zg)**: Dashed line at channel's upper edge (lowest high)
+- **Lower edge line (zd)**: Dashed line at channel's lower edge (highest low)
+- **Border rectangle**: Dashed outline for visual clarity
 
 ## Configuration
 

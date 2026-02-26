@@ -1,4 +1,4 @@
-import { fetchK, fetchMergeK, fetchBi } from "@/app/api/fetch";
+import { fetchK, fetchMergeK, fetchBi, fetchChannel } from "@/app/api/fetch";
 import KPanel from "@/app/components/k-panel";
 import KPanelSkeleton from "@/app/components/k-panel/skeleton";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
@@ -14,17 +14,18 @@ async function fetchData() {
 
   const mergeK = fetchMergeK(k);
   const bi = fetchBi(k);
+  const channel = bi.then((biData) => fetchChannel(biData)); // Channel 依赖 Bi
 
-  return { k, mergeK, bi };
+  return { k, mergeK, bi, channel };
 }
 
 export default async function K() {
-  const { k, mergeK, bi } = await fetchData();
+  const { k, mergeK, bi, channel } = await fetchData();
 
   return (
     <ErrorBoundary>
       <Suspense fallback={<KPanelSkeleton />}>
-        <KPanel k={k} mergeK={mergeK} bi={bi} />
+        <KPanel k={k} mergeK={mergeK} bi={bi} channel={channel} />
       </Suspense>
     </ErrorBoundary>
   );

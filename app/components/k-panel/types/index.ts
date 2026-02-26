@@ -1,6 +1,9 @@
 import {
   BiType,
+  ChannelLevel,
+  ChannelType,
   IFetchBi,
+  IFetchChannel,
   IFetchK,
   IMergeK,
   TrendDirection,
@@ -10,6 +13,7 @@ export interface KPanelProps {
   k: IFetchK[];
   mergeK: Promise<IMergeK[]>;
   bi: Promise<IFetchBi[]>;
+  channel: Promise<IFetchChannel[]>;
 }
 
 // 定义合并K线矩形的类型
@@ -41,4 +45,19 @@ export interface BiStyle {
   lineWidth: number;
   lineDash: number[];
   opacity: number;
+}
+
+// 定义中枢数据的映射类型
+export interface ChannelMappedData {
+  channelId: number;
+  startIndex: number;
+  endIndex: number;
+  zg: number; // 中枢上沿
+  zd: number; // 中枢下沿
+  gg: number; // 中枢最高
+  dd: number; // 中枢最低
+  trend: TrendDirection;
+  type: ChannelType;
+  level: ChannelLevel;
+  bis: BiMappedData[];
 }

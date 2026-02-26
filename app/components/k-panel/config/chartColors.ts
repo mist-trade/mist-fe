@@ -1,4 +1,4 @@
-import { BiType, TrendDirection } from "@/app/api/fetch";
+import { BiType, ChannelType, TrendDirection } from "@/app/api/fetch";
 import type { BiStyle } from "../types";
 
 // 根据 BiType 获取颜色
@@ -52,3 +52,28 @@ export const COLORS = {
   upFill: "rgba(239, 83, 80, 0.1)",
   downFill: "rgba(38, 166, 154, 0.1)",
 } as const;
+
+// 根据 ChannelType 获取颜色
+export const getChannelColor = (type: ChannelType): string => {
+  switch (type) {
+    case ChannelType.Complete:
+      return "#4caf50"; // 绿色
+    case ChannelType.UnComplete:
+      return "#ff9800"; // 橙色
+    default:
+      return "#666"; // 默认灰色
+  }
+};
+
+// 将 hex 颜色转换为 rgba
+export const hexToRgba = (hex: string, alpha: number): string => {
+  // 移除 # 前缀
+  const cleanHex = hex.replace("#", "");
+
+  // 解析 RGB 值
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
