@@ -26,10 +26,10 @@ import type { ComposeOption } from "echarts/core";
 import * as echarts from "echarts/core";
 import { LabelLayout, UniversalTransition } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
-import type { KPanelProps } from "./types";
-import { useChartData } from "./hooks/useChartData";
 import { useChartConfig } from "./hooks/useChartConfig";
+import { useChartData } from "./hooks/useChartData";
 import { useChartRender } from "./hooks/useChartRender";
+import type { KPanelProps } from "./types";
 
 echarts.use([
   CandlestickChart,
@@ -60,12 +60,23 @@ type ECOption = ComposeOption<
 >;
 
 // Re-export types for external use
-export type { KPanelProps } from "./types";
-export type { MergeKRect, BiMappedData, BiStyle, ChannelMappedData } from "./types";
+export type {
+  BiMappedData,
+  BiStyle,
+  ChannelMappedData,
+  KPanelProps,
+  MergeKRect,
+} from "./types";
 export type { ECOption };
 
 function KPanel(props: KPanelProps) {
-  const { data, isReady } = useChartData(props.k, props.mergeK, props.bi, props.channel);
+  const { data, isReady } = useChartData(
+    props.k,
+    props.mergeK,
+    props.bi,
+    props.fenxing,
+    props.channel
+  );
   const { setOption } = useChartConfig({
     k: props.k,
     ...(data || {
@@ -75,6 +86,8 @@ function KPanel(props: KPanelProps) {
       biPlaceholders: [],
       channelData: [],
       channelPlaceholders: [],
+      fenxingData: [],
+      fenxingPlaceholders: [],
     }),
   });
   const containerRef = useChartRender({ setOption, isEnabled: isReady });

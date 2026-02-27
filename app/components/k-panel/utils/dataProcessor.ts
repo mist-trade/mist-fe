@@ -1,6 +1,16 @@
-import { TrendDirection } from "@/app/api/fetch";
-import type { IFetchBi, IFetchChannel, IFetchK, IMergeK } from "@/app/api/fetch";
-import type { BiMappedData, ChannelMappedData, MergeKRect } from "../types";
+import type {
+  IFetchBi,
+  IFetchChannel,
+  IFetchK,
+  IMergeK,
+} from "@/app/api/fetch";
+import { FenxingType, TrendDirection } from "@/app/api/fetch";
+import type {
+  BiMappedData,
+  ChannelMappedData,
+  FenxingMappedData,
+  MergeKRect,
+} from "../types";
 
 // 计算合并K线矩形的数据
 export const calculateMergeKRects = (
@@ -41,7 +51,10 @@ export const calculateMergeKRects = (
 };
 
 // 计算笔数据
-export const calculateBiData = (k: IFetchK[], bi: IFetchBi[]): BiMappedData[] => {
+export const calculateBiData = (
+  k: IFetchK[],
+  bi: IFetchBi[]
+): BiMappedData[] => {
   if (k.length === 0 || bi.length === 0) return [];
 
   const biData: BiMappedData[] = [];
@@ -61,14 +74,30 @@ export const calculateBiData = (k: IFetchK[], bi: IFetchBi[]): BiMappedData[] =>
     });
 
     if (startIndex === -1 || endIndex === -1) {
-      return null;
+      return; // 找不到匹配时跳过这笔数据
+    }
+
+    // 使用分型价格计算笔的起点和终点
+    // 上升笔：从底分型的最低点 到顶分型的最高点
+    // 下降笔：从顶分型的最高点 到底分型的最低点
+    let startPrice: number;
+    let endPrice: number;
+
+    if (b.trend === TrendDirection.Up) {
+      // 上升笔
+      startPrice = b.startFenxing?.lowest ?? b.lowest;
+      endPrice = b.endFenxing?.highest ?? b.highest;
+    } else {
+      // 下降笔
+      startPrice = b.startFenxing?.highest ?? b.highest;
+      endPrice = b.endFenxing?.lowest ?? b.lowest;
     }
 
     biData.push({
       startIndex,
       endIndex,
-      startPrice: b.trend === TrendDirection.Up ? b.lowest : b.highest,
-      endPrice: b.trend === TrendDirection.Up ? b.highest : b.lowest,
+      startPrice,
+      endPrice,
       trend: b.trend,
       type: b.type,
       independentCount: b.independentCount,
@@ -142,26 +171,30 @@ export const calculateChannelData = (
 
     // 验证索引有效性
     if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
-      console.warn(`Invalid channel indices: ${startIndex}-${endIndex}, channel startId: ${channel.startId}, endId: ${channel.endId}`);
+      console.warn(
+        `Invalid channel indices: ${startIndex}-${endIndex}, channel startId: ${channel.startId}, endId: ${channel.endId}`
+      );
       return;
     }
 
     // 查找对应的 Bi 数据
-    const channelBiData = channel.bis.map((apiBi) => {
-      const startTime = new Date(apiBi.startTime);
-      const endTime = new Date(apiBi.endTime);
+    const channelBiData = channel.bis
+      .map((apiBi) => {
+        const startTime = new Date(apiBi.startTime);
+        const endTime = new Date(apiBi.endTime);
 
-      return biMappedData.find((bi) => {
-        const biStartTime = k[bi.startIndex]?.time;
-        const biEndTime = k[bi.endIndex]?.time;
-        return (
-          biStartTime &&
-          biEndTime &&
-          new Date(biStartTime).getTime() === startTime.getTime() &&
-          new Date(biEndTime).getTime() === endTime.getTime()
-        );
-      });
-    }).filter((bi): bi is BiMappedData => bi !== undefined);
+        return biMappedData.find((bi) => {
+          const biStartTime = k[bi.startIndex]?.time;
+          const biEndTime = k[bi.endIndex]?.time;
+          return (
+            biStartTime &&
+            biEndTime &&
+            new Date(biStartTime).getTime() === startTime.getTime() &&
+            new Date(biEndTime).getTime() === endTime.getTime()
+          );
+        });
+      })
+      .filter((bi): bi is BiMappedData => bi !== undefined);
 
     channelData.push({
       channelId: index,
@@ -179,6 +212,111 @@ export const calculateChannelData = (
   });
 
   return channelData;
+};
+
+// Helper function to safely convert time to ISO date string
+const toISODateString = (time: Date | string): string => {
+  if (typeof time === "string") {
+    return time.split("T")[0];
+  }
+  return time.toISOString().split("T")[0];
+};
+
+// 计算分型数据（使用后端返回的分型数据）
+export const calculateFenxingData = (
+  k: IFetchK[],
+  fenxingsFromBackend: IFenxing[],
+  bi?: IFetchBi[]
+): FenxingMappedData[] => {
+  const fenxings: FenxingMappedData[] = [];
+
+  // 收集所有被笔使用的分型的原始K索引
+  const usedFenxingOriginIndices = new Set<number>();
+  if (bi && bi.length > 0) {
+    bi.forEach((b) => {
+      // 使用middleIds的第一个ID来标记已使用的分型
+      if (b.startFenxing?.middleIds && b.startFenxing.middleIds.length > 0) {
+        usedFenxingOriginIndices.add(b.startFenxing.middleIds[0]);
+      }
+      if (b.endFenxing?.middleIds && b.endFenxing.middleIds.length > 0) {
+        usedFenxingOriginIndices.add(b.endFenxing.middleIds[0]);
+      }
+    });
+  }
+
+  // 使用后端返回的分型数据
+  fenxingsFromBackend.forEach((fenxing) => {
+    if (!fenxing.middleIds || fenxing.middleIds.length === 0) {
+      return;
+    }
+
+    const firstOriginId = fenxing.middleIds[0];
+    // 如果这个分型已经被笔使用了，跳过
+    if (usedFenxingOriginIndices.has(firstOriginId)) {
+      return;
+    }
+
+    // 找到分型价格对应的原始K线
+    // 顶分型：找到包含highest的K线
+    // 底分型：找到包含lowest的K线
+    const targetPrice =
+      fenxing.type === "top" ? fenxing.highest : fenxing.lowest;
+    let targetOriginId = fenxing.middleIds[0]; // 默认使用第一个
+
+    // 在middleIds中找到包含目标价格的K线
+    for (const id of fenxing.middleIds) {
+      const kItem = k.find((k) => k.id === id);
+      if (kItem) {
+        if (fenxing.type === "top" && kItem.highest === targetPrice) {
+          targetOriginId = id;
+          break;
+        }
+        if (fenxing.type === "bottom" && kItem.lowest === targetPrice) {
+          targetOriginId = id;
+          break;
+        }
+      }
+    }
+
+    // 找到目标K线在原始K数组中的索引
+    const originKIndex = k.findIndex((item) => item.id === targetOriginId);
+
+    if (originKIndex !== -1) {
+      const now = k[originKIndex];
+      const fenxingType =
+        fenxing.type === "top"
+          ? ("top" as FenxingType)
+          : ("bottom" as FenxingType);
+      const price = targetPrice;
+
+      fenxings.push({
+        index: originKIndex, // 使用包含分型价格的原始K索引
+        type: fenxingType,
+        date: toISODateString(now.time),
+        price: price,
+        highest: fenxing.highest,
+        lowest: fenxing.lowest,
+      });
+    }
+  });
+
+  return fenxings;
+};
+
+// 创建分型的占位符数组
+export const createFenxingPlaceholders = (
+  fenxings: FenxingMappedData[],
+  kLength: number
+): Array<number | null> => {
+  const placeholders: Array<number | null> = new Array(kLength).fill(null);
+
+  fenxings.forEach((fenxing) => {
+    if (fenxing.index >= 0 && fenxing.index < placeholders.length) {
+      placeholders[fenxing.index] = fenxing.index;
+    }
+  });
+
+  return placeholders;
 };
 
 // 创建中枢的占位符数组

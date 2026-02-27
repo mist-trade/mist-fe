@@ -8,12 +8,7 @@ export const formatKDate = (time: Date): string => {
 
 // 格式化 K 线数据为 Kline 格式
 export const formatKlineData = (k: IFetchK[]): number[][] => {
-  return k.map((item) => [
-    item.open,
-    item.close,
-    item.lowest,
-    item.highest,
-  ]);
+  return k.map((item) => [item.open, item.close, item.lowest, item.highest]);
 };
 
 // 格式化成交量数据
@@ -45,7 +40,9 @@ export const formatKTooltip = (
 };
 
 // 计算价格范围
-export const calculatePriceRange = (k: IFetchK[]): { min: number; max: number; range: number } => {
+export const calculatePriceRange = (
+  k: IFetchK[]
+): { min: number; max: number; range: number } => {
   const prices = k.flatMap((item) => [
     item.highest,
     item.lowest,

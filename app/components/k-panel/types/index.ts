@@ -2,6 +2,8 @@ import {
   BiType,
   ChannelLevel,
   ChannelType,
+  FenxingType,
+  IFenxing,
   IFetchBi,
   IFetchChannel,
   IFetchK,
@@ -9,10 +11,20 @@ import {
   TrendDirection,
 } from "@/app/api/fetch";
 
+export interface FenxingMappedData {
+  index: number;
+  type: FenxingType;
+  date: string;
+  price: number;
+  highest: number;
+  lowest: number;
+}
+
 export interface KPanelProps {
   k: IFetchK[];
   mergeK: Promise<IMergeK[]>;
   bi: Promise<IFetchBi[]>;
+  fenxing: Promise<IFenxing[]>;
   channel: Promise<IFetchChannel[]>;
 }
 
@@ -60,4 +72,14 @@ export interface ChannelMappedData {
   type: ChannelType;
   level: ChannelLevel;
   bis: BiMappedData[];
+}
+
+// 分型数据的映射类型
+export interface FenxingMappedData {
+  index: number;
+  type: FenxingType;
+  date: string;
+  price: number;
+  highest: number;
+  lowest: number;
 }

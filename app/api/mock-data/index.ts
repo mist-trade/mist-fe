@@ -1,6 +1,6 @@
-import { mockCSI300Data2025Real } from "../mock-csi300-2025-real";
-import { mockKData3002025 } from "../mock-300-2025";
 import type { IFetchK } from "../fetch";
+import { mockKData3002025 } from "../mock-300-2025";
+import { mockCSI300Data2025Real } from "../mock-csi300-2025-real";
 
 type Dataset = "development" | "testing" | "production";
 

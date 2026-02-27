@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useRef } from "react";
 import type { IFetchK } from "@/app/api/fetch";
 import type {
   BarSeriesOption,
@@ -15,21 +14,33 @@ import type {
 } from "echarts/components";
 import type { ComposeOption } from "echarts/core";
 import * as echarts from "echarts/core";
-import type { BiMappedData, ChannelMappedData, MergeKRect } from "../types";
-import { getBiColor, getBiStyle, getChannelColor, hexToRgba, COLORS } from "../config/chartColors";
+import { useCallback, useEffect, useRef } from "react";
 import {
-  GRID_CONFIG,
+  COLORS,
+  getBiColor,
+  getBiStyle,
+  getChannelColor,
+  hexToRgba,
+} from "../config/chartColors";
+import {
   DATAZOOM_CONFIG,
+  GRID_CONFIG,
   LEGEND_CONFIG,
   TITLE_CONFIG,
   TOOLTIP_CONFIG,
 } from "../config/chartOptions";
-import { formatKTooltip } from "../utils/formatters";
+import type {
+  BiMappedData,
+  ChannelMappedData,
+  FenxingMappedData,
+  MergeKRect,
+} from "../types";
 import {
+  calculatePriceRange,
   formatDateArray,
   formatKlineData,
+  formatKTooltip,
   formatVolumeData,
-  calculatePriceRange,
 } from "../utils/formatters";
 
 type ECOption = ComposeOption<
@@ -52,6 +63,8 @@ interface UseChartConfigProps {
   biPlaceholders: Array<number | null>;
   channelData: ChannelMappedData[];
   channelPlaceholders: Array<number | null>;
+  fenxingData: FenxingMappedData[];
+  fenxingPlaceholders: Array<number | null>;
 }
 
 export function useChartConfig({
@@ -62,13 +75,20 @@ export function useChartConfig({
   biPlaceholders,
   channelData,
   channelPlaceholders,
+  fenxingData,
+  fenxingPlaceholders,
 }: UseChartConfigProps) {
   const mergeKRectsRef = useRef<MergeKRect[]>(mergeKRects);
   const biDataRef = useRef<BiMappedData[]>(biData);
-  const mergeKPlaceholdersRef = useRef<Array<number | null>>(mergeKPlaceholders);
+  const mergeKPlaceholdersRef =
+    useRef<Array<number | null>>(mergeKPlaceholders);
   const biPlaceholdersRef = useRef<Array<number | null>>(biPlaceholders);
   const channelDataRef = useRef<ChannelMappedData[]>(channelData);
-  const channelPlaceholdersRef = useRef<Array<number | null>>(channelPlaceholders);
+  const channelPlaceholdersRef =
+    useRef<Array<number | null>>(channelPlaceholders);
+  const fenxingDataRef = useRef<FenxingMappedData[]>(fenxingData);
+  const fenxingPlaceholdersRef =
+    useRef<Array<number | null>>(fenxingPlaceholders);
 
   // Update refs using useEffect to avoid accessing refs during render
   useEffect(() => {
@@ -94,6 +114,14 @@ export function useChartConfig({
   useEffect(() => {
     channelPlaceholdersRef.current = channelPlaceholders;
   }, [channelPlaceholders]);
+
+  useEffect(() => {
+    fenxingDataRef.current = fenxingData;
+  }, [fenxingData]);
+
+  useEffect(() => {
+    fenxingPlaceholdersRef.current = fenxingPlaceholders;
+  }, [fenxingPlaceholders]);
 
   // 创建合并k线的数据
   const createMergeKSeries = useCallback((): CustomSeriesOption => {
@@ -176,7 +204,9 @@ export function useChartConfig({
         }
 
         // 根据占位符值找到对应的笔
-        const biItem = biDataRef.current.find((b) => b.biId === placeholderValue);
+        const biItem = biDataRef.current.find(
+          (b) => b.biId === placeholderValue
+        );
 
         if (!biItem) {
           return null;
@@ -270,7 +300,12 @@ export function useChartConfig({
         const zgEndY = api.coord([channel.endIndex, channel.zg])?.[1];
         const zdEndY = api.coord([channel.endIndex, channel.zd])?.[1];
 
-        if (zgY === undefined || zdY === undefined || zgEndY === undefined || zdEndY === undefined) {
+        if (
+          zgY === undefined ||
+          zdY === undefined ||
+          zgEndY === undefined ||
+          zdEndY === undefined
+        ) {
           return null;
         }
 
@@ -352,6 +387,90 @@ export function useChartConfig({
     };
   }, []);
 
+  // 创建分型的数据
+  const createFenxingSeries = useCallback((): CustomSeriesOption => {
+    return {
+      name: "fenxing",
+      type: "custom",
+      renderItem: (params, api) => {
+        const dataIndex = params.dataIndex;
+        const placeholderValue = fenxingPlaceholdersRef.current[dataIndex];
+
+        // 如果这个位置没有分型占位符，跳过
+        if (placeholderValue === null) {
+          return null;
+        }
+
+        // 根据占位符值找到对应的分型
+        const fenxing = fenxingDataRef.current.find(
+          (f) => f.index === placeholderValue
+        );
+
+        if (!fenxing) {
+          return null;
+        }
+
+        // 获取分型位置的坐标
+        const point = api.coord([fenxing.index, fenxing.price]);
+
+        // 检查坐标是否有效
+        if (!point) {
+          return null;
+        }
+
+        // 获取 K 线柱子的宽度信息
+        const sizeResult = api.size?.([1, 0]) || [20, 0];
+        const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
+
+        // 分型颜色：顶分型用蓝色，底分型用橙色
+        const color = fenxing.type === "top" ? "#2196f3" : "#ff9800";
+        const size = barWidth * 0.4; // 减小标记大小
+        const halfSize = size / 2;
+        const offset = barWidth * 1.5; // 距离K线的偏移量
+
+        // 顶分型用倒三角（绘制在上方），底分型用圆点
+        if (fenxing.type === "top") {
+          // 顶分型：绘制倒三角，向上偏移
+          const yOffset = point[1] - offset;
+          return {
+            type: "path",
+            shape: {
+              pathData: `M ${point[0] - halfSize},${yOffset - halfSize}
+                         L ${point[0] + halfSize},${yOffset - halfSize}
+                         L ${point[0]},${yOffset + halfSize}
+                         Z`,
+            },
+            style: {
+              fill: color,
+              stroke: "#fff",
+              lineWidth: 2,
+            },
+            z: 15,
+          };
+        } else {
+          // 底分型：绘制圆点，向下偏移
+          const yOffset = point[1] + offset;
+          return {
+            type: "circle",
+            shape: {
+              cx: point[0],
+              cy: yOffset,
+              r: halfSize,
+            },
+            style: {
+              fill: color,
+              stroke: "#fff",
+              lineWidth: 2,
+            },
+            z: 15,
+          };
+        }
+      },
+      data: fenxingPlaceholdersRef.current,
+      z: 15,
+    };
+  }, []);
+
   const setOption = useCallback(
     (chart: echarts.ECharts) => {
       if (!chart || k.length === 0) return;
@@ -359,8 +478,11 @@ export function useChartConfig({
       const dates = formatDateArray(k);
       const klineData = formatKlineData(k);
       const volumes = formatVolumeData(k);
-      const { min: minPrice, max: maxPrice, range: priceRange } =
-        calculatePriceRange(k);
+      const {
+        min: minPrice,
+        max: maxPrice,
+        range: priceRange,
+      } = calculatePriceRange(k);
 
       const options: ECOption = {
         title: TITLE_CONFIG,
@@ -433,9 +555,11 @@ export function useChartConfig({
               borderColor0: COLORS.down,
             },
           },
-          createChannelSeries(),
+          // Temporarily disable channel to focus on fenxing and bi visualization
+          // createChannelSeries(),
           createMergeKSeries(),
           createBiSeries(),
+          createFenxingSeries(),
           {
             name: "成交量",
             type: "bar",
@@ -456,7 +580,7 @@ export function useChartConfig({
 
       chart.setOption(options, true);
     },
-    [k, createChannelSeries, createMergeKSeries, createBiSeries]
+    [k, createMergeKSeries, createFenxingSeries]
   );
 
   return { setOption };

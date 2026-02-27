@@ -1,6 +1,7 @@
 import { getMockData } from "./mock-data";
 
-export const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8008";
+export const BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8008";
 const TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "10000");
 
 const getPath = (path: string) => `${BASE}${path}`;
@@ -12,13 +13,14 @@ const routes = {
   KDJ: "/indicator/kdj",
   MergeK: "/chan/merge-k",
   Bi: "/chan/bi",
+  Fenxing: "/chan/fenxing",
   Channel: "/chan/channel",
 };
 
 export interface IFetchK {
   id: number;
   symbol: string;
-  time: Date;
+  time: Date | string;
   amount: number;
   open: number;
   close: number;
@@ -77,8 +79,8 @@ export enum ChannelType {
 }
 
 export interface IMergeK {
-  startTime: Date;
-  endTime: Date;
+  startTime: Date | string;
+  endTime: Date | string;
   highest: number;
   lowest: number;
   trend: TrendDirection;
@@ -87,9 +89,20 @@ export interface IMergeK {
   mergedData: IFetchK[];
 }
 
+export interface IFenxing {
+  type: "top" | "bottom";
+  highest: number;
+  lowest: number;
+  leftIds: number[];
+  middleIds: number[];
+  rightIds: number[];
+  middleIndex: number;
+  middleOriginId: number;
+}
+
 export interface IFetchBi {
-  startTime: Date;
-  endTime: Date;
+  startTime: Date | string;
+  endTime: Date | string;
   highest: number;
   lowest: number;
   trend: TrendDirection;
@@ -97,6 +110,8 @@ export interface IFetchBi {
   independentCount: number; // 独立k线数量
   originIds: number[];
   originData: IFetchK[];
+  startFenxing: IFenxing | null;
+  endFenxing: IFenxing | null;
 }
 
 export interface IFetchChannel {
@@ -110,6 +125,19 @@ export interface IFetchChannel {
   endId: number; // 结束K线索引
   trend: TrendDirection; // 中枢趋势
   bis: IFetchBi[]; // 组成中枢的笔数组
+}
+
+export type FenxingType = "top" | "bottom";
+
+export interface IFetchFenxing {
+  type: "top" | "bottom";
+  highest: number;
+  lowest: number;
+  leftIds: number[];
+  middleIds: number[];
+  rightIds: number[];
+  middleIndex: number;
+  middleOriginId: number;
 }
 
 export const fetchMergeK = async (data: IFetchK[]): Promise<IMergeK[]> => {
@@ -156,7 +184,31 @@ export const fetchBi = async (data: IFetchK[]): Promise<IFetchBi[]> => {
   }
 };
 
-export const fetchChannel = async (bi: IFetchBi[]): Promise<IFetchChannel[]> => {
+export const fetchFenxing = async (data: IFetchK[]): Promise<IFenxing[]> => {
+  try {
+    const response = await fetch(getPath(routes.Fenxing), {
+      method: "POST",
+      body: JSON.stringify({ k: data }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(TIMEOUT),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching Fenxing data:", error);
+    throw new Error("Failed to fetch Fenxing data");
+  }
+};
+
+export const fetchChannel = async (
+  bi: IFetchBi[]
+): Promise<IFetchChannel[]> => {
   try {
     const response = await fetch(getPath(routes.Channel), {
       method: "POST",
@@ -176,4 +228,61 @@ export const fetchChannel = async (bi: IFetchBi[]): Promise<IFetchChannel[]> => 
     console.error("Error fetching Channel data:", error);
     throw new Error("Failed to fetch Channel data");
   }
+};
+
+// Helper function to safely convert time to ISO date string
+const toISODateString = (time: Date | string): string => {
+  if (typeof time === "string") {
+    return time.split("T")[0];
+  }
+  return time.toISOString().split("T")[0];
+};
+
+/**
+ * 计算分型（Fenxing）数据
+ * 顶分型：中间K线高点最高，且高点>左右高点，低点>min(左右低点)
+ * 底分型：中间K线低点最低，且低点<左右低点，高点<max(左右高点)
+ */
+export const calculateFenxings = (k: IFetchK[]): IFetchFenxing[] => {
+  const fenxings: IFetchFenxing[] = [];
+
+  for (let i = 1; i < k.length - 1; i++) {
+    const prev = k[i - 1];
+    const now = k[i];
+    const next = k[i + 1];
+
+    const isTop =
+      now.highest > prev.highest &&
+      now.highest > next.highest &&
+      now.lowest > Math.min(prev.lowest, next.lowest);
+
+    const isBottom =
+      now.lowest < prev.lowest &&
+      now.lowest < next.lowest &&
+      now.highest < Math.max(prev.highest, next.highest);
+
+    if (isTop) {
+      fenxings.push({
+        type: "top",
+        index: i,
+        date: toISODateString(now.time),
+        price: now.highest,
+        highest: now.highest,
+        lowest: now.lowest,
+        middleIndex: i,
+      });
+    } else if (isBottom) {
+      fenxings.push({
+        type: "bottom",
+        index: i,
+        date: toISODateString(now.time),
+        price: now.lowest,
+        highest: now.highest,
+        lowest: now.lowest,
+        middleIndex: i,
+      });
+    }
+  }
+
+  return fenxings;
 };
