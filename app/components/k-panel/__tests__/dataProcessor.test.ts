@@ -1,5 +1,5 @@
 import { calculateMergeKRects, calculateBiData, createMergeKPlaceholders, createBiPlaceholders } from '../utils/dataProcessor';
-import { TrendDirection, BiType } from '@/app/api/fetch';
+import { TrendDirection, BiType, BiStatus } from '@/app/api/fetch';
 import type { IFetchK, IMergeK, IFetchBi } from '@/app/api/fetch';
 
 describe('DataProcessor', () => {
@@ -17,8 +17,8 @@ describe('DataProcessor', () => {
   ];
 
   const mockBi: IFetchBi[] = [
-    { startTime: new Date('2024-01-01'), endTime: new Date('2024-01-03'), highest: 110, lowest: 95, trend: TrendDirection.Up, type: BiType.Complete, independentCount: 3, originIds: [1, 2, 3], originData: [mockK[0], mockK[1], mockK[2]] },
-    { startTime: new Date('2024-01-03'), endTime: new Date('2024-01-05'), highest: 115, lowest: 100, trend: TrendDirection.Down, type: BiType.UnComplete, independentCount: 3, originIds: [3, 4, 5], originData: [mockK[2], mockK[3], mockK[4]] },
+    { startTime: new Date('2024-01-01'), endTime: new Date('2024-01-03'), highest: 110, lowest: 95, trend: TrendDirection.Up, type: BiType.Complete, status: BiStatus.Valid, independentCount: 3, originIds: [1, 2, 3], originData: [mockK[0], mockK[1], mockK[2]], startFenxing: null, endFenxing: null },
+    { startTime: new Date('2024-01-03'), endTime: new Date('2024-01-05'), highest: 115, lowest: 100, trend: TrendDirection.Down, type: BiType.UnComplete, status: BiStatus.Unknown, independentCount: 3, originIds: [3, 4, 5], originData: [mockK[2], mockK[3], mockK[4]], startFenxing: null, endFenxing: null },
   ];
 
   describe('calculateMergeKRects', () => {
@@ -111,7 +111,7 @@ describe('DataProcessor', () => {
 
   describe('createBiPlaceholders', () => {
     const biData = [
-      { startIndex: 0, endIndex: 4, startPrice: 95, endPrice: 110, trend: TrendDirection.Up, type: BiType.Complete, independentCount: 5, originData: mockK, highest: 110, lowest: 95, biId: 0 },
+      { startIndex: 0, endIndex: 4, startPrice: 95, endPrice: 110, trend: TrendDirection.Up, type: BiType.Complete, status: BiStatus.Valid, independentCount: 5, originData: mockK, highest: 110, lowest: 95, biId: 0 },
     ];
 
     it('should create placeholder array with biId at middle position', () => {
@@ -127,7 +127,7 @@ describe('DataProcessor', () => {
 
     it('should handle even number of K-lines correctly', () => {
       const biDataEven = [
-        { startIndex: 0, endIndex: 3, startPrice: 95, endPrice: 110, trend: TrendDirection.Up, type: BiType.Complete, independentCount: 4, originData: mockK.slice(0, 4), highest: 110, lowest: 95, biId: 0 },
+        { startIndex: 0, endIndex: 3, startPrice: 95, endPrice: 110, trend: TrendDirection.Up, type: BiType.Complete, status: BiStatus.Valid, independentCount: 4, originData: mockK.slice(0, 4), highest: 110, lowest: 95, biId: 0 },
       ];
       const result = createBiPlaceholders(biDataEven, 4);
 

@@ -1,5 +1,5 @@
 import { calculateChannelData, createChannelPlaceholders } from '../utils/dataProcessor';
-import { ChannelLevel, ChannelType, TrendDirection, BiType } from '@/app/api/fetch';
+import { ChannelLevel, ChannelType, TrendDirection, BiType, BiStatus } from '@/app/api/fetch';
 import type { IFetchK, IFetchChannel, IFetchBi } from '@/app/api/fetch';
 import type { BiMappedData } from '../types';
 
@@ -25,6 +25,7 @@ describe('Channel Data Processing', () => {
       endPrice: 115,
       trend: TrendDirection.Up,
       type: BiType.Complete,
+      status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[0], mockK[1], mockK[2]],
       highest: 115,
@@ -38,6 +39,7 @@ describe('Channel Data Processing', () => {
       endPrice: 101,
       trend: TrendDirection.Down,
       type: BiType.Complete,
+      status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[2], mockK[3], mockK[4]],
       highest: 115,
@@ -51,6 +53,7 @@ describe('Channel Data Processing', () => {
       endPrice: 118,
       trend: TrendDirection.Up,
       type: BiType.Complete,
+      status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[4], mockK[5], mockK[6]],
       highest: 118,
@@ -64,6 +67,7 @@ describe('Channel Data Processing', () => {
       endPrice: 120,
       trend: TrendDirection.Down,
       type: BiType.Complete,
+      status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[6], mockK[7], mockK[8]],
       highest: 120,

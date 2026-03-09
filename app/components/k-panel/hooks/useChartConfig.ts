@@ -220,8 +220,21 @@ export function useChartConfig({
           return null;
         }
 
-        const color = getBiColor(biItem.type);
+        const color = getBiColor(biItem.type, biItem.status);
         const style = getBiStyle(biItem.trend);
+
+        // 调试日志：打印笔的详细信息，包括起点和终点价格
+        console.log(`Rendering bi ${biItem.biId}:`, {
+          type: biItem.type,
+          color: color,
+          trend: biItem.trend,
+          startIndex: biItem.startIndex,
+          endIndex: biItem.endIndex,
+          startPrice: biItem.startPrice,
+          endPrice: biItem.endPrice,
+          highest: biItem.highest,
+          lowest: biItem.lowest,
+        });
 
         return {
           type: "line",

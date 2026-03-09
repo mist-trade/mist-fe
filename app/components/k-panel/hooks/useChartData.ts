@@ -56,6 +56,20 @@ export function useChartData(
       const fenxingData = await fenxing;
       const channelData = await channel;
 
+
+      console.log("bi", biData);
+      // 详细打印每条笔的数据，特别是 type 字段
+      biData.forEach((b, index) => {
+        console.log(`Bi ${index}:`, {
+          startTime: b.startTime,
+          endTime: b.endTime,
+          trend: b.trend,
+          type: b.type,
+        highest: b.highest,
+          lowest: b.lowest,
+        });
+      });
+
       const mergeKRects = calculateMergeKRects(k, mergeKData);
       const biMappedData = calculateBiData(k, biData);
       const mergeKPlaceholders = createMergeKPlaceholders(

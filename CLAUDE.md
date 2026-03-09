@@ -85,7 +85,6 @@ const mergeKData = mergeKArray.reduce((acc, item) => {
 **Trend Lines (笔)**: Identifies significant price movements with visual overlays. Classified as:
 - Complete (`BiType.Complete`) - blue (`#2196f3`)
 - UnComplete (`BiType.UnComplete`) - purple (`#9c27b0`)
-- Initial (`BiType.Initial`) - orange (`#ff9800`)
 
 **Color Scheme**:
 - Up trends: red (`#ef5350`)
@@ -159,7 +158,6 @@ enum ChannelType {
 **Trend Lines (笔)**: Identifies significant price movements with visual overlays. Classified as:
 - Complete (`BiType.Complete`) - blue (`#2196f3`)
 - UnComplete (`BiType.UnComplete`) - purple (`#9c27b0`)
-- Initial (`BiType.Initial`) - orange (`#ff9800`)
 
 **Central Channels (中枢)**: Identifies consolidation zones formed by alternating Bi (笔). A channel requires at least 5 Bi with price overlap. Classified as:
 - Complete - green (`#4caf50`), 15% opacity fill

@@ -1,15 +1,32 @@
-import { BiType, ChannelType, TrendDirection } from "@/app/api/fetch";
+import { BiType, BiStatus, ChannelType, TrendDirection } from "@/app/api/fetch";
 import type { BiStyle } from "../types";
 
-// 根据 BiType 获取颜色
-export const getBiColor = (type: BiType): string => {
+// 根据 BiStatus 获取颜色（优先级更高）
+const getBiColorByStatus = (status: BiStatus): string => {
+  switch (status) {
+    case BiStatus.Valid:
+      return "#00bcd4";   // 青色 - 有效笔（清新醒目）
+    case BiStatus.Invalid:
+      return "#ec407a";   // 粉红色 - 无效笔（柔和但明显）
+    case BiStatus.Unknown:
+    default:
+      return "#ff9800";   // 橙色 - 未知状态（醒目标记）
+  }
+};
+
+// 根据 BiType 获取颜色（作为后备）
+export const getBiColor = (type: BiType, status?: BiStatus): string => {
+  // 如果提供了 status，优先使用状态颜色
+  if (status !== undefined) {
+    return getBiColorByStatus(status);
+  }
+
+  // 否则回退到原有逻辑（使用清新配色方案保持一致）
   switch (type) {
-    case BiType.Initial: // 初始笔
-      return "#ff9800"; // 橙色
     case BiType.UnComplete: // 未完成笔
-      return "#9c27b0"; // 紫色
+      return "#ff9800"; // 橙色（与Unknown保持一致）
     case BiType.Complete: // 完成笔
-      return "#2196f3"; // 蓝色
+      return "#00bcd4"; // 青色（与Valid保持一致）
     default:
       return "#666"; // 默认灰色
   }
@@ -27,7 +44,7 @@ export const getBiStyle = (trend: TrendDirection): BiStyle => {
     case TrendDirection.Down:
       return {
         lineWidth: 2,
-        lineDash: [5, 3], // 虚线
+        lineDash: [], // 实线
         opacity: 1,
       };
     case TrendDirection.None:

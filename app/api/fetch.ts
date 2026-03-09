@@ -63,9 +63,14 @@ export enum TrendDirection {
 }
 
 export enum BiType {
-  Initial = "initial",
   UnComplete = "uncomplete",
   Complete = "complete",
+}
+
+export enum BiStatus {
+  Unknown = 0,    // 未知状态（初始默认值）
+  Valid = 1,      // 有效笔（满足所有条件）
+  Invalid = 2,    // 无效笔（不满足条件）
 }
 
 export enum ChannelLevel {
@@ -107,6 +112,7 @@ export interface IFetchBi {
   lowest: number;
   trend: TrendDirection;
   type: BiType;
+  status: BiStatus; // 笔的状态
   independentCount: number; // 独立k线数量
   originIds: number[];
   originData: IFetchK[];

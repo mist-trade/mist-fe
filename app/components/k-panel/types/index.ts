@@ -1,5 +1,6 @@
 import {
   BiType,
+  BiStatus,
   ChannelLevel,
   ChannelType,
   FenxingType,
@@ -46,6 +47,7 @@ export interface BiMappedData {
   endPrice: number;
   trend: TrendDirection;
   type: BiType;
+  status: BiStatus; // 笔的状态
   independentCount: number;
   originData: IFetchK[];
   highest: number;

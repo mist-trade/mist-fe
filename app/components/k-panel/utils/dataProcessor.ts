@@ -77,21 +77,30 @@ export const calculateBiData = (
       return; // 找不到匹配时跳过这笔数据
     }
 
-    // 使用分型价格计算笔的起点和终点
-    // 上升笔：从底分型的最低点 到顶分型的最高点
-    // 下降笔：从顶分型的最高点 到底分型的最低点
+    // 直接使用后端返回的最高最低点，不重新计算
+    // 后端已经计算好了笔的数据，前端只需要映射到K线图上
     let startPrice: number;
     let endPrice: number;
 
     if (b.trend === TrendDirection.Up) {
-      // 上升笔
-      startPrice = b.startFenxing?.lowest ?? b.lowest;
-      endPrice = b.endFenxing?.highest ?? b.highest;
+      // 上升笔：从最低点 到 最高点
+      startPrice = b.lowest;
+      endPrice = b.highest;
     } else {
-      // 下降笔
-      startPrice = b.startFenxing?.highest ?? b.highest;
-      endPrice = b.endFenxing?.lowest ?? b.lowest;
+      // 下降笔：从最高点 到 最低点
+      startPrice = b.highest;
+      endPrice = b.lowest;
     }
+
+    console.log(`Bi ${index}:`, {
+      trend: b.trend,
+      startTime: b.startTime,
+      endTime: b.endTime,
+      startPrice,
+      endPrice,
+      highest: b.highest,
+      lowest: b.lowest,
+    });
 
     biData.push({
       startIndex,
@@ -100,6 +109,7 @@ export const calculateBiData = (
       endPrice,
       trend: b.trend,
       type: b.type,
+      status: b.status,
       independentCount: b.independentCount,
       originData: b.originData,
       highest: b.highest,
@@ -250,11 +260,11 @@ export const calculateFenxingData = (
       return;
     }
 
-    const firstOriginId = fenxing.middleIds[0];
+    // const firstOriginId = fenxing.middleIds[0];
     // 如果这个分型已经被笔使用了，跳过
-    if (usedFenxingOriginIndices.has(firstOriginId)) {
-      return;
-    }
+    // if (usedFenxingOriginIndices.has(firstOriginId)) {
+    //   return;
+    // }
 
     // 找到分型价格对应的原始K线
     // 顶分型：找到包含highest的K线
