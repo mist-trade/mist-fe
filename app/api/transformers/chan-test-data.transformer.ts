@@ -317,6 +317,7 @@ export function transformChanTestData(
       ...mk,
       startTime: new Date(mk.startTime),
       endTime: new Date(mk.endTime),
+      trend: mk.trend as TrendDirection,
       mergedData: mk.mergedData.map(transformKLine),
     })),
     bis: backendResults.data.bis.map(transformBi),
