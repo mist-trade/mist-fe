@@ -4,7 +4,7 @@ import {
   fetchFenxing,
   fetchMergeK,
 } from "@/app/api/fetch";
-import { shanghaiIndex2024_2025Results } from "@/test-data/results/types";
+import { shanghaiindex20242025results } from "@/test-data/results/types";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
 import KPanel from "@/app/components/k-panel";
 import KPanelSkeleton from "@/app/components/k-panel/skeleton";
@@ -18,7 +18,7 @@ async function fetchData() {
 
   if (USE_MOCK_KLINE) {
     // Use mock K-line data from test results
-    k = shanghaiIndex2024_2025Results.data.originalKLines;
+    k = shanghaiindex20242025results.data.originalKLines;
   } else {
     // Fetch from backend API (requires mist service with database)
     // Not implemented yet
@@ -38,7 +38,7 @@ async function fetchData() {
     fenxing,
     channel,
     statistics: USE_MOCK_KLINE
-      ? shanghaiIndex2024_2025Results.summary
+      ? shanghaiindex20242025results.summary
       : undefined,
   };
 }
