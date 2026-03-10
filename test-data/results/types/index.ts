@@ -1,8 +1,7 @@
 /**
- * Test Results Types - Unified Export
+ * Test Results Type Definitions
  *
- * This file exports all test result type definitions.
- * These are generated from backend test executions and synced via the sync script.
+ * @last-updated 2026-03-10T20:54:54.237Z
  */
 
-export * from "./shanghai-index-2024-2025-results";
+export * from './shanghai-index-2024-2025-results';

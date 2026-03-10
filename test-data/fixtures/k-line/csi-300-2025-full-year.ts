@@ -1,4 +1,4 @@
-import { IFetchK } from "./fetch";
+import { IFetchK } from "@/app/api/fetch";
 
 /**
  * Mock 沪深300指数日线数据

@@ -7,6 +7,8 @@
  * @module test-data
  */
 
+import type { IFetchK } from '@/app/api/fetch';
+
 // K-line fixtures
 export { mockKData, getMockKData } from './fixtures/k-line/csi-300-2024-2025-simple';
 export {
@@ -40,18 +42,6 @@ export const DATASET = {
  */
 export type Dataset = typeof DATASET[keyof typeof DATASET];
 
-// Import IFetchK type for proper typing
-type MockDataItem = {
-  id: number;
-  symbol: string;
-  time: Date;
-  amount: number;
-  open: number;
-  close: number;
-  highest: number;
-  lowest: number;
-};
-
 /**
  * Mock dataset registry mapping environments to their data sources
  *
@@ -59,7 +49,7 @@ type MockDataItem = {
  * - testing: Simplified 2024-2025 data for faster tests
  * - production: Empty array (no mock data in production)
  */
-const MOCK_DATASETS: Record<Dataset, MockDataItem[]> = {
+const MOCK_DATASETS: Record<Dataset, IFetchK[]> = {
   development: _mockCSI300Data2025Real,
   testing: _mockKData,
   production: [],
@@ -110,7 +100,7 @@ const getDataset = (): Dataset => {
  * const data = getMockData(); // No await needed for synchronous access
  * ```
  */
-export const getMockData = (): MockDataItem[] => {
+export const getMockData = (): IFetchK[] => {
   const dataset = getDataset();
   return MOCK_DATASETS[dataset];
 };

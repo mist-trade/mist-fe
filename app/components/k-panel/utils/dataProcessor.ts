@@ -1,4 +1,5 @@
 import type {
+  IFenxing,
   IFetchBi,
   IFetchChannel,
   IFetchK,
