@@ -1,118 +1,55 @@
-# Test Data Directory
+# Test Data
 
-This directory contains all test fixtures and test results for the mist-fe frontend project.
+Frontend test data directory with fixtures and synced backend results.
 
 ## Directory Structure
 
 ```
 test-data/
-├── fixtures/              # Test fixture files
-│   ├── k-line/           # K-line chart test data
-│   │   ├── csi-300-2023-real.ts
-│   │   ├── csi-300-2024-2025-simple.ts
-│   │   ├── csi-300-2025-full-year.ts
-│   │   └── csi-300-2025-real.ts
-│   └── patterns/         # Pattern matching test data (empty, ready for use)
-└── results/              # Generated test results
-    ├── json/             # JSON test output data (empty, ready for use)
-    └── types/            # TypeScript type definitions
-        └── index.ts
+├── fixtures/           # Static fixtures (local)
+│   ├── k-line/         # K-line fixtures
+│   └── patterns/       # Pattern fixtures
+├── results/            # From backend sync
+│   ├── json/          # Raw JSON results
+│   └── types/         # TypeScript definitions
+└── index.ts           # Unified export
 ```
 
-## Fixtures
+## Usage
 
-### K-line Fixtures
+```typescript
+// Import fixtures
+import { getMockKData } from '@/test-data';
 
-Located in `test-data/fixtures/k-line/`, these files contain CSI 300 index data for testing:
+// Import synced results
+import { shanghaiIndex2024_2025Results } from '@/test-data/results/types';
+```
 
-- **csi-300-2023-real.ts** - CSI 300 real data from 2023 (21KB)
-- **csi-300-2024-2025-simple.ts** - Simplified CSI 300 data spanning 2024-2025 (18KB)
-- **csi-300-2025-full-year.ts** - Complete CSI 300 data for 2025 (23KB)
-- **csi-300-2025-real.ts** - Real CSI 300 data from 2025 (47KB)
-
-### Pattern Fixtures
-
-Located in `test-data/fixtures/patterns/`, this directory is ready for pattern recognition test data.
-
-## Test Results
-
-The `results/` directory stores generated test output and type definitions:
-
-- **json/** - Directory for JSON test output files (currently empty)
-- **types/index.ts** - TypeScript type definitions file for test data types
-
-## Syncing Test Data
-
-Test data can be synced from the backend mist project:
+## Syncing
 
 ```bash
-# Sync test data from backend (runs sync script then starts dev server)
-pnpm run dev:sync
-
-# Sync test data from backend (standalone)
+# Manual sync from backend
 pnpm run sync:from-backend
 ```
 
-This executes the sync script at `scripts/sync-from-backend.js` which copies test data from the backend mist project.
+## Files
 
-## Running Tests
+### Fixtures
 
-```bash
-# Run all tests
-pnpm test
+- **csi-300-2024-2025-simple.ts** - Simple test data (89 records)
+- **csi-300-2023-real.ts** - Real market data 2023 (112 records)
+- **csi-300-2025-full-year.ts** - Full year 2025 data (122 records)
+- **csi-300-2025-real.ts** - Real market data 2025 (large dataset)
 
-# Run tests in watch mode
-pnpm test:watch
+### Results (synced from backend)
 
-# Run tests with coverage
-pnpm test:coverage
-```
+- **json/** - JSON test results from backend tests
+- **types/** - TypeScript definitions for test results
 
-## Usage in Tests
+## Development
 
-Import fixtures in your test files using path aliases:
-
-```typescript
-import { csi3002023Real } from '@/test-data/fixtures/k-line/csi-300-2023-real';
-import { csi3002024_2025Simple } from '@/test-data/fixtures/k-line/csi-300-2024-2025-simple';
-```
-
-## Path Aliases
-
-The test-data directory is configured as a path alias in `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@test-data/*": ["test-data/*"]
-    }
-  }
-}
-```
-
-This allows importing from the test-data directory using the `@test-data/` prefix.
-
-## Maintenance
-
-When adding new test fixtures:
-
-1. Place fixture files in the appropriate subdirectory under `test-data/fixtures/`
-2. Follow the naming convention: `{name}.ts` (e.g., `csi-300-2026-real.ts`)
-3. Export the data appropriately from the fixture file
-4. Update this README to document new fixtures
-5. If needed, add types to `test-data/results/types/index.ts`
-
-## Sync Script
-
-The sync script is located at `scripts/sync-from-backend.js` and handles copying test data from the backend mist project to the frontend test-data directory. It's configured to:
-
-- Read from backend test fixtures
-- Transform data if needed
-- Output to the appropriate `test-data/fixtures/` subdirectories
-
-## Related Documentation
-
-- [Main README](../README.md) - Project overview
-- [CLAUDE.md](../CLAUDE.md) - Claude Code instructions
-- [Backend Test Data](../../mist/test-data/README.md) - Backend test data documentation (if exists)
+The test data system provides:
+- Unified export via `@/test-data` path alias
+- Environment-based dataset selection
+- Type-safe data access
+- Automated sync from backend
