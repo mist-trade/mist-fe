@@ -2,6 +2,7 @@ import {
   IFetchK,
   IFetchBi,
   IFetchChannel,
+  IMergeK,
   TrendDirection,
   BiType,
   ChannelType,
@@ -127,7 +128,7 @@ interface BackendChannel {
  */
 export interface FrontendChanTestData {
   kLines: IFetchK[];
-  mergeK: any[]; // Using any for mergedK as it's not exported from fetch.ts
+  mergeK: IMergeK[];
   bis: IFetchBi[];
   channels: IFetchChannel[];
   statistics: TestStatistics;
@@ -201,12 +202,29 @@ function transformBi(backendBi: BackendBi): IFetchBi {
     lowest: backendBi.lowest,
     trend: backendBi.trend as TrendDirection,
     type: backendBi.type as BiType,
+    status: 1, // Default status: Valid
     independentCount: backendBi.independentCount,
     originIds: backendBi.originIds,
     originData: backendBi.originData.map(transformKLine),
-    // Note: startFenxing and endFenxing are not in IFetchBi interface
-    // but included here for potential future use
-  } as IFetchBi;
+    startFenxing: backendBi.startFenxing ? transformFenxing(backendBi.startFenxing) : null,
+    endFenxing: backendBi.endFenxing ? transformFenxing(backendBi.endFenxing) : null,
+  };
+}
+
+/**
+ * Transform backend Fenxing to frontend format
+ */
+function transformFenxing(backendFenxing: BackendFenxing) {
+  return {
+    type: backendFenxing.type,
+    highest: backendFenxing.highest,
+    lowest: backendFenxing.lowest,
+    leftIds: backendFenxing.leftIds,
+    middleIds: backendFenxing.middleIds,
+    rightIds: backendFenxing.rightIds,
+    middleIndex: backendFenxing.middleIndex,
+    middleOriginId: backendFenxing.middleOriginId,
+  };
 }
 
 /**
