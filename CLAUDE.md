@@ -195,10 +195,38 @@ Channels are rendered as multi-layered rectangles with:
 ## Development Notes
 
 - The `/k` route displays the main K-line chart
-- Mock data files in `app/api/` simulate CSI 300 index data for development
-- Active mock file: `mock-csi300-2025-real.ts` (imported in `fetch.ts`)
 - Chart calculations (merge K, trend lines) happen client-side in real-time
 - API calls in `fetch.ts` make HTTP requests but return mock data for development
+
+## Test Data Management
+
+### Directory Structure
+
+```
+mist-fe/test-data/
+├── fixtures/           # Test input data (synced from backend)
+│   ├── k-line/         # K-line raw data
+│   └── patterns/       # Test pattern data
+└── results/            # Test output (synced from backend)
+    ├── json/           # JSON results
+    └── types/          # TypeScript definitions
+```
+
+### Synchronization
+
+Test data is synced from the backend:
+```bash
+# From backend directory
+cd ../mist
+pnpm run test:sync     # Sync test results to frontend
+```
+
+### Usage in Development
+
+When developing visualizations, you can use the synced test data:
+- Import from `@/test-data/fixtures` for test inputs
+- Import from `@/test-data/results` for expected outputs
+- Type definitions are auto-generated and available in `test-data/results/types/`
 
 ## API Integration
 

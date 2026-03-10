@@ -1,7 +1,7 @@
 import type { IFetchK } from "@/app/api/fetch";
 
 // 格式化日期显示
-export const formatKDate = (time: Date): string => {
+export const formatKDate = (time: Date | string): string => {
   const date = new Date(time);
   return `${date.getMonth() + 1}/${date.getDate()}`;
 };

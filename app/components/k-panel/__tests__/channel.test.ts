@@ -165,9 +165,12 @@ describe('Channel Data Processing', () => {
             lowest: bi.lowest,
             trend: bi.trend,
             type: bi.type,
+            status: bi.status,
             independentCount: bi.independentCount,
             originIds: [bi.startIndex + 1, bi.endIndex + 1],
             originData: bi.originData,
+            startFenxing: null,
+            endFenxing: null,
           })),
         },
       ];

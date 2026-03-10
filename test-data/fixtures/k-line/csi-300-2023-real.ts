@@ -1,4 +1,4 @@
-import { IFetchK } from "./fetch";
+import { IFetchK } from "@/app/api/fetch";
 
 /**
  * 真实沪深300指数模拟数据

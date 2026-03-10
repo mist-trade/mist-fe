@@ -135,17 +135,6 @@ export interface IFetchChannel {
 
 export type FenxingType = "top" | "bottom";
 
-export interface IFetchFenxing {
-  type: "top" | "bottom";
-  highest: number;
-  lowest: number;
-  leftIds: number[];
-  middleIds: number[];
-  rightIds: number[];
-  middleIndex: number;
-  middleOriginId: number;
-}
-
 export const fetchMergeK = async (data: IFetchK[]): Promise<IMergeK[]> => {
   try {
     const response = await fetch(getPath(routes.MergeK), {
@@ -234,61 +223,4 @@ export const fetchChannel = async (
     console.error("Error fetching Channel data:", error);
     throw new Error("Failed to fetch Channel data");
   }
-};
-
-// Helper function to safely convert time to ISO date string
-const toISODateString = (time: Date | string): string => {
-  if (typeof time === "string") {
-    return time.split("T")[0];
-  }
-  return time.toISOString().split("T")[0];
-};
-
-/**
- * 计算分型（Fenxing）数据
- * 顶分型：中间K线高点最高，且高点>左右高点，低点>min(左右低点)
- * 底分型：中间K线低点最低，且低点<左右低点，高点<max(左右高点)
- */
-export const calculateFenxings = (k: IFetchK[]): IFetchFenxing[] => {
-  const fenxings: IFetchFenxing[] = [];
-
-  for (let i = 1; i < k.length - 1; i++) {
-    const prev = k[i - 1];
-    const now = k[i];
-    const next = k[i + 1];
-
-    const isTop =
-      now.highest > prev.highest &&
-      now.highest > next.highest &&
-      now.lowest > Math.min(prev.lowest, next.lowest);
-
-    const isBottom =
-      now.lowest < prev.lowest &&
-      now.lowest < next.lowest &&
-      now.highest < Math.max(prev.highest, next.highest);
-
-    if (isTop) {
-      fenxings.push({
-        type: "top",
-        index: i,
-        date: toISODateString(now.time),
-        price: now.highest,
-        highest: now.highest,
-        lowest: now.lowest,
-        middleIndex: i,
-      });
-    } else if (isBottom) {
-      fenxings.push({
-        type: "bottom",
-        index: i,
-        date: toISODateString(now.time),
-        price: now.lowest,
-        highest: now.highest,
-        lowest: now.lowest,
-        middleIndex: i,
-      });
-    }
-  }
-
-  return fenxings;
 };

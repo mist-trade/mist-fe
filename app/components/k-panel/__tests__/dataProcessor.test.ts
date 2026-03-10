@@ -78,7 +78,20 @@ describe('DataProcessor', () => {
 
     it('should filter out Bi entries with invalid time ranges', () => {
       const invalidBi: IFetchBi[] = [
-        { startTime: new Date('2099-01-01'), endTime: new Date('2099-01-03'), highest: 100, lowest: 90, trend: TrendDirection.Up, type: BiType.Complete, independentCount: 2, originIds: [1, 2], originData: [] },
+        {
+          startTime: new Date('2099-01-01'),
+          endTime: new Date('2099-01-03'),
+          highest: 100,
+          lowest: 90,
+          trend: TrendDirection.Up,
+          type: BiType.Complete,
+          status: 1,
+          independentCount: 2,
+          originIds: [1, 2],
+          originData: [],
+          startFenxing: null,
+          endFenxing: null,
+        },
       ];
       const result = calculateBiData(mockK, invalidBi);
       expect(result).toHaveLength(0);
