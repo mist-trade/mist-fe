@@ -10,8 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "sync:from-backend": "node scripts/sync-from-backend.js",
-    "dev:sync": "node scripts/sync-from-backend.js && next dev"
+    "sync:from-backend": "node scripts/sync-from-backend.mjs",
+    "dev:sync": "node scripts/sync-from-backend.mjs && next dev"
   },
   "dependencies": {
     "echarts": "^6.0.0",
