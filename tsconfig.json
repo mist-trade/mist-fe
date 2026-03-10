@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/test-data": ["./test-data/index.ts"],
+      "@/test-data/*": ["./test-data/*"]
     },
     "types": ["jest"]
   },
