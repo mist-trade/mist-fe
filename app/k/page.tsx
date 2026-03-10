@@ -4,11 +4,10 @@ import {
   fetchFenxing,
   fetchMergeK,
 } from "@/app/api/fetch";
-import { shanghaiIndex2024_2025TestData } from "@/app/api/mock-data/shanghai-index-2024-2025-results";
+import { shanghaiIndex2024_2025Results } from "@/test-data/results/types";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
 import KPanel from "@/app/components/k-panel";
 import KPanelSkeleton from "@/app/components/k-panel/skeleton";
-import TestStatisticsPanel from "@/app/components/test-statistics-panel";
 import { Suspense } from "react";
 
 // Use mock K-line data, but calculate merge-k, fenxing, bi, channel via backend API
@@ -19,7 +18,7 @@ async function fetchData() {
 
   if (USE_MOCK_KLINE) {
     // Use mock K-line data from test results
-    k = shanghaiIndex2024_2025TestData.data.originalKLines;
+    k = shanghaiIndex2024_2025Results.data.originalKLines;
   } else {
     // Fetch from backend API (requires mist service with database)
     // Not implemented yet
@@ -39,7 +38,7 @@ async function fetchData() {
     fenxing,
     channel,
     statistics: USE_MOCK_KLINE
-      ? shanghaiIndex2024_2025TestData.summary
+      ? shanghaiIndex2024_2025Results.summary
       : undefined,
   };
 }
@@ -49,9 +48,6 @@ export default async function K() {
 
   return (
     <ErrorBoundary>
-      {USE_MOCK_KLINE && statistics && (
-        <TestStatisticsPanel statistics={statistics} />
-      )}
       <Suspense fallback={<KPanelSkeleton />}>
         <KPanel
           k={k}
