@@ -223,19 +223,6 @@ export function useChartConfig({
         const color = getBiColor(biItem.type, biItem.status);
         const style = getBiStyle(biItem.trend);
 
-        // 调试日志：打印笔的详细信息，包括起点和终点价格
-        console.log(`Rendering bi ${biItem.biId}:`, {
-          type: biItem.type,
-          color: color,
-          trend: biItem.trend,
-          startIndex: biItem.startIndex,
-          endIndex: biItem.endIndex,
-          startPrice: biItem.startPrice,
-          endPrice: biItem.endPrice,
-          highest: biItem.highest,
-          lowest: biItem.lowest,
-        });
-
         return {
           type: "line",
           shape: {
@@ -282,9 +269,9 @@ export function useChartConfig({
           return null;
         }
 
-        // 获取坐标
-        const startPoint = api.coord([channel.startIndex, channel.gg]);
-        const endPoint = api.coord([channel.endIndex, channel.dd]);
+        // 获取坐标 - 使用 zg 和 zd 来显示重叠区域
+        const startPoint = api.coord([channel.startIndex, channel.zg]);
+        const endPoint = api.coord([channel.endIndex, channel.zd]);
 
         if (!startPoint || !endPoint) {
           return null;
@@ -295,11 +282,11 @@ export function useChartConfig({
         const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
         const halfBarWidth = barWidth * 0.4;
 
-        // 计算矩形的位置和大小
+        // 计算重叠区域矩形的位置和大小
         const x = startPoint[0] - halfBarWidth;
-        const y = Math.min(startPoint[1], endPoint[1]);
+        const y = startPoint[1];  // zg 的 y 坐标（价格较高，y值较小）
         const width = endPoint[0] - startPoint[0] + barWidth * 0.8;
-        const height = Math.abs(startPoint[1] - endPoint[1]);
+        const height = endPoint[1] - startPoint[1];  // zd 到 zg 的距离
 
         const color = getChannelColor(channel.type);
         const fillColor = hexToRgba(
@@ -568,10 +555,13 @@ export function useChartConfig({
               borderColor0: COLORS.down,
             },
           },
-          // Temporarily disable channel to focus on fenxing and bi visualization
-          // createChannelSeries(),
+          // Channel series - render Zhongshu (central channels) z=3
+          createChannelSeries(),
+          // MergeK series (合并K) z=5
           createMergeKSeries(),
+          // Bi series (笔) z=10
           createBiSeries(),
+          // Fenxing series (分型) z=15
           createFenxingSeries(),
           {
             name: "成交量",
@@ -593,7 +583,7 @@ export function useChartConfig({
 
       chart.setOption(options, true);
     },
-    [k, createMergeKSeries, createFenxingSeries]
+    [k, createMergeKSeries, createChannelSeries, createBiSeries, createFenxingSeries]
   );
 
   return { setOption };
