@@ -93,16 +93,6 @@ export const calculateBiData = (
       endPrice = b.lowest;
     }
 
-    console.log(`Bi ${index}:`, {
-      trend: b.trend,
-      startTime: b.startTime,
-      endTime: b.endTime,
-      startPrice,
-      endPrice,
-      highest: b.highest,
-      lowest: b.lowest,
-    });
-
     biData.push({
       startIndex,
       endIndex,
