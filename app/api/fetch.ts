@@ -131,6 +131,8 @@ export interface IFetchChannel {
   endId: number; // 结束K线索引
   trend: TrendDirection; // 中枢趋势
   bis: IFetchBi[]; // 组成中枢的笔数组
+  displayStartId: number; // 第一笔的中间位置K线ID
+  displayEndId: number; // 最后一笔的中间位置K线ID
 }
 
 export type FenxingType = "top" | "bottom";

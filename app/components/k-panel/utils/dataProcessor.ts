@@ -166,14 +166,18 @@ export const calculateChannelData = (
   const channelData: ChannelMappedData[] = [];
 
   channels.forEach((channel, index) => {
-    // 使用 startId/endId 查找 K 线索引
-    const startIndex = k.findIndex((item) => item.id === channel.startId);
-    const endIndex = k.findIndex((item) => item.id === channel.endId);
+    // 使用 displayStartId/displayEndId 查找 K 线索引
+    // 如果 display 字段不存在，则回退到 startId/endId
+    const startIdToUse = channel.displayStartId ?? channel.startId;
+    const endIdToUse = channel.displayEndId ?? channel.endId;
+
+    const startIndex = k.findIndex((item) => item.id === startIdToUse);
+    const endIndex = k.findIndex((item) => item.id === endIdToUse);
 
     // 验证索引有效性
     if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
       console.warn(
-        `Invalid channel indices: ${startIndex}-${endIndex}, channel startId: ${channel.startId}, endId: ${channel.endId}`
+        `Invalid channel indices: ${startIndex}-${endIndex}, channel startId: ${startIdToUse}, endId: ${endIdToUse}`
       );
       return;
     }
