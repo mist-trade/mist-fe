@@ -121,6 +121,8 @@ interface BackendChannel {
   startId: number;
   endId: number;
   trend: string;
+  displayStartId?: number;
+  displayEndId?: number;
 }
 
 /**
@@ -242,6 +244,9 @@ function transformChannel(backendChannel: BackendChannel): IFetchChannel {
     startId: backendChannel.startId,
     endId: backendChannel.endId,
     trend: backendChannel.trend as TrendDirection,
+    // Use display fields if available, otherwise fall back to start/end ID for backward compatibility
+    displayStartId: backendChannel.displayStartId ?? backendChannel.startId,
+    displayEndId: backendChannel.displayEndId ?? backendChannel.endId,
   };
 }
 

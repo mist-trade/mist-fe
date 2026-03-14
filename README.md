@@ -1,186 +1,183 @@
 # Mist Frontend (mist-fe)
 
-A sophisticated Next.js application for financial charting and technical analysis, specifically designed for Chinese stock market data visualization. Implements advanced charting capabilities using ECharts with custom Chen Theory (缠论) patterns.
+<p align="center">
+  <strong>智能股票市场分析与预警系统 - 前端应用</strong>
+</p>
 
-## Features
+<p align="center">
+  基于 Next.js 的金融图表与技术分析应用，专为中文股票市场数据可视化设计
+</p>
 
-- **K-line Chart Visualization**: Interactive candlestick charts with volume indicators
-- **Merge K (合并K)**: Groups consecutive K-lines based on containment relationships
-- **Trend Lines (笔)**: Visualizes significant price movements with color-coded states
-- **Real-time Data Processing**: Client-side calculations with streaming support
-- **Error Boundaries**: Graceful error handling with fallback UIs
-- **Environment Configuration**: Flexible API configuration via environment variables
-- **Testing**: Jest-based unit testing with high coverage
+---
 
-## Tech Stack
+## 📖 项目简介
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| [Next.js](https://nextjs.org) | 16.1.4 | React framework with App Router |
-| [React](https://react.dev) | 19.2.3 | UI library |
-| [TypeScript](https://www.typescriptlang.org) | 5.9.3 | Type-safe development |
-| [ECharts](https://echarts.apache.org) | 6.0.0 | Charting library |
-| [Tailwind CSS](https://tailwindcss.com) | 4.x | Utility-first CSS |
-| [Jest](https://jestjs.io) | 30.2.0 | Testing framework |
+Mist Frontend 是一个基于 Next.js 的金融图表和技术分析应用，专为中文股票市场数据可视化而设计。使用 ECharts 实现高级图表功能，支持自定义缠论（缠论）模式展示。
 
-## Project Structure
+### ✨ 核心特性
+
+- **K 线图表可视化**：交互式蜡烛图与成交量指标
+- **合并 K（合并K）**：基于包含关系对连续 K 线进行分组
+- **趋势线（笔）**：使用颜色编码状态可视化显著价格变动
+- **中枢（中枢）**：展示由交替笔形成的整理区间
+- **实时数据处理**：客户端计算与流式传输支持
+- **错误边界**：优雅的错误处理与降级 UI
+- **环境配置**：通过环境变量灵活配置 API
+
+---
+
+## 🚀 技术栈
+
+| 技术 | 版本 | 用途 |
+|------|------|------|
+| [Next.js](https://nextjs.org) | 16.1.4 | React 框架（App Router） |
+| [React](https://react.dev) | 19.2.3 | UI 库 |
+| [TypeScript](https://www.typescriptlang.org) | 5.9.3 | 类型安全开发 |
+| [ECharts](https://echarts.apache.org) | 6.0.0 | 图表库 |
+| [Tailwind CSS](https://tailwindcss.com) | 4.x | 原子化 CSS |
+| [Jest](https://jestjs.io) | 30.2.0 | 测试框架 |
+
+---
+
+## 🏗️ 项目结构
 
 ```
 app/
-├── api/
-│   ├── fetch.ts              # API client & data fetching
-│   ├── mock-data/
-│   │   └── index.ts          # Unified mock data source
-│   └── mock-*.ts             # K-line mock datasets
+├── api/                   # API 路由与数据获取
+│   ├── fetch.ts           # API 客户端与数据获取
+│   └── mock-data/         # 开发用模拟数据
+│       └── index.ts       # 统一模拟数据源
 ├── components/
-│   ├── k-panel/
-│   │   ├── index.tsx         # Main K-chart component
-│   │   ├── hooks/            # Custom React hooks
-│   │   │   ├── useChartData.ts       # Data processing
-│   │   │   ├── useChartConfig.ts     # Chart configuration
-│   │   │   └── useChartRender.ts     # ECharts rendering
-│   │   ├── utils/            # Utility functions
-│   │   │   ├── dataProcessor.ts      # Pure calculation functions
-│   │   │   └── formatters.ts         # Data formatting
-│   │   ├── config/           # Configuration constants
-│   │   │   ├── chartColors.ts        # Color schemes
-│   │   │   └── chartOptions.ts       # Chart options
-│   │   ├── types/            # TypeScript type definitions
-│   │   │   └── index.ts
-│   │   ├── __tests__/        # Unit tests
-│   │   └── skeleton.tsx      # Loading skeleton
-│   └── ErrorBoundary.tsx     # Error boundary component
+│   ├── k-panel/           # 主 K 线图组件
+│   │   ├── index.tsx      # K 线图主组件
+│   │   ├── hooks/         # 自定义 React Hooks
+│   │   │   ├── useChartData.ts      # 数据处理
+│   │   │   ├── useChartConfig.ts    # 图表配置
+│   │   │   └── useChartRender.ts    # ECharts 渲染
+│   │   ├── utils/        # 工具函数
+│   │   │   ├── dataProcessor.ts     # 纯计算函数
+│   │   │   └── formatters.ts        # 数据格式化
+│   │   ├── config/       # 配置常量
+│   │   │   ├── chartColors.ts       # 颜色方案
+│   │   │   └── chartOptions.ts      # 图表选项
+│   │   ├── types/        # TypeScript 类型定义
+│   │   ├── __tests__/    # 单元测试
+│   │   └── skeleton.tsx  # 加载骨架屏
+│   └── ErrorBoundary.tsx # 错误边界组件
 ├── k/
-│   └── page.tsx              # K-line chart page
-├── layout.tsx                # Root layout
-└── globals.css               # Global styles
+│   └── page.tsx           # K 线图页面路由
+├── layout.tsx             # 根布局
+└── globals.css            # 全局样式
 ```
 
-## Getting Started
+---
 
-### Prerequisites
+## 🚀 快速开始
+
+### 前置要求
 
 - Node.js 18+
 - pnpm 8+
 
-### Installation
+### 安装依赖
 
 ```bash
-# Install dependencies
 pnpm install
 ```
 
-### Environment Configuration
+### 环境配置
 
-Create a `.env.local` file (see `.env.example`):
+创建 `.env.local` 文件（参考 `.env.example`）：
 
 ```env
-# API Configuration
+# API 配置
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8008
 NEXT_PUBLIC_API_TIMEOUT=10000
 
-# Environment
+# 环境
 NODE_ENV=development
 ```
 
-### Development
+### 开发
 
 ```bash
-# Start development server
+# 启动开发服务器
 pnpm dev
 ```
 
-Visit [http://localhost:3000/k](http://localhost:3000/k) to see the K-line chart.
+访问 http://localhost:3000/k 查看 K 线图。
 
-### Building for Production
+### 生产构建
 
 ```bash
-# Build for production
+# 构建生产版本
 pnpm build
 
-# Start production server
+# 启动生产服务器
 pnpm start
 ```
 
-## Available Scripts
+---
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Build for production |
-| `pnpm start` | Start production server |
-| `pnpm lint` | Run ESLint |
-| `pnpm test` | Run Jest tests once |
-| `pnpm test:watch` | Run Jest tests in watch mode |
-| `pnpm test:coverage` | Run tests with coverage report |
+## 📚 可用脚本
 
-## Architecture
+| 命令 | 描述 |
+|------|------|
+| `pnpm dev` | 启动开发服务器 |
+| `pnpm build` | 构建生产版本 |
+| `pnpm start` | 启动生产服务器 |
+| `pnpm lint` | 运行 ESLint |
+| `pnpm test` | 运行 Jest 测试 |
+| `pnpm test:watch` | 监听模式运行测试 |
+| `pnpm test:coverage` | 生成测试覆盖率报告 |
 
-### Data Flow
+---
 
-1. Server components fetch initial data via `app/api/fetch.ts`
-2. **Promises are passed** (not resolved) to `KPanel` client component
-3. Client uses React 19's `use()` hook to unwrap Promises
-4. ECharts renders K-lines with custom overlays
+## 🏛️ 架构设计
 
-This pattern enables streaming and progressive rendering.
+### 数据流模式
 
-### Component Architecture
+**核心架构**：Server components 通过 `app/api/fetch.ts` 获取初始数据，将**未解析的 Promises** 传递给 client components，后者使用 React 19 的 `use()` hook 来解包 Promises。
 
-The KPanel component follows a modular architecture:
+**为什么使用这种模式**：支持流式传输和渐进式渲染。`use()` hook 会暂停组件直到数据可用。
 
 ```
-KPanel (main component)
-├── useChartData       - Data processing & transformation
-├── useChartConfig     - Chart configuration & series creation
-└── useChartRender     - ECharts initialization & updates
+Server Component (page.tsx)
+    ↓
+fetch.ts 返回 Promises
+    ↓
+Client Component (KPanel) 接收 Promises
+    ↓
+use() hook 解包 Promises
+    ↓
+ECharts 渲染图表
 ```
 
-Each hook has a single responsibility:
-- **useChartData**: Processes raw data into chart-ready format
-- **useChartConfig**: Creates ECharts configuration and series
-- **useChartRender**: Manages ECharts lifecycle
+### 组件架构
 
-### Chen Theory Implementation
-
-**Merge K (合并K)**: Groups consecutive K-lines based on containment relationships to identify trends and reversals.
-
-**Trend Lines (笔)**: Identifies significant price movements with visual overlays.
-
-| Type | Color | Description |
-|------|-------|-------------|
-| Complete (完成笔) | Blue (#2196f3) | Fully formed trend line |
-| UnComplete (未完成笔) | Purple (#9c27b0) | Incomplete trend line |
-| Initial (初始笔) | Orange (#ff9800) | Initial trend line |
-
-**Trend Colors**:
-- Up trends: Red (#ef5350)
-- Down trends: Teal (#26a69a)
-
-## API Integration
-
-The application expects a backend API at `NEXT_PUBLIC_API_BASE_URL` with the following endpoints:
-
-### Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/indicator/k` | POST | Fetch K-line data |
-| `/chan/merge-k` | POST | Calculate Merge K |
-| `/chan/bi` | POST | Calculate Trend Lines (Bi) |
-
-### Request/Response Types
+KPanel 组件遵循模块化架构：
 
 ```typescript
-// K-line request
-interface KRequest {
-  symbol: string;    // e.g., "000300"
-  code: string;      // e.g., "sh"
-  startDate: string; // "YYYY-MM-DD"
-  endDate: string;   // "YYYY-MM-DD"
-}
+<KPanel>
+  ├── useChartData       // 数据处理与转换
+  ├── useChartConfig     // 图表配置与系列创建
+  └── useChartRender     // ECharts 初始化与更新
+</KPanel>
+```
 
-// K-line response
+**关注点分离**：
+- **useChartData**：将原始数据处理为图表就绪格式
+- **useChartConfig**：创建 ECharts 配置和系列
+- **useChartRender**：管理 ECharts 生命周期
+
+---
+
+## 📊 缠论实现
+
+### 数据结构
+
+```typescript
+// K 线数据
 interface IFetchK {
   id: number;
   symbol: string;
@@ -191,26 +188,102 @@ interface IFetchK {
   highest: number;
   lowest: number;
 }
+
+// 合并 K
+interface IMergeK {
+  startTime: Date;
+  endTime: Date;
+  highest: number;
+  lowest: number;
+  trend: TrendDirection;  // 'up' | 'down' | 'none'
+  mergedCount: number;
+  mergedIds: number[];
+  mergedData: IFetchK[];
+}
+
+// 笔
+interface IFetchBi {
+  startTime: Date;
+  endTime: Date;
+  highest: number;
+  lowest: number;
+  trend: TrendDirection;
+  type: BiType;  // 'initial' | 'uncomplete' | 'complete'
+  independentCount: number;
+  originIds: number[];
+  originData: IFetchK[];
+}
+
+// 中枢
+interface IFetchChannel {
+  zg: number;           // 中枢上沿（中枢最低的高点）
+  zd: number;           // 中枢下沿（中枢最高的低点）
+  gg: number;           // 中枢最高（所有笔的最高点）
+  dd: number;           // 中枢最低（所有笔的最低点）
+  level: ChannelLevel;  // 'bi' | 'duan'
+  type: ChannelType;    // 'complete' | 'uncomplete'
+  startId: number;
+  endId: number;
+  trend: TrendDirection;
+  bis: IFetchBi[];
+}
 ```
 
-## Testing
+### 可视化元素
 
-### Running Tests
+**合并 K（合并K）**：基于包含关系对连续 K 线进行分组
 
-```bash
-# Run all tests
-pnpm test
+**笔**：识别显著价格变动
 
-# Run in watch mode
-pnpm test:watch
+| 类型 | 颜色 | 描述 |
+|------|------|------|
+| 完成 | 蓝色 (#2196f3) | 完全形成的趋势线 |
+| 未完成 | 紫色 (#9c27b0) | 未完成的趋势线 |
+| 初始 | 橙色 (#ff9800) | 初始趋势线 |
 
-# Generate coverage report
-pnpm test:coverage
+**中枢**：由交替笔形成的整理区间
+
+| 类型 | 颜色 | 透明度 |
+|------|------|--------|
+| 完成 | 绿色 (#4caf50) | 15% |
+| 未完成 | 橙色 (#ff9800) | 8% |
+
+**趋势颜色**：
+- 上涨：红色 (#ef5350)
+- 下跌：青色 (#26a69a)
+
+---
+
+## 🔌 API 集成
+
+### 后端 API
+
+应用期望后端 API 位于 `NEXT_PUBLIC_API_BASE_URL`（默认：`http://127.0.0.1:8008`）
+
+### 端点
+
+| 端点 | 方法 | 描述 |
+|------|------|------|
+| `/indicator/k` | POST | 获取 K 线数据 |
+| `/chan/merge-k` | POST | 计算合并 K |
+| `/chan/bi` | POST | 计算笔 |
+| `/chan/channel` | POST | 计算中枢 |
+
+### 配置
+
+在 `app/api/fetch.ts` 中配置：
+
+```typescript
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8008';
 ```
 
-### Test Structure
+---
 
-Unit tests are located alongside source files in `__tests__` directories:
+## 🧪 测试
+
+### 测试结构
+
+单元测试位于源文件旁的 `__tests__` 目录中：
 
 ```
 app/components/k-panel/
@@ -219,38 +292,158 @@ app/components/k-panel/
 │       └── dataProcessor.test.ts
 ```
 
-### Current Coverage
+### 运行测试
 
-- Data processing functions: 100% coverage
-- 11 passing tests
+```bash
+# 运行所有测试
+pnpm test
 
-## Error Handling
+# 监听模式
+pnpm test:watch
 
-The application implements multiple layers of error handling:
-
-1. **API Level**: Try/catch with timeout handling in `fetch.ts`
-2. **Component Level**: ErrorBoundary wraps the chart component
-3. **User Feedback**: Graceful fallback UIs with retry options
-
-## Mock Data
-
-For development, the application uses mock data from `app/api/mock-data/`. Configure the active dataset via:
-
-```env
-NEXT_PUBLIC_MOCK_DATASET=development  # or 'testing', 'production'
+# 生成覆盖率报告
+pnpm test:coverage
 ```
 
-## Contributing
+### 当前覆盖率
 
-1. Follow the existing code style
-2. Write tests for new features
-3. Run `pnpm lint` before committing
-4. Ensure `pnpm test` passes
+- 数据处理函数：100% 覆盖率
+- 11 个通过的测试
 
-## License
+---
 
-This project is private and proprietary.
+## 🧪 测试数据管理
 
-## Support
+### 目录结构
 
-For issues or questions, please open an issue in the repository.
+```
+test-data/
+├── fixtures/              # 静态 fixtures（本地）
+│   └── k-line/           # K 线 fixtures
+└── results/              # 从后端同步
+    ├── json/             # 原始 JSON 结果
+    └── types/            # TypeScript 定义
+```
+
+### 从后端同步
+
+```bash
+# 从后端拉取最新数据
+pnpm run sync:from-backend
+
+# 同步 + 启动开发服务器
+pnpm run dev:sync
+```
+
+### 使用方式
+
+```typescript
+// 导入同步的结果
+import { shanghaiIndex20242025Results } from '@/test-data/results/types';
+
+// 使用数据
+const kData = shanghaiIndex20242025Results.data.originalKLines;
+const summary = shanghaiIndex20242025Results.summary;
+```
+
+---
+
+## ⚙️ 配置
+
+### 环境变量
+
+创建 `.env.local` 文件（参考 `.env.example`）：
+
+```env
+# API 配置
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8008
+NEXT_PUBLIC_API_TIMEOUT=10000
+
+# 环境
+NODE_ENV=development
+```
+
+### TypeScript 路径别名
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+### Tailwind CSS v4
+
+使用新的 `@import "tailwindcss"` 语法与 CSS 变量进行主题化。
+
+---
+
+## 🛠️ 错误处理
+
+### 错误边界
+
+应用实现了多层错误处理：
+
+1. **API 层**：`fetch.ts` 中的 try/catch 与超时处理
+2. **组件层**：ErrorBoundary 包装图表组件
+3. **用户反馈**：优雅的降级 UI 与重试选项
+
+### 错误边界位置
+
+`app/components/ErrorBoundary.tsx` 包装主 KPanel 组件。
+
+---
+
+## 📝 开发注意事项
+
+### 关键路由
+
+`/k` 路由显示主 K 线图
+
+### 图表计算
+
+图表计算（合并 K、趋势线）在客户端实时进行
+
+### 模拟数据
+
+开发中，应用使用来自 `app/api/mock-data/` 的模拟数据。可通过以下方式配置活动数据集：
+
+```env
+NEXT_PUBLIC_MOCK_DATASET=development  # 或 'testing', 'production'
+```
+
+---
+
+## 🔑 关键依赖
+
+| 包 | 版本 | 用途 |
+|------|------|------|
+| next | 16.1.4 | React 框架 |
+| react | 19.2.3 | UI 库 |
+| echarts | 6.0.0 | 图表库 |
+| tailwindcss | 4.x | 原子化 CSS |
+| typescript | 5.9.3 | 类型安全开发 |
+| jest | 30.2.0 | 测试框架 |
+
+---
+
+## 🐛 已知问题
+
+- 开发中使用模拟数据（后端集成进行中）
+- 数据集很大时图表性能可能下降
+
+---
+
+## 📝 许可证
+
+本项目为私有项目，版权所有。
+
+---
+
+## 📮 相关文档
+
+- [后端项目](../mist/)
+- [主目录文档](../)

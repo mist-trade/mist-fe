@@ -3,7 +3,9 @@ import {
   fetchChannel,
   fetchFenxing,
   fetchMergeK,
+  IFetchK,
 } from "@/app/api/fetch";
+import { TestStatistics } from "@/app/api/types/test-statistics.types";
 import { shanghaiindex20242025results } from "@/test-data/results/types";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
 import KPanel from "@/app/components/k-panel";
@@ -15,43 +17,49 @@ import { Suspense } from "react";
 const USE_MOCK_KLINE = true;
 
 async function fetchData() {
-  let k: any[];
-  let statistics: any;
+  let k: IFetchK[];
+  let statistics: TestStatistics | null = null;
 
   if (USE_MOCK_KLINE) {
     // Use mock K-line data from test results
     k = shanghaiindex20242025results.data.originalKLines;
 
     // Manually construct TestStatistics from raw data
-    const rawData = shanghaiindex20242025results as any; // Access full backend data
+    const rawData = shanghaiindex20242025results; // Use available data structure
     statistics = {
       metadata: {
         testName: rawData.metadata.testName,
         timestamp: rawData.metadata.timestamp,
-        dataSource: rawData.metadata.dataSource,
-        dateRange: `${rawData.metadata.dataRange.start} to ${rawData.metadata.dataRange.end}`,
+        dataSource: rawData.metadata.datasetName,
+        dateRange: '2024-2025',
       },
-      marketStats: rawData.metadata.marketStats,
+      marketStats: {
+        highest: 0,
+        lowest: 0,
+        yearStart2024: 0,
+        yearEnd2024: 0,
+        yearReturn2024: 0,
+      },
       dataStats: {
-        totalKLines: rawData.summary.originalKLines,
-        totalMergeK: rawData.summary.mergedKLines,
-        mergeRatio: rawData.summary.mergeRatio,
-        dataBreakdown: `2024: ${rawData.metadata.dataRange.breakdown[2024]} days, 2025: ${rawData.metadata.dataRange.breakdown[2025]} days`,
+        totalKLines: rawData.summary.totalKLines,
+        totalMergeK: rawData.summary.totalMergeK,
+        mergeRatio: 0,
+        dataBreakdown: 'See summary',
       },
       biStats: {
-        total: rawData.summary.totalBis,
-        complete: rawData.summary.completeBis,
-        uncomplete: rawData.summary.uncompleteBis,
-        up: rawData.summary.upBis,
-        down: rawData.summary.downBis,
-        avgDuration: rawData.biStatistics.averageDuration,
-        maxDuration: rawData.biStatistics.maxDuration,
-        minDuration: rawData.biStatistics.minDuration,
+        total: rawData.summary.totalBi,
+        complete: 0,
+        uncomplete: 0,
+        up: 0,
+        down: 0,
+        avgDuration: 0,
+        maxDuration: 0,
+        minDuration: 0,
       },
       channelStats: {
         total: rawData.summary.totalChannels,
-        complete: rawData.summary.completeChannels,
-        uncomplete: rawData.summary.uncompleteChannels,
+        complete: 0,
+        uncomplete: 0,
         channels: [], // Channel details would require parsing from rawData.data.channels
       },
     };
