@@ -387,4 +387,73 @@ describe('Channel Data Processing', () => {
       expect(rgba).toBe('rgba(255, 171, 0, 0.12)');
     });
   });
+
+  describe('display field usage', () => {
+    it('should use displayStartId/displayEndId for x-axis range calculation', () => {
+      // Create mockK with 6 elements (ids: 1, 2, 3, 10, 11, 12)
+      const mockKWithGaps: IFetchK[] = [
+        { id: 1, symbol: '000300', time: new Date('2024-01-01'), amount: 1000, open: 100, close: 105, highest: 110, lowest: 95 },
+        { id: 2, symbol: '000300', time: new Date('2024-01-02'), amount: 1200, open: 105, close: 108, highest: 112, lowest: 103 },
+        { id: 3, symbol: '000300', time: new Date('2024-01-03'), amount: 1100, open: 108, close: 102, highest: 115, lowest: 100 },
+        { id: 10, symbol: '000300', time: new Date('2024-01-10'), amount: 1900, open: 117, close: 115, highest: 122, lowest: 114 },
+        { id: 11, symbol: '000300', time: new Date('2024-01-11'), amount: 2000, open: 115, close: 118, highest: 120, lowest: 113 },
+        { id: 12, symbol: '000300', time: new Date('2024-01-12'), amount: 2100, open: 118, close: 116, highest: 121, lowest: 115 },
+      ];
+
+      // Create mockChannel with displayStartId: 2, displayEndId: 11
+      const mockChannelWithDisplayFields: IFetchChannel[] = [
+        {
+          zg: 118,
+          zd: 107,
+          gg: 120,
+          dd: 100,
+          level: ChannelLevel.Bi,
+          type: ChannelType.Complete,
+          startId: 1,  // startId points to id=1 (index 0)
+          endId: 12,   // endId points to id=12 (index 5)
+          trend: TrendDirection.Up,
+          bis: [],
+          displayStartId: 2,  // Should map to index 1
+          displayEndId: 11,   // Should map to index 4
+        },
+      ];
+
+      const result = calculateChannelData(mockKWithGaps, mockChannelWithDisplayFields, []);
+
+      // Verify displayStartId/displayEndId are used for mapping
+      expect(result).toHaveLength(1);
+      expect(result[0].startIndex).toBe(1);  // index of id=2
+      expect(result[0].endIndex).toBe(4);   // index of id=11
+    });
+
+    it('should fallback to startId/endId when display fields are not provided', () => {
+      // Test backward compatibility - display fields might not exist in old data
+      const legacyChannel: IFetchChannel[] = [
+        {
+          zg: 118,
+          zd: 107,
+          gg: 120,
+          dd: 100,
+          level: ChannelLevel.Bi,
+          type: ChannelType.Complete,
+          startId: 1,
+          endId: 9,
+          trend: TrendDirection.Up,
+          bis: [],
+          displayStartId: undefined as any,  // Simulate missing field
+          displayEndId: undefined as any,
+        },
+      ];
+
+      // This test documents expected behavior when display fields are missing
+      // The implementation should handle this gracefully
+      const result = calculateChannelData(mockK, legacyChannel, []);
+
+      // When display fields are undefined, the function should use startId/endId
+      // This will be verified by the implementation
+      expect(result).toHaveLength(1);
+      expect(result[0].startIndex).toBe(0);  // id=1 is at index 0
+      expect(result[0].endIndex).toBe(8);   // id=9 is at index 8
+    });
+  });
 });
