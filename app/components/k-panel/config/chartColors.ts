@@ -74,9 +74,9 @@ export const COLORS = {
 export const getChannelColor = (type: ChannelType): string => {
   switch (type) {
     case ChannelType.Complete:
-      return "#4caf50"; // 绿色
+      return "#00e676"; // 亮绿色 - 更高饱和度和亮度，适合夜间模式
     case ChannelType.UnComplete:
-      return "#ff9800"; // 橙色
+      return "#ffab00"; // 亮橙色 - 温暖醒目，夜间模式对比度高
     default:
       return "#666"; // 默认灰色
   }

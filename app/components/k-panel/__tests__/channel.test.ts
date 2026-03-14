@@ -2,6 +2,7 @@ import { calculateChannelData, createChannelPlaceholders } from '../utils/dataPr
 import { ChannelLevel, ChannelType, TrendDirection, BiType, BiStatus } from '@/app/api/fetch';
 import type { IFetchK, IFetchChannel, IFetchBi } from '@/app/api/fetch';
 import type { BiMappedData } from '../types';
+import { getChannelColor, hexToRgba } from '../config/chartColors';
 
 describe('Channel Data Processing', () => {
   const mockK: IFetchK[] = [
@@ -362,6 +363,28 @@ describe('Channel Data Processing', () => {
         .filter(idx => idx !== -1);
 
       expect(nonNullIndices).toEqual([0, 5]);
+    });
+  });
+
+  describe('Channel color updates', () => {
+    it('should return "#00e676" for Complete channel type', () => {
+      const color = getChannelColor(ChannelType.Complete);
+      expect(color).toBe('#00e676');
+    });
+
+    it('should return "#ffab00" for UnComplete channel type', () => {
+      const color = getChannelColor(ChannelType.UnComplete);
+      expect(color).toBe('#ffab00');
+    });
+
+    it('should convert "#00e676" with 0.20 opacity to rgba', () => {
+      const rgba = hexToRgba('#00e676', 0.20);
+      expect(rgba).toBe('rgba(0, 230, 118, 0.2)');
+    });
+
+    it('should convert "#ffab00" with 0.12 opacity to rgba', () => {
+      const rgba = hexToRgba('#ffab00', 0.12);
+      expect(rgba).toBe('rgba(255, 171, 0, 0.12)');
     });
   });
 });

@@ -291,7 +291,7 @@ export function useChartConfig({
         const color = getChannelColor(channel.type);
         const fillColor = hexToRgba(
           color,
-          channel.type === "complete" ? 0.15 : 0.08
+          channel.type === "complete" ? 0.20 : 0.12
         );
 
         // 获取 zg 和 zd 的 y 坐标
