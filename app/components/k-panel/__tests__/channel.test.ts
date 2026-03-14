@@ -440,8 +440,8 @@ describe('Channel Data Processing', () => {
           endId: 9,
           trend: TrendDirection.Up,
           bis: [],
-          displayStartId: undefined as any,  // Simulate missing field
-          displayEndId: undefined as any,
+          displayStartId: undefined as unknown as number,  // Simulate missing field
+          displayEndId: undefined as unknown as number,
         },
       ];
 

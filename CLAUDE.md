@@ -4,29 +4,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Mist Frontend (mist-fe) - A Next.js application for financial charting and technical analysis, specifically designed for Chinese stock market data visualization. Implements advanced charting capabilities using ECharts with custom Chen Theory (缠论) patterns.
+**Mist Frontend** is a Next.js application for financial charting and technical analysis, specifically designed for Chinese stock market data visualization. Implements advanced charting capabilities using ECharts with custom Chan Theory (缠论) patterns.
 
-## Development Commands
+**Tech Stack**: Next.js 16.1.4 (App Router), React 19.2.3, TypeScript 5, ECharts 6.0.0, Tailwind CSS 4
+
+## Quick Start
 
 ```bash
+# Install dependencies
+pnpm install
+
 # Development
-pnpm dev             # Start development server on http://localhost:3000
+pnpm dev                    # http://localhost:3000
 
 # Production
-pnpm build           # Build for production
-pnpm start           # Start production server
+pnpm build
+pnpm start
 
-# Code Quality
-pnpm lint            # Run ESLint
+# Code quality
+pnpm lint                   # ESLint
+pnpm test                   # Jest tests
+pnpm test:watch             # Watch mode
+pnpm test:coverage          # Coverage report
 ```
 
-## Tech Stack
-
-- **Framework**: Next.js 16.1.4 (App Router)
-- **Language**: TypeScript 5 (strict mode)
-- **UI**: React 19.2.3
-- **Charting**: ECharts 6.0.0
-- **Styling**: Tailwind CSS 4 (postcss-based)
+---
 
 ## Architecture
 
@@ -34,63 +36,116 @@ pnpm lint            # Run ESLint
 
 ```
 app/
-├── api/               # API routes & mock data
-│   ├── fetch.ts       # API client & data fetching
-│   └── mock*.ts       # K-line mock datasets (CSI 300)
+├── api/                    # API routes & data fetching
+│   ├── fetch.ts            # API client & data fetching
+│   └── mock-data/          # Mock datasets for development
+│       └── index.ts        # Unified mock data source
 ├── components/
-│   └── k-panel/       # Main K-chart component
-│       ├── index.tsx  # K-line chart with ECharts
-│       └── skeleton.tsx
-├── k/page.tsx         # K-line chart page route
-├── layout.tsx         # Root layout
-└── globals.css        # Tailwind v4 global styles
+│   ├── k-panel/            # Main K-chart component
+│   │   ├── index.tsx       # K-line chart with ECharts
+│   │   ├── hooks/          # Custom React hooks
+│   │   │   ├── useChartData.ts      # Data processing
+│   │   │   ├── useChartConfig.ts    # Chart configuration
+│   │   │   └── useChartRender.ts    # ECharts rendering
+│   │   ├── utils/         # Utility functions
+│   │   │   ├── dataProcessor.ts     # Pure calculations
+│   │   │   └── formatters.ts        # Data formatting
+│   │   ├── config/        # Configuration constants
+│   │   │   ├── chartColors.ts       # Color schemes
+│   │   │   └── chartOptions.ts      # Chart options
+│   │   ├── types/         # TypeScript definitions
+│   │   ├── __tests__/     # Unit tests
+│   │   └── skeleton.tsx   # Loading skeleton
+│   └── ErrorBoundary.tsx  # Error boundary
+├── k/
+│   └── page.tsx           # K-line chart page route
+├── layout.tsx             # Root layout
+└── globals.css            # Tailwind v4 global styles
 ```
 
-### Data Flow
+### Data Flow Pattern
 
-1. Server components fetch initial data via `app/api/fetch.ts`
-2. **Promises are passed** to `KPanel` client component (not resolved data)
-3. Client uses React 19's `use()` hook to unwrap Promises
-4. ECharts renders K-lines with custom overlays (merge K, trend lines)
+**Key Architecture**: Server components fetch data via `app/api/fetch.ts`, pass **unresolved Promises** to client components, which use React 19's `use()` hook to unwrap them.
 
-**Key Pattern**: Passing unresolved Promises from server to client components enables streaming and progressive rendering. The `use()` hook suspends the component until data is available.
+**Why this pattern**: Enables streaming and progressive rendering. The `use()` hook suspends the component until data is available.
 
-### Chart Architecture (app/components/k-panel/index.tsx)
+```
+Server Component (page.tsx)
+    ↓
+fetch.ts returns Promises
+    ↓
+Client Component (KPanel) receives Promises
+    ↓
+use() hook unwraps Promises
+    ↓
+ECharts renders chart
+```
 
-The K-panel implements a sophisticated charting system with:
+---
 
-- **Custom ECharts Series**: Uses `custom` series type for overlay graphics (merge K rectangles, trend lines)
-- **Placeholder Arrays**: Efficient mapping between data layers - creates placeholder items for overlay positioning
+## Component Architecture
+
+### KPanel Component Structure
+
+The KPanel component follows a modular architecture:
+
+```typescript
+<KPanel>
+  ├── useChartData       // Data processing & transformation
+  ├── useChartConfig     // Chart configuration & series creation
+  └── useChartRender     // ECharts initialization & updates
+</KPanel>
+```
+
+**Separation of Concerns**:
+- **useChartData**: Processes raw data into chart-ready format
+- **useChartConfig**: Creates ECharts configuration and series
+- **useChartRender**: Manages ECharts lifecycle
+
+---
+
+## Chart Architecture (app/components/k-panel/index.tsx)
+
+### Custom ECharts Series
+
+The K-panel implements sophisticated charting with:
+
+- **Custom series type**: Uses `custom` series for overlay graphics
+- **Placeholder arrays**: Efficient mapping between data layers
 - **Multi-layered Rendering**:
   - K-line candlesticks (base data)
-  - Merge K (合并K) - translucent rectangles grouping consecutive K-lines based on containment relationships
-  - Trend lines (笔) - lines showing significant price movements, classified as complete/incomplete/initial
-- **Color Coding**: Different colors for trend directions (up/down) and states
+  - Merge K (合并K) - translucent rectangles
+  - Trend lines (笔) - lines showing significant movements
+  - Channels (中枢) - consolidation zones
 
-Key implementation patterns:
+### Rendering Layers (z-index)
+
+```
+K-line (candlestick):  z=0
+Volume:                z=1
+Channel:               z=3
+Merge K:               z=5
+Bi (trend lines):      z=10
+```
+
+### Key Implementation Pattern
+
 ```typescript
-// Custom series rendering with placeholder arrays
+// Placeholder array technique
 const placeholder = new Array(rawData.length).fill(null);
-// Mix actual data with null placeholders for correct positioning
+
+// Mix actual data with null placeholders
 const mergeKData = mergeKArray.reduce((acc, item) => {
   acc[item.id] = item;  // Place data at specific indices
   return acc;
 }, placeholder);
 ```
 
-### Chen Theory (缠论) Implementation
+---
 
-**Merge K (合并K)**: Groups consecutive K-lines based on containment relationships to identify trends and reversals.
+## Chan Theory (缠论) Implementation
 
-**Trend Lines (笔)**: Identifies significant price movements with visual overlays. Classified as:
-- Complete (`BiType.Complete`) - blue (`#2196f3`)
-- UnComplete (`BiType.UnComplete`) - purple (`#9c27b0`)
-
-**Color Scheme**:
-- Up trends: red (`#ef5350`)
-- Down trends: teal (`#26a69a`)
-
-## Data Structures
+### Data Structures
 
 ```typescript
 interface IFetchK {
@@ -134,69 +189,62 @@ interface IFetchChannel {
   dd: number;           // 中枢最低（所有笔的最低点）
   level: ChannelLevel;  // 'bi' | 'duan'
   type: ChannelType;    // 'complete' | 'uncomplete'
-  startId: number;      // 起始的K线索引
-  endId: number;        // 结束的K线索引
+  startId: number;
+  endId: number;
   trend: TrendDirection;
-  bis: IFetchBi[];      // 组成中枢的笔数组
-}
-
-enum ChannelLevel {
-  Bi = 'bi',      // 笔级别
-  Duan = 'duan',  // 段级别
-}
-
-enum ChannelType {
-  Complete = 'complete',       // 完成中枢
-  UnComplete = 'uncomplete',   // 未完成中枢
+  bis: IFetchBi[];
 }
 ```
 
-### Chen Theory (缠论) Implementation
+### Visualization Elements
 
-**Merge K (合并K)**: Groups consecutive K-lines based on containment relationships to identify trends and reversals.
+**Merge K (合并K)**: Groups consecutive K-lines based on containment relationships
 
-**Trend Lines (笔)**: Identifies significant price movements with visual overlays. Classified as:
-- Complete (`BiType.Complete`) - blue (`#2196f3`)
-- UnComplete (`BiType.UnComplete`) - purple (`#9c27b0`)
+**Trend Lines (笔)**: Identifies significant price movements
 
-**Central Channels (中枢)**: Identifies consolidation zones formed by alternating Bi (笔). A channel requires at least 5 Bi with price overlap. Classified as:
-- Complete - green (`#4caf50`), 15% opacity fill
-- UnComplete - orange (`#ff9800`), 8% opacity fill
+| Type | Color | Description |
+|------|-------|-------------|
+| Complete | Blue (#2196f3) | Fully formed trend line |
+| UnComplete | Purple (#9c27b0) | Incomplete trend line |
+| Initial | Orange (#ff9800) | Initial trend line |
 
-**Color Scheme**:
-- Up trends: red (`#ef5350`)
-- Down trends: teal (`#26a69a`)
-- Channel complete: green (`#4caf50`)
-- Channel uncomplete: orange (`#ff9800`)
+**Central Channels (中枢)**: Consolidation zones formed by alternating Bi
 
-### Visualization Layers (z-index)
+| Type | Color | Opacity |
+|------|-------|----------|
+| Complete | Green (#4caf50) | 15% |
+| UnComplete | Orange (#ff9800) | 8% |
 
+**Trend Colors**:
+- Up trends: Red (#ef5350)
+- Down trends: Teal (#26a69a)
+
+---
+
+## API Integration
+
+### Backend API
+
+The application expects backend API at `NEXT_PUBLIC_API_BASE_URL` (default: `http://127.0.0.1:8008`)
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/indicator/k` | POST | Fetch K-line data |
+| `/chan/merge-k` | POST | Calculate Merge K |
+| `/chan/bi` | POST | Calculate Trend Lines (Bi) |
+| `/chan/channel` | POST | Calculate Channels |
+
+### Configuration
+
+Configure in `app/api/fetch.ts`:
+
+```typescript
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8008';
 ```
-K-line (candlestick):  z=0
-Volume:                z=1
-Channel:               z=3  ← NEW
-Merge K:               z=5
-Bi (trend lines):      z=10
-```
 
-Channels are rendered as multi-layered rectangles with:
-- **Fill rectangle**: Shows overall channel range (dd to gg)
-- **Upper edge line (zg)**: Dashed line at channel's upper edge (lowest high)
-- **Lower edge line (zd)**: Dashed line at channel's lower edge (highest low)
-- **Border rectangle**: Dashed outline for visual clarity
-
-## Configuration
-
-- **Tailwind CSS v4**: Uses new `@import "tailwindcss"` syntax with CSS variables for theming
-- **TypeScript Path Aliases**: `"@/*": ["./*"]` configured in tsconfig.json
-- **Chart Renderer**: Canvas renderer for performance
-- **Base URL**: Configured in `app/api/fetch.ts`
-
-## Development Notes
-
-- The `/k` route displays the main K-line chart
-- Chart calculations (merge K, trend lines) happen client-side in real-time
-- API calls in `fetch.ts` make HTTP requests but return mock data for development
+---
 
 ## Test Data Management
 
@@ -204,35 +252,158 @@ Channels are rendered as multi-layered rectangles with:
 
 ```
 mist-fe/test-data/
-├── fixtures/           # Test input data (synced from backend)
-│   ├── k-line/         # K-line raw data
-│   └── patterns/       # Test pattern data
-└── results/            # Test output (synced from backend)
-    ├── json/           # JSON results
-    └── types/          # TypeScript definitions
+├── fixtures/              # Static fixtures (local)
+│   └── k-line/           # K-line fixtures
+└── results/              # From backend sync
+    ├── json/             # Raw JSON results
+    └── types/            # TypeScript definitions
 ```
 
-### Synchronization
+### Sync from Backend
 
-Test data is synced from the backend:
 ```bash
-# From backend directory
-cd ../mist
-pnpm run test:sync     # Sync test results to frontend
+# Pull latest data from backend
+pnpm run sync:from-backend
+
+# Sync + start dev server
+pnpm run dev:sync
 ```
 
-### Usage in Development
+### Usage
 
-When developing visualizations, you can use the synced test data:
-- Import from `@/test-data/fixtures` for test inputs
-- Import from `@/test-data/results` for expected outputs
-- Type definitions are auto-generated and available in `test-data/results/types/`
+```typescript
+// Import synced results
+import { shanghaiIndex20242025Results } from '@/test-data/results/types';
 
-## API Integration
+// Use the data
+const kData = shanghaiIndex20242025Results.data.originalKLines;
+const summary = shanghaiIndex20242025Results.summary;
+```
 
-The backend API (`http://127.0.0.1:8008`) is expected to provide endpoints:
-- `/indicator/k` - K-line data
-- `/chan/merge-k` - Merge K calculations
-- `/chan/bi` - Trend line (Bi) calculations
+---
 
-Currently, the frontend makes fetch requests but resolves with mock data. To connect to a real backend, modify the `.then()` handlers in `fetch.ts` to return actual response data.
+## Configuration
+
+### Environment Variables
+
+Create `.env.local` (see `.env.example`):
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8008
+NEXT_PUBLIC_API_TIMEOUT=10000
+
+# Environment
+NODE_ENV=development
+```
+
+### TypeScript Path Aliases
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+### Tailwind CSS v4
+
+Uses new `@import "tailwindcss"` syntax with CSS variables for theming.
+
+---
+
+## Error Handling
+
+### Error Boundaries
+
+The application implements multiple layers of error handling:
+
+1. **API Level**: Try/catch with timeout handling in `fetch.ts`
+2. **Component Level**: ErrorBoundary wraps the chart component
+3. **User Feedback**: Graceful fallback UIs with retry options
+
+### Error Boundary Location
+
+`app/components/ErrorBoundary.tsx` wraps the main KPanel component.
+
+---
+
+## Development Notes
+
+### Key Route
+
+The `/k` route displays the main K-line chart
+
+### Chart Calculations
+
+Chart calculations (merge K, trend lines) happen client-side in real-time
+
+### Mock Data
+
+For development, the application uses mock data from `app/api/mock-data/`. Configure the active dataset via:
+
+```env
+NEXT_PUBLIC_MOCK_DATASET=development  # or 'testing', 'production'
+```
+
+---
+
+## Testing
+
+### Test Structure
+
+Unit tests are located alongside source files in `__tests__` directories:
+
+```
+app/components/k-panel/
+├── utils/
+│   └── __tests__/
+│       └── dataProcessor.test.ts
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pnpm test
+
+# Run in watch mode
+pnpm test:watch
+
+# Generate coverage report
+pnpm test:coverage
+```
+
+### Current Coverage
+
+- Data processing functions: 100% coverage
+- 11 passing tests
+
+---
+
+## Key Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| next | 16.1.4 | React framework |
+| react | 19.2.3 | UI library |
+| echarts | 6.0.0 | Charting library |
+| tailwindcss | 4.x | Utility-first CSS |
+| typescript | 5.9.3 | Type-safe development |
+| jest | 30.2.0 | Testing framework |
+
+---
+
+## Known Issues
+
+- Mock data is used in development (backend integration WIP)
+- Chart performance may degrade with very large datasets
+
+---
+
+## License
+
+This project is private and proprietary.
