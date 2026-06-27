@@ -37,8 +37,6 @@ pnpm run sync:from-backend
 ### Fixtures
 
 - **csi-300-2024-2025-simple.ts** - Simple test data (89 records)
-- **csi-300-2023-real.ts** - Real market data 2023 (112 records)
-- **csi-300-2025-full-year.ts** - Full year 2025 data (122 records)
 - **csi-300-2025-real.ts** - Real market data 2025 (large dataset)
 
 ### Results (synced from backend)

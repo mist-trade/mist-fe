@@ -12,15 +12,6 @@ import type { IFetchK } from '@/app/api/fetch';
 // K-line fixtures
 export { mockKData, getMockKData } from './fixtures/k-line/csi-300-2024-2025-simple';
 export {
-  mockCSIData300Real,
-  getRealCSIData,
-  getCSIDataByDateRange,
-} from './fixtures/k-line/csi-300-2023-real';
-export {
-  mockKData3002025,
-  getMockKData3002025,
-} from './fixtures/k-line/csi-300-2025-full-year';
-export {
   mockCSI300Data2025Real,
 } from './fixtures/k-line/csi-300-2025-real';
 
