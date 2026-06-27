@@ -87,6 +87,8 @@ describe('Channel Data Processing', () => {
       type: ChannelType.Complete,
       startId: 1,
       endId: 9,
+      displayStartId: 1,
+      displayEndId: 9,
       trend: TrendDirection.Up,
       bis: [] as IFetchBi[], // Would be full IFetchBi[] in real scenario
     },
@@ -127,6 +129,8 @@ describe('Channel Data Processing', () => {
           type: ChannelType.Complete,
           startId: 999,  // Non-existent ID
           endId: 1000,
+          displayStartId: 999,
+          displayEndId: 1000,
           trend: TrendDirection.Up,
           bis: [],
         },
@@ -146,6 +150,8 @@ describe('Channel Data Processing', () => {
           type: ChannelType.Complete,
           startId: 9,  // Higher ID
           endId: 1,   // Lower ID (should be filtered out)
+          displayStartId: 9,
+          displayEndId: 1,
           trend: TrendDirection.Up,
           bis: [],
         },
@@ -191,6 +197,8 @@ describe('Channel Data Processing', () => {
           type: ChannelType.Complete,
           startId: 1,
           endId: 5,
+          displayStartId: 1,
+          displayEndId: 5,
           trend: TrendDirection.Up,
           bis: [],
         },
@@ -203,6 +211,8 @@ describe('Channel Data Processing', () => {
           type: ChannelType.UnComplete,
           startId: 6,
           endId: 10,
+          displayStartId: 6,
+          displayEndId: 10,
           trend: TrendDirection.Down,
           bis: [],
         },
