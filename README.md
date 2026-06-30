@@ -91,8 +91,12 @@ pnpm install
 
 ```env
 # API 配置
-NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8008
+NEXT_PUBLIC_MIST_API_BASE_PATH=/api/mist
+NEXT_PUBLIC_CHAN_API_BASE_PATH=/api/chan
+MIST_API_PROXY_TARGET=http://127.0.0.1:8001
+CHAN_API_PROXY_TARGET=http://127.0.0.1:8008
 NEXT_PUBLIC_API_TIMEOUT=10000
+NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK=false
 
 # 环境
 NODE_ENV=development
@@ -258,23 +262,44 @@ interface IFetchChannel {
 
 ### 后端 API
 
-应用期望后端 API 位于 `NEXT_PUBLIC_API_BASE_URL`（默认：`http://127.0.0.1:8008`）
+生产部署默认走同源 nginx 网关：
+
+- Mist 后端：`/api/mist`
+- Chan 分析服务：`/api/chan`
+
+本地开发如果没有启动 nginx，推荐保持浏览器同源请求，并让 Next dev server 代理到后端：
+
+```env
+MIST_API_PROXY_TARGET=http://127.0.0.1:8001
+CHAN_API_PROXY_TARGET=http://127.0.0.1:8008
+```
+
+如果后端明确允许 CORS，也可以让浏览器直连绝对 URL：
+
+```env
+NEXT_PUBLIC_MIST_API_BASE_URL=http://127.0.0.1:8001
+NEXT_PUBLIC_CHAN_API_BASE_URL=http://127.0.0.1:8008
+```
 
 ### 端点
 
 | 端点 | 方法 | 描述 |
 |------|------|------|
-| `/indicator/k` | POST | 获取 K 线数据 |
-| `/chan/merge-k` | POST | 计算合并 K |
-| `/chan/bi` | POST | 计算笔 |
-| `/chan/channel` | POST | 计算中枢 |
+| `/api/mist/security/v1/all` | GET | 获取股票列表 |
+| `/api/mist/v1/collector/collect` | POST | 触发指定股票与周期的 K 线采集 |
+| `/api/chan/indicator/k` | POST | 获取 K 线数据 |
+| `/api/chan/chan/merge-k` | POST | 计算合并 K |
+| `/api/chan/chan/bi` | POST | 计算笔 |
+| `/api/chan/chan/fenxing` | POST | 计算分型 |
+| `/api/chan/chan/channel` | POST | 计算中枢 |
 
 ### 配置
 
-在 `app/api/fetch.ts` 中配置：
+统一 API 边界在 `app/api/client.ts` 中配置。默认使用相对路径以保持浏览器单 origin；本地直连时再设置 `NEXT_PUBLIC_MIST_API_BASE_URL` 和 `NEXT_PUBLIC_CHAN_API_BASE_URL`。
 
 ```typescript
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8008';
+const mistBase = getMistApiBase(); // /api/mist
+const chanBase = getAnalysisApiBase(); // /api/chan
 ```
 
 ---
@@ -356,12 +381,18 @@ const summary = shanghaiIndex20242025Results.summary;
 
 ```env
 # API 配置
-NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8008
+NEXT_PUBLIC_MIST_API_BASE_PATH=/api/mist
+NEXT_PUBLIC_CHAN_API_BASE_PATH=/api/chan
+MIST_API_PROXY_TARGET=http://127.0.0.1:8001
+CHAN_API_PROXY_TARGET=http://127.0.0.1:8008
 NEXT_PUBLIC_API_TIMEOUT=10000
+NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK=false
 
 # 环境
 NODE_ENV=development
 ```
+
+`NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK=true` 仅用于开发调试。当实时 K 线请求失败时，页面会显示 fallback 状态，避免误认为是真实行情。
 
 ### TypeScript 路径别名
 
