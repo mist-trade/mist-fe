@@ -1,7 +1,7 @@
 import { getMockData } from "@/test-data";
+import { getAnalysisApiBase } from "./client";
 
-export const BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8008";
+export const BASE = getAnalysisApiBase();
 const TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "10000");
 
 const getPath = (path: string) => `${BASE}${path}`;
