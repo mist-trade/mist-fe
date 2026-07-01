@@ -121,6 +121,38 @@ pnpm build
 pnpm start
 ```
 
+### Docker 镜像
+
+生产部署使用 `ghcr.io/mist-trade/mist-fe`。GitHub Actions 工作流
+`Build Frontend Docker Image` 会发布当前提交 SHA tag，`master` 分支额外发布
+`latest`。
+
+本地构建与 smoke：
+
+```bash
+docker build -t ghcr.io/mist-trade/mist-fe:local .
+docker run --rm -p 3000:3000 ghcr.io/mist-trade/mist-fe:local
+curl http://127.0.0.1:3000/
+```
+
+默认基础镜像固定为 `node:22.13-alpine`，匹配 `pnpm@11.7.0` 的 Node
+版本要求。如果本机访问 Docker Hub 慢，可以临时换源，但仍要使用 Node
+`22.13` 或更高版本：
+
+```bash
+docker build \
+  --build-arg NODE_IMAGE=docker.m.daocloud.io/library/node:22.13-alpine \
+  --build-arg NPM_REGISTRY=https://registry.npmmirror.com \
+  -t ghcr.io/mist-trade/mist-fe:local .
+```
+
+容器默认使用同源网关路径：
+
+```env
+NEXT_PUBLIC_MIST_API_BASE_PATH=/api/mist
+NEXT_PUBLIC_CHAN_API_BASE_PATH=/api/chan
+```
+
 ---
 
 ## 📚 可用脚本

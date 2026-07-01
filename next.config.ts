@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   async rewrites() {
     const rewrites = [];
     const mistTarget = process.env.MIST_API_PROXY_TARGET;
