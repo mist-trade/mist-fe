@@ -1,0 +1,88 @@
+name: Build Frontend Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_repository:
+        description: Frontend image repository
+        required: true
+        default: ghcr.io/mist-trade/mist-fe
+        type: string
+      node_image:
+        description: Docker base image for Node.js. Use a mirror when Docker Hub is slow.
+        required: true
+        default: node:22.13-alpine
+        type: string
+      npm_registry:
+        description: npm registry used during Docker build dependency install.
+        required: true
+        default: https://registry.npmjs.org
+        type: string
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker:
+    name: Build and publish frontend image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout frontend
+        uses: actions/checkout@v4
+
+      - name: Set image metadata
+        id: meta
+        shell: bash
+        run: |
+          image_repository="${{ github.event.inputs.image_repository || 'ghcr.io/mist-trade/mist-fe' }}"
+          node_image="${{ github.event.inputs.node_image || 'node:22.13-alpine' }}"
+          npm_registry="${{ github.event.inputs.npm_registry || 'https://registry.npmjs.org' }}"
+          short_sha="${GITHUB_SHA::7}"
+          tags="${image_repository}:${GITHUB_SHA}"
+          if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
+            tags="${tags}"$'\n'"${image_repository}:latest"
+          fi
+
+          {
+            echo "image_repository=${image_repository}"
+            echo "node_image=${node_image}"
+            echo "npm_registry=${npm_registry}"
+            echo "short_sha=${short_sha}"
+            echo "tags<<EOF"
+            echo "${tags}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            NODE_IMAGE=${{ steps.meta.outputs.node_image }}
+            NPM_REGISTRY=${{ steps.meta.outputs.npm_registry }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Print image tags
+        shell: bash
+        run: |
+          echo "Published frontend image:"
+          echo "${{ steps.meta.outputs.tags }}"

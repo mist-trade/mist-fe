@@ -32,4 +32,8 @@ describe("next config local API proxy", () => {
       },
     ]);
   });
+
+  it("builds a standalone production server for Docker images", () => {
+    expect(nextConfig.output).toBe("standalone");
+  });
 });
