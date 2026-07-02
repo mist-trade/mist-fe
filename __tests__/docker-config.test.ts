@@ -9,7 +9,7 @@ describe("frontend Docker image configuration", () => {
   it("builds a standalone Next.js runtime image", () => {
     const dockerfile = read("Dockerfile");
 
-    expect(dockerfile).toContain("ARG NODE_IMAGE=node:22.13-alpine");
+    expect(dockerfile).toContain("ARG NODE_IMAGE=node:24-alpine");
     expect(dockerfile).toContain("ARG NPM_REGISTRY=https://registry.npmjs.org");
     expect(dockerfile).toContain("FROM ${NODE_IMAGE} AS base");
     expect(dockerfile).toContain("npm install -g pnpm@11.7.0 --registry=${NPM_REGISTRY}");
@@ -33,13 +33,18 @@ describe("frontend Docker image configuration", () => {
     expect(workflow).toContain("${image_repository}:${GITHUB_SHA}");
     expect(workflow).toContain("${image_repository}:latest");
     expect(workflow).toContain("docker/build-push-action@v6");
+    expect(workflow).toContain("validate:");
+    expect(workflow).toContain("needs: validate");
+    expect(workflow).toContain("pnpm lint");
+    expect(workflow).toContain("pnpm run typecheck");
+    expect(workflow).toContain("pnpm run test:ci");
   });
 
   it("allows manual workflow builds to override Docker and npm registries", () => {
     const workflow = read(".github/workflows/docker.yml");
 
     expect(workflow).toContain("node_image:");
-    expect(workflow).toContain("default: node:22.13-alpine");
+    expect(workflow).toContain("default: node:24-alpine");
     expect(workflow).toContain("npm_registry:");
     expect(workflow).toContain("default: https://registry.npmjs.org");
     expect(workflow).toContain("node_image=${node_image}");

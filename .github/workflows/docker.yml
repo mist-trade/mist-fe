@@ -11,7 +11,7 @@ on:
       node_image:
         description: Docker base image for Node.js. Use a mirror when Docker Hub is slow.
         required: true
-        default: node:22.13-alpine
+        default: node:24-alpine
         type: string
       npm_registry:
         description: npm registry used during Docker build dependency install.
@@ -27,9 +27,38 @@ permissions:
   packages: write
 
 jobs:
+  validate:
+    name: Validate frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout frontend
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm run test:ci
+
   docker:
     name: Build and publish frontend image
     runs-on: ubuntu-latest
+    needs: validate
 
     steps:
       - name: Checkout frontend
@@ -40,7 +69,7 @@ jobs:
         shell: bash
         run: |
           image_repository="${{ github.event.inputs.image_repository || 'ghcr.io/mist-trade/mist-fe' }}"
-          node_image="${{ github.event.inputs.node_image || 'node:22.13-alpine' }}"
+          node_image="${{ github.event.inputs.node_image || 'node:24-alpine' }}"
           npm_registry="${{ github.event.inputs.npm_registry || 'https://registry.npmjs.org' }}"
           short_sha="${GITHUB_SHA::7}"
           tags="${image_repository}:${GITHUB_SHA}"

@@ -23,7 +23,7 @@
       "@/test-data": ["./test-data/index.ts"],
       "@/test-data/*": ["./test-data/*"]
     },
-    "types": ["jest"]
+    "types": ["jest", "@testing-library/jest-dom"]
   },
   "include": [
     "next-env.d.ts",
