@@ -7,7 +7,7 @@
  * @module test-data
  */
 
-import type { IFetchK } from '@/app/api/fetch';
+import type { IFetchK } from '@/app/api/types';
 
 // K-line fixtures
 export { mockKData, getMockKData } from './fixtures/k-line/csi-300-2024-2025-simple';

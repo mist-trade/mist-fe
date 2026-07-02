@@ -1,4 +1,4 @@
-import type { IFetchK } from "@/app/api/fetch";
+import type { IFetchK } from "@/app/api/types";
 
 // 格式化日期显示
 export const formatKDate = (time: Date | string): string => {
@@ -27,10 +27,16 @@ export const formatKTooltip = (
   k: IFetchK[],
   dates: string[]
 ): string => {
-  const dataIndex = params[0].dataIndex;
+  const dataIndex = params[0]?.dataIndex;
+  if (dataIndex === undefined || dataIndex < 0 || dataIndex >= k.length) {
+    return "";
+  }
   const item = k[dataIndex];
+  if (!item) {
+    return "";
+  }
   return [
-    `日期: ${dates[dataIndex]}`,
+    `日期: ${dates[dataIndex] ?? ""}`,
     `开盘: ${item.open}`,
     `收盘: ${item.close}`,
     `最低: ${item.lowest}`,
@@ -43,14 +49,16 @@ export const formatKTooltip = (
 export const calculatePriceRange = (
   k: IFetchK[]
 ): { min: number; max: number; range: number } => {
-  const prices = k.flatMap((item) => [
-    item.highest,
-    item.lowest,
-    item.open,
-    item.close,
-  ]);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
+  if (k.length === 0) {
+    return { min: 0, max: 0, range: 0 };
+  }
+
+  let minPrice = Number.POSITIVE_INFINITY;
+  let maxPrice = Number.NEGATIVE_INFINITY;
+  k.forEach((item) => {
+    minPrice = Math.min(minPrice, item.highest, item.lowest, item.open, item.close);
+    maxPrice = Math.max(maxPrice, item.highest, item.lowest, item.open, item.close);
+  });
   const priceRange = maxPrice - minPrice;
 
   return { min: minPrice, max: maxPrice, range: priceRange };

@@ -1,4 +1,4 @@
-import { IFetchK } from "@/app/api/fetch";
+import type { IFetchK } from "@/app/api/types";
 
 /**
  * 真实沪深300指数2025年数据

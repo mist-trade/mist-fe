@@ -1,4 +1,4 @@
-import { IFetchK } from "@/app/api/fetch";
+import type { IFetchK } from "@/app/api/types";
 
 /**
  * Mock K线数据

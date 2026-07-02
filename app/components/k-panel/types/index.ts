@@ -10,7 +10,7 @@ import {
   IFetchK,
   IMergeK,
   TrendDirection,
-} from "@/app/api/fetch";
+} from "@/app/api/types";
 
 export interface FenxingMappedData {
   index: number;
