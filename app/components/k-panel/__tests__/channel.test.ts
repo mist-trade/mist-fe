@@ -1,6 +1,6 @@
 import { calculateChannelData, createChannelPlaceholders } from '../utils/dataProcessor';
-import { ChannelLevel, ChannelType, TrendDirection, BiType, BiStatus } from '@/app/api/fetch';
-import type { IFetchK, IFetchChannel, IFetchBi } from '@/app/api/fetch';
+import { ChannelLevel, ChannelType, TrendDirection, BiType, BiStatus } from '@/app/api/types';
+import type { IFetchK, IFetchChannel, IFetchBi } from '@/app/api/types';
 import type { BiMappedData } from '../types';
 import { getChannelColor, hexToRgba } from '../config/chartColors';
 

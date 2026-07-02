@@ -10,6 +10,14 @@ import {
   fetchSecurities,
 } from "@/app/api/client";
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((innerResolve) => {
+    resolve = innerResolve;
+  });
+  return { promise, resolve };
+}
+
 jest.mock("@/app/api/client", () => ({
   collectKLines: jest.fn(),
   fetchBi: jest.fn(),
@@ -34,6 +42,7 @@ const mockedFetchBi = fetchBi as jest.Mock;
 const mockedFetchFenxing = fetchFenxing as jest.Mock;
 const mockedFetchChannel = fetchChannel as jest.Mock;
 const mockedCollectKLines = collectKLines as jest.Mock;
+const originalEnv = process.env;
 
 const securities = [
   { code: "600519", name: "贵州茅台", type: "stock", status: 1 },
@@ -56,6 +65,8 @@ const kLines = [
 describe("KLineLivePage", () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    process.env = { ...originalEnv };
+    delete process.env.NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK;
     window.history.replaceState(null, "", "/k");
     mockedFetchSecurities.mockResolvedValue(securities);
     mockedFetchK.mockResolvedValue(kLines);
@@ -64,6 +75,10 @@ describe("KLineLivePage", () => {
     mockedFetchFenxing.mockResolvedValue([]);
     mockedFetchChannel.mockResolvedValue([]);
     mockedCollectKLines.mockResolvedValue({ code: "600519", period: 1440, count: 1 });
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
   });
 
   it("shows stock selection state without rendering fixture data when code is missing", async () => {
@@ -120,6 +135,75 @@ describe("KLineLivePage", () => {
       endDate: "2026-06-30",
     });
     expect(screen.getByDisplayValue("600519")).toBeInTheDocument();
+  });
+
+  it("falls back to the default source when URL source is invalid", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/k?code=600519&source=bogus&period=1440&startDate=2026-01-01&endDate=2026-06-30"
+    );
+
+    render(<KLineLivePage />);
+
+    await screen.findByTestId("k-panel");
+    expect(mockedFetchK).toHaveBeenCalledWith({
+      code: "600519",
+      source: "tdx",
+      period: 1440,
+      startDate: "2026-01-01",
+      endDate: "2026-06-30",
+    });
+  });
+
+  it("keeps newer chart data when an older request resolves later", async () => {
+    const oldK = deferred<typeof kLines>();
+    const newerK = [
+      ...kLines,
+      {
+        ...kLines[0],
+        id: 2,
+        time: "2026-07-01T00:00:00.000Z",
+      },
+    ];
+
+    mockedFetchK
+      .mockImplementationOnce(() => oldK.promise)
+      .mockResolvedValueOnce(newerK);
+
+    window.history.replaceState(
+      null,
+      "",
+      "/k?code=600519&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
+    );
+
+    render(<KLineLivePage />);
+
+    fireEvent.change(await screen.findByDisplayValue("600519"), {
+      target: { value: "000001" },
+    });
+
+    expect(await screen.findByText("K lines: 2")).toBeInTheDocument();
+    oldK.resolve(kLines);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("k-panel")).toHaveTextContent("K lines: 2");
+    });
+  });
+
+  it("uses explicit development fallback when enabled", async () => {
+    process.env.NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK = "true";
+    mockedFetchK.mockRejectedValue(new Error("offline"));
+    window.history.replaceState(
+      null,
+      "",
+      "/k?code=600519&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
+    );
+
+    render(<KLineLivePage />);
+
+    expect(await screen.findByText("开发 fallback")).toBeInTheDocument();
+    expect(screen.getByTestId("k-panel")).toBeInTheDocument();
   });
 
   it("blocks manual refresh until required parameters are selected", async () => {

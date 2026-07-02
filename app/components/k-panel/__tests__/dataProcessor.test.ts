@@ -1,6 +1,12 @@
-import { calculateMergeKRects, calculateBiData, createMergeKPlaceholders, createBiPlaceholders } from '../utils/dataProcessor';
-import { TrendDirection, BiType, BiStatus } from '@/app/api/fetch';
-import type { IFetchK, IMergeK, IFetchBi } from '@/app/api/fetch';
+import {
+  buildKLineIndexes,
+  calculateMergeKRects,
+  calculateBiData,
+  createMergeKPlaceholders,
+  createBiPlaceholders,
+} from '../utils/dataProcessor';
+import { TrendDirection, BiType, BiStatus } from '@/app/api/types';
+import type { IFetchK, IMergeK, IFetchBi } from '@/app/api/types';
 
 describe('DataProcessor', () => {
   const mockK: IFetchK[] = [
@@ -52,6 +58,13 @@ describe('DataProcessor', () => {
     it('should handle K data with no merge K data', () => {
       const result = calculateMergeKRects(mockK, []);
       expect(result).toEqual([]);
+    });
+
+    it('should expose reusable timestamp and id indexes for large datasets', () => {
+      const indexes = buildKLineIndexes(mockK);
+
+      expect(indexes.byId.get(3)).toBe(2);
+      expect(indexes.byTime.get(new Date('2024-01-04').getTime())).toBe(3);
     });
   });
 

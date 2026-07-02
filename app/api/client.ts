@@ -1,3 +1,11 @@
+import type {
+  IFenxing,
+  IFetchBi,
+  IFetchChannel,
+  IFetchK,
+  IMergeK,
+} from "./types";
+
 const DEFAULT_MIST_API_BASE_PATH = "/api/mist";
 const DEFAULT_CHAN_API_BASE_PATH = "/api/chan";
 
@@ -119,11 +127,7 @@ async function requestJson<T>(
 
   if (!response.ok) {
     if (payload) {
-      try {
-        return unwrapApiResponse<T>(payload);
-      } catch (error) {
-        throw error;
-      }
+      return unwrapApiResponse<T>(payload);
     }
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -143,31 +147,31 @@ export const collectKLines = (query: KLineQuery) =>
   });
 
 export const fetchK = (query: KLineQuery) =>
-  requestJson<import("./fetch").IFetchK[]>(getAnalysisApiBase(), "/indicator/k", {
+  requestJson<IFetchK[]>(getAnalysisApiBase(), "/indicator/k", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
 export const fetchMergeK = (query: KLineQuery) =>
-  requestJson<import("./fetch").IMergeK[]>(getAnalysisApiBase(), "/chan/merge-k", {
+  requestJson<IMergeK[]>(getAnalysisApiBase(), "/chan/merge-k", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
 export const fetchBi = (query: KLineQuery) =>
-  requestJson<import("./fetch").IFetchBi[]>(getAnalysisApiBase(), "/chan/bi", {
+  requestJson<IFetchBi[]>(getAnalysisApiBase(), "/chan/bi", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
 export const fetchFenxing = (query: KLineQuery) =>
-  requestJson<import("./fetch").IFenxing[]>(getAnalysisApiBase(), "/chan/fenxing", {
+  requestJson<IFenxing[]>(getAnalysisApiBase(), "/chan/fenxing", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
 export const fetchChannel = (query: KLineQuery) =>
-  requestJson<import("./fetch").IFetchChannel[]>(
+  requestJson<IFetchChannel[]>(
     getAnalysisApiBase(),
     "/chan/channel",
     {

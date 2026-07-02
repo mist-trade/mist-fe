@@ -1,4 +1,4 @@
-import { BiType, BiStatus, ChannelType, TrendDirection } from "@/app/api/fetch";
+import { BiType, BiStatus, ChannelType, TrendDirection } from "@/app/api/types";
 import type { BiStyle } from "../types";
 
 // 根据 BiStatus 获取颜色（优先级更高）

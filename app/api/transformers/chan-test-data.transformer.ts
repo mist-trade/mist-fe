@@ -7,7 +7,19 @@ import {
   BiType,
   ChannelType,
   ChannelLevel,
-} from '../fetch';
+} from '../types';
+
+function parseEnumValue<T extends Record<string, string>>(
+  enumObject: T,
+  value: string,
+  label: string
+): T[keyof T] {
+  const values = Object.values(enumObject);
+  if (values.includes(value)) {
+    return value as T[keyof T];
+  }
+  throw new Error(`Invalid ${label}: ${value}`);
+}
 
 /**
  * Backend Chan test results structure (from test JSON)
@@ -202,8 +214,8 @@ function transformBi(backendBi: BackendBi): IFetchBi {
     endTime: new Date(backendBi.endTime),
     highest: backendBi.highest,
     lowest: backendBi.lowest,
-    trend: backendBi.trend as TrendDirection,
-    type: backendBi.type as BiType,
+    trend: parseEnumValue(TrendDirection, backendBi.trend, 'Bi trend'),
+    type: parseEnumValue(BiType, backendBi.type, 'Bi type'),
     status: 1, // Default status: Valid
     independentCount: backendBi.independentCount,
     originIds: backendBi.originIds,
@@ -239,11 +251,15 @@ function transformChannel(backendChannel: BackendChannel): IFetchChannel {
     gg: backendChannel.gg,
     dd: backendChannel.dd,
     bis: backendChannel.bis.map(transformBi),
-    level: backendChannel.level as ChannelLevel,
-    type: backendChannel.type as ChannelType,
+    level: parseEnumValue(ChannelLevel, backendChannel.level, 'Channel level'),
+    type: parseEnumValue(ChannelType, backendChannel.type, 'Channel type'),
     startId: backendChannel.startId,
     endId: backendChannel.endId,
-    trend: backendChannel.trend as TrendDirection,
+    trend: parseEnumValue(
+      TrendDirection,
+      backendChannel.trend,
+      'Channel trend'
+    ),
     // Use display fields if available, otherwise fall back to start/end ID for backward compatibility
     displayStartId: backendChannel.displayStartId ?? backendChannel.startId,
     displayEndId: backendChannel.displayEndId ?? backendChannel.endId,
@@ -322,7 +338,7 @@ export function transformChanTestData(
       ...mk,
       startTime: new Date(mk.startTime),
       endTime: new Date(mk.endTime),
-      trend: mk.trend as TrendDirection,
+      trend: parseEnumValue(TrendDirection, mk.trend, 'Merge-k trend'),
       mergedData: mk.mergedData.map(transformKLine),
     })),
     bis: backendResults.data.bis.map(transformBi),

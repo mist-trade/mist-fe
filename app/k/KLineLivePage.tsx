@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   collectKLines,
   fetchBi,
@@ -21,8 +21,7 @@ import type {
   IFetchChannel,
   IFetchK,
   IMergeK,
-} from "@/app/api/fetch";
-import { getMockData } from "@/test-data";
+} from "@/app/api/types";
 
 interface ChartState {
   k: IFetchK[];
@@ -35,6 +34,11 @@ interface ChartState {
 
 const DEFAULT_SOURCE: DataSourceValue = "tdx";
 const DEFAULT_PERIOD = 1440;
+const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "mqmt"]);
+
+function isDataSourceValue(value: string | null): value is DataSourceValue {
+  return value !== null && DATA_SOURCE_VALUES.has(value as DataSourceValue);
+}
 
 function todayString() {
   const date = new Date();
@@ -60,9 +64,10 @@ function getDefaultQuery(): KLineQuery {
 function getQueryFromUrl(): KLineQuery {
   if (typeof window === "undefined") return getDefaultQuery();
   const params = new URLSearchParams(window.location.search);
+  const source = params.get("source");
   return {
     code: params.get("code") || "",
-    source: (params.get("source") as DataSourceValue | null) || DEFAULT_SOURCE,
+    source: isDataSourceValue(source) ? source : DEFAULT_SOURCE,
     period: Number(params.get("period") || DEFAULT_PERIOD),
     startDate: params.get("startDate") || defaultStartDate(),
     endDate: params.get("endDate") || todayString(),
@@ -87,6 +92,11 @@ function isDevelopmentFallbackEnabled() {
   return process.env.NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK === "true";
 }
 
+async function loadDevelopmentFallbackData() {
+  const { getMockData } = await import("@/test-data");
+  return getMockData();
+}
+
 export default function KLineLivePage() {
   const [query, setQuery] = useState<KLineQuery>(getDefaultQuery);
   const [securities, setSecurities] = useState<SecurityOption[]>([]);
@@ -97,6 +107,7 @@ export default function KLineLivePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [chart, setChart] = useState<ChartState | null>(null);
+  const chartRequestIdRef = useRef(0);
 
   const selectedSecurity = useMemo(
     () => securities.find((item) => item.code === query.code),
@@ -159,6 +170,10 @@ export default function KLineLivePage() {
 
   const loadChart = useCallback(
     async (nextQuery: KLineQuery) => {
+      const requestId = chartRequestIdRef.current + 1;
+      chartRequestIdRef.current = requestId;
+      const isCurrentRequest = () => chartRequestIdRef.current === requestId;
+
       if (!hasCompleteQuery(nextQuery)) {
         setChart(null);
         setChartError("");
@@ -173,21 +188,29 @@ export default function KLineLivePage() {
 
       try {
         const k = await fetchK(nextQuery);
+        if (!isCurrentRequest()) return;
         if (k.length === 0) {
           setStatusMessage("当前查询没有 K 线数据");
           return;
         }
 
-        setChart(await createChartState(k, false, nextQuery));
+        const nextChart = await createChartState(k, false, nextQuery);
+        if (!isCurrentRequest()) return;
+        setChart(nextChart);
       } catch (error) {
+        if (!isCurrentRequest()) return;
         if (isDevelopmentFallbackEnabled()) {
-          setChart(await createChartState(getMockData(), true, nextQuery));
+          const fallbackData = await loadDevelopmentFallbackData();
+          if (!isCurrentRequest()) return;
+          setChart(await createChartState(fallbackData, true, nextQuery));
           setStatusMessage("正在显示开发 fallback 数据");
           return;
         }
         setChartError(error instanceof Error ? error.message : String(error));
       } finally {
-        setIsLoading(false);
+        if (isCurrentRequest()) {
+          setIsLoading(false);
+        }
       }
     },
     [createChartState]
@@ -285,7 +308,11 @@ export default function KLineLivePage() {
           <select
             value={query.source}
             onChange={(event) =>
-              setQueryAndUrl({ source: event.target.value as DataSourceValue })
+              setQueryAndUrl({
+                source: isDataSourceValue(event.target.value)
+                  ? event.target.value
+                  : DEFAULT_SOURCE,
+              })
             }
           >
             <option value="tdx">TDX</option>

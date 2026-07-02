@@ -11,13 +11,19 @@ export function useChartRender({ setOption, isEnabled }: UseChartRenderProps) {
   const chartRef = useRef<echarts.ECharts | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const myChart = echarts.init(containerRef.current);
+    const myChart = echarts.init(container);
     chartRef.current = myChart;
+    const resizeObserver = new ResizeObserver(() => {
+      myChart.resize();
+    });
+    resizeObserver.observe(container);
 
     return () => {
-      chartRef.current?.dispose();
+      resizeObserver.disconnect();
+      myChart.dispose();
       chartRef.current = null;
     };
   }, []);

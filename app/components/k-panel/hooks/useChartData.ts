@@ -4,7 +4,7 @@ import type {
   IFetchChannel,
   IFetchK,
   IMergeK,
-} from "@/app/api/fetch";
+} from "@/app/api/types";
 import { useEffect, useState } from "react";
 import type {
   BiMappedData,
@@ -47,28 +47,17 @@ export function useChartData(
   channel: Promise<IFetchChannel[]>
 ): UseChartDataResult {
   const [data, setData] = useState<ChartData | null>(null);
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    let active = true;
+
     const processData = async () => {
       const mergeKData = await mergeK;
       const biData = await bi;
       const fenxingData = await fenxing;
       const channelData = await channel;
 
-
-      console.log("bi", biData);
-      // 详细打印每条笔的数据，特别是 type 字段
-      biData.forEach((b, index) => {
-        console.log(`Bi ${index}:`, {
-          startTime: b.startTime,
-          endTime: b.endTime,
-          trend: b.trend,
-          type: b.type,
-        highest: b.highest,
-          lowest: b.lowest,
-        });
-      });
+      if (!active) return;
 
       const mergeKRects = calculateMergeKRects(k, mergeKData);
       const biMappedData = calculateBiData(k, biData);
@@ -102,11 +91,13 @@ export function useChartData(
         fenxingData: fenxingMappedData,
         fenxingPlaceholders,
       });
-      setIsReady(true);
     };
 
     processData();
+    return () => {
+      active = false;
+    };
   }, [k, mergeK, bi, fenxing, channel]);
 
-  return { data, isReady };
+  return { data, isReady: data !== null };
 }

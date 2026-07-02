@@ -4,14 +4,33 @@ import type {
   IFetchChannel,
   IFetchK,
   IMergeK,
-} from "@/app/api/fetch";
-import { FenxingType, TrendDirection } from "@/app/api/fetch";
+} from "@/app/api/types";
+import { FenxingType, TrendDirection } from "@/app/api/types";
 import type {
   BiMappedData,
   ChannelMappedData,
   FenxingMappedData,
   MergeKRect,
 } from "../types";
+
+export interface KLineIndexes {
+  byTime: Map<number, number>;
+  byId: Map<number, number>;
+}
+
+const timeKey = (time: Date | string): number => new Date(time).getTime();
+
+export const buildKLineIndexes = (k: IFetchK[]): KLineIndexes => {
+  const byTime = new Map<number, number>();
+  const byId = new Map<number, number>();
+
+  k.forEach((item, index) => {
+    byTime.set(timeKey(item.time), index);
+    byId.set(item.id, index);
+  });
+
+  return { byTime, byId };
+};
 
 // 计算合并K线矩形的数据
 export const calculateMergeKRects = (
@@ -21,20 +40,11 @@ export const calculateMergeKRects = (
   if (k.length === 0 || mergeK.length === 0) return [];
 
   const mergeKRects: MergeKRect[] = [];
+  const indexes = buildKLineIndexes(k);
 
   mergeK.forEach((merge, index) => {
-    const startTime = new Date(merge.startTime);
-    const endTime = new Date(merge.endTime);
-
-    const startIndex = k.findIndex((item) => {
-      const kTime = new Date(item.time);
-      return kTime.getTime() === startTime.getTime();
-    });
-
-    const endIndex = k.findIndex((item) => {
-      const kTime = new Date(item.time);
-      return kTime.getTime() === endTime.getTime();
-    });
+    const startIndex = indexes.byTime.get(timeKey(merge.startTime)) ?? -1;
+    const endIndex = indexes.byTime.get(timeKey(merge.endTime)) ?? -1;
 
     if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
       mergeKRects.push({
@@ -59,20 +69,11 @@ export const calculateBiData = (
   if (k.length === 0 || bi.length === 0) return [];
 
   const biData: BiMappedData[] = [];
+  const indexes = buildKLineIndexes(k);
 
   bi.forEach((b, index) => {
-    const startTime = new Date(b.startTime);
-    const endTime = new Date(b.endTime);
-
-    const startIndex = k.findIndex((item) => {
-      const kTime = new Date(item.time);
-      return kTime.getTime() === startTime.getTime();
-    });
-
-    const endIndex = k.findIndex((item) => {
-      const kTime = new Date(item.time);
-      return kTime.getTime() === endTime.getTime();
-    });
+    const startIndex = indexes.byTime.get(timeKey(b.startTime)) ?? -1;
+    const endIndex = indexes.byTime.get(timeKey(b.endTime)) ?? -1;
 
     if (startIndex === -1 || endIndex === -1) {
       return; // 找不到匹配时跳过这笔数据
@@ -164,6 +165,15 @@ export const calculateChannelData = (
   }
 
   const channelData: ChannelMappedData[] = [];
+  const indexes = buildKLineIndexes(k);
+  const biByTimeRange = new Map<string, BiMappedData>();
+  biMappedData.forEach((bi) => {
+    const startTime = k[bi.startIndex]?.time;
+    const endTime = k[bi.endIndex]?.time;
+    if (startTime && endTime) {
+      biByTimeRange.set(`${timeKey(startTime)}:${timeKey(endTime)}`, bi);
+    }
+  });
 
   channels.forEach((channel, index) => {
     // 使用 displayStartId/displayEndId 查找 K 线索引
@@ -171,33 +181,20 @@ export const calculateChannelData = (
     const startIdToUse = channel.displayStartId ?? channel.startId;
     const endIdToUse = channel.displayEndId ?? channel.endId;
 
-    const startIndex = k.findIndex((item) => item.id === startIdToUse);
-    const endIndex = k.findIndex((item) => item.id === endIdToUse);
+    const startIndex = indexes.byId.get(startIdToUse) ?? -1;
+    const endIndex = indexes.byId.get(endIdToUse) ?? -1;
 
     // 验证索引有效性
     if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
-      console.warn(
-        `Invalid channel indices: ${startIndex}-${endIndex}, channel startId: ${startIdToUse}, endId: ${endIdToUse}`
-      );
       return;
     }
 
     // 查找对应的 Bi 数据
     const channelBiData = channel.bis
       .map((apiBi) => {
-        const startTime = new Date(apiBi.startTime);
-        const endTime = new Date(apiBi.endTime);
-
-        return biMappedData.find((bi) => {
-          const biStartTime = k[bi.startIndex]?.time;
-          const biEndTime = k[bi.endIndex]?.time;
-          return (
-            biStartTime &&
-            biEndTime &&
-            new Date(biStartTime).getTime() === startTime.getTime() &&
-            new Date(biEndTime).getTime() === endTime.getTime()
-          );
-        });
+        return biByTimeRange.get(
+          `${timeKey(apiBi.startTime)}:${timeKey(apiBi.endTime)}`
+        );
       })
       .filter((bi): bi is BiMappedData => bi !== undefined);
 
@@ -234,6 +231,7 @@ export const calculateFenxingData = (
   bi?: IFetchBi[]
 ): FenxingMappedData[] => {
   const fenxings: FenxingMappedData[] = [];
+  const indexes = buildKLineIndexes(k);
 
   // 收集所有被笔使用的分型的原始K索引
   const usedFenxingOriginIndices = new Set<number>();
@@ -270,7 +268,8 @@ export const calculateFenxingData = (
 
     // 在middleIds中找到包含目标价格的K线
     for (const id of fenxing.middleIds) {
-      const kItem = k.find((k) => k.id === id);
+      const kIndex = indexes.byId.get(id);
+      const kItem = kIndex === undefined ? undefined : k[kIndex];
       if (kItem) {
         if (fenxing.type === "top" && kItem.highest === targetPrice) {
           targetOriginId = id;
@@ -284,7 +283,7 @@ export const calculateFenxingData = (
     }
 
     // 找到目标K线在原始K数组中的索引
-    const originKIndex = k.findIndex((item) => item.id === targetOriginId);
+    const originKIndex = indexes.byId.get(targetOriginId) ?? -1;
 
     if (originKIndex !== -1) {
       const now = k[originKIndex];
