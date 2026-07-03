@@ -68,4 +68,27 @@ describe("frontend runtime source boundaries", () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it("keeps mapped chart data interfaces single-sourced", () => {
+    const typesSource = read("app/components/k-panel/types/index.ts");
+    const fenxingDefinitions = typesSource.match(
+      /export\s+interface\s+FenxingMappedData\b/g
+    );
+
+    expect(fenxingDefinitions ?? []).toHaveLength(1);
+  });
+
+  it("declares local Node and staged-check tooling", () => {
+    const packageJson = JSON.parse(read("package.json"));
+
+    expect(read(".nvmrc").trim()).toBe("24");
+    expect(packageJson.scripts.prepare).toBe("husky");
+    expect(packageJson.devDependencies.husky).toBeDefined();
+    expect(packageJson.devDependencies["lint-staged"]).toBeDefined();
+    expect(packageJson["lint-staged"]).toMatchObject({
+      "*.{ts,tsx}": expect.arrayContaining(["pnpm lint"]),
+      "*.{js,mjs,cjs}": expect.arrayContaining(["pnpm lint"]),
+    });
+    expect(existsSync(path.join(appRoot, ".husky/pre-commit"))).toBe(true);
+  });
 });

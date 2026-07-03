@@ -75,13 +75,3 @@ export interface ChannelMappedData {
   level: ChannelLevel;
   bis: BiMappedData[];
 }
-
-// 分型数据的映射类型
-export interface FenxingMappedData {
-  index: number;
-  type: FenxingType;
-  date: string;
-  price: number;
-  highest: number;
-  lowest: number;
-}
