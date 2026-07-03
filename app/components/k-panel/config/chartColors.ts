@@ -70,6 +70,11 @@ export const COLORS = {
   downFill: "rgba(38, 166, 154, 0.1)",
 } as const;
 
+export const FENXING_COLORS = {
+  top: "#2196f3",
+  bottom: "#ff9800",
+} as const;
+
 // 根据 ChannelType 获取颜色
 export const getChannelColor = (type: ChannelType): string => {
   switch (type) {
@@ -88,9 +93,9 @@ export const hexToRgba = (hex: string, alpha: number): string => {
   const cleanHex = hex.replace("#", "");
 
   // 解析 RGB 值
-  const r = parseInt(cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.substring(4, 6), 16);
+  const r = Number.parseInt(cleanHex.substring(0, 2), 16);
+  const g = Number.parseInt(cleanHex.substring(2, 4), 16);
+  const b = Number.parseInt(cleanHex.substring(4, 6), 16);
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };

@@ -1,5 +1,18 @@
 import type { IFetchK } from "@/app/api/types";
 
+export interface KTooltipParam {
+  dataIndex: number;
+}
+
+export const isKTooltipParams = (params: unknown): params is KTooltipParam[] =>
+  Array.isArray(params) &&
+  params.every(
+    (param) =>
+      typeof param === "object" &&
+      param !== null &&
+      typeof (param as { dataIndex?: unknown }).dataIndex === "number"
+  );
+
 // 格式化日期显示
 export const formatKDate = (time: Date | string): string => {
   const date = new Date(time);
@@ -23,7 +36,7 @@ export const formatDateArray = (k: IFetchK[]): string[] => {
 
 // 格式化 Tooltip 内容
 export const formatKTooltip = (
-  params: Array<{ dataIndex: number }>,
+  params: KTooltipParam[],
   k: IFetchK[],
   dates: string[]
 ): string => {

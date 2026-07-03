@@ -34,6 +34,7 @@ interface ChartState {
 
 const DEFAULT_SOURCE: DataSourceValue = "tdx";
 const DEFAULT_PERIOD = 1440;
+const SECURITY_SEARCH_LIMIT = 20;
 const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "mqmt"]);
 
 function isDataSourceValue(value: string | null): value is DataSourceValue {
@@ -116,14 +117,14 @@ export default function KLineLivePage() {
 
   const filteredSecurities = useMemo(() => {
     const term = stockFilter.trim().toLowerCase();
-    if (!term) return securities.slice(0, 20);
+    if (!term) return securities.slice(0, SECURITY_SEARCH_LIMIT);
     return securities
       .filter((item) => {
         const code = item.code.toLowerCase();
         const name = item.name.toLowerCase();
         return code.includes(term) || name.includes(term);
       })
-      .slice(0, 20);
+      .slice(0, SECURITY_SEARCH_LIMIT);
   }, [securities, stockFilter]);
 
   const setQueryAndUrl = useCallback((updates: Partial<KLineQuery>) => {

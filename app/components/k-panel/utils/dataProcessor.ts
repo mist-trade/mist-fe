@@ -1,11 +1,12 @@
 import type {
+  FenxingType,
   IFenxing,
   IFetchBi,
   IFetchChannel,
   IFetchK,
   IMergeK,
 } from "@/app/api/types";
-import { FenxingType, TrendDirection } from "@/app/api/types";
+import { TrendDirection } from "@/app/api/types";
 import type {
   BiMappedData,
   ChannelMappedData,
@@ -141,11 +142,6 @@ export const createBiPlaceholders = (
   biData.forEach((biItem) => {
     const midIndex = Math.floor((biItem.startIndex + biItem.endIndex) / 2);
 
-    // 如果笔的K线数量是偶数，使用较小的中间索引（你的建议：偶数就index-1）
-    if ((biItem.endIndex - biItem.startIndex + 1) % 2 === 0) {
-      // 已经使用Math.floor，所以会自动向下取整，对于偶数来说就是较小的中间索引
-    }
-
     if (midIndex >= 0 && midIndex < placeholders.length) {
       placeholders[midIndex] = biItem.biId;
     }
@@ -228,36 +224,18 @@ const toISODateString = (time: Date | string): string => {
 export const calculateFenxingData = (
   k: IFetchK[],
   fenxingsFromBackend: IFenxing[],
-  bi?: IFetchBi[]
+  _bi?: IFetchBi[]
 ): FenxingMappedData[] => {
+  void _bi;
+
   const fenxings: FenxingMappedData[] = [];
   const indexes = buildKLineIndexes(k);
-
-  // 收集所有被笔使用的分型的原始K索引
-  const usedFenxingOriginIndices = new Set<number>();
-  if (bi && bi.length > 0) {
-    bi.forEach((b) => {
-      // 使用middleIds的第一个ID来标记已使用的分型
-      if (b.startFenxing?.middleIds && b.startFenxing.middleIds.length > 0) {
-        usedFenxingOriginIndices.add(b.startFenxing.middleIds[0]);
-      }
-      if (b.endFenxing?.middleIds && b.endFenxing.middleIds.length > 0) {
-        usedFenxingOriginIndices.add(b.endFenxing.middleIds[0]);
-      }
-    });
-  }
 
   // 使用后端返回的分型数据
   fenxingsFromBackend.forEach((fenxing) => {
     if (!fenxing.middleIds || fenxing.middleIds.length === 0) {
       return;
     }
-
-    // const firstOriginId = fenxing.middleIds[0];
-    // 如果这个分型已经被笔使用了，跳过
-    // if (usedFenxingOriginIndices.has(firstOriginId)) {
-    //   return;
-    // }
 
     // 找到分型价格对应的原始K线
     // 顶分型：找到包含highest的K线
@@ -269,13 +247,13 @@ export const calculateFenxingData = (
     // 在middleIds中找到包含目标价格的K线
     for (const id of fenxing.middleIds) {
       const kIndex = indexes.byId.get(id);
-      const kItem = kIndex === undefined ? undefined : k[kIndex];
-      if (kItem) {
-        if (fenxing.type === "top" && kItem.highest === targetPrice) {
+      const sourceK = kIndex === undefined ? undefined : k[kIndex];
+      if (sourceK) {
+        if (fenxing.type === "top" && sourceK.highest === targetPrice) {
           targetOriginId = id;
           break;
         }
-        if (fenxing.type === "bottom" && kItem.lowest === targetPrice) {
+        if (fenxing.type === "bottom" && sourceK.lowest === targetPrice) {
           targetOriginId = id;
           break;
         }
@@ -287,10 +265,7 @@ export const calculateFenxingData = (
 
     if (originKIndex !== -1) {
       const now = k[originKIndex];
-      const fenxingType =
-        fenxing.type === "top"
-          ? ("top" as FenxingType)
-          : ("bottom" as FenxingType);
+      const fenxingType: FenxingType = fenxing.type;
       const price = targetPrice;
 
       fenxings.push({
