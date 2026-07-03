@@ -1,22 +1,10 @@
 import type { IFetchK } from "@/app/api/types";
-import type {
-  BarSeriesOption,
-  CandlestickSeriesOption,
-  CustomSeriesOption,
-} from "echarts/charts";
-import type {
-  DatasetComponentOption,
-  DataZoomComponentOption,
-  GridComponentOption,
-  LegendComponentOption,
-  TitleComponentOption,
-  TooltipComponentOption,
-} from "echarts/components";
-import type { ComposeOption } from "echarts/core";
+import type { CustomSeriesOption } from "echarts/charts";
 import * as echarts from "echarts/core";
 import { useCallback, useEffect, useRef } from "react";
 import {
   COLORS,
+  FENXING_COLORS,
   getBiColor,
   getBiStyle,
   getChannelColor,
@@ -32,6 +20,7 @@ import {
 import type {
   BiMappedData,
   ChannelMappedData,
+  ECOption,
   FenxingMappedData,
   MergeKRect,
 } from "../types";
@@ -41,19 +30,8 @@ import {
   formatKlineData,
   formatKTooltip,
   formatVolumeData,
+  isKTooltipParams,
 } from "../utils/formatters";
-
-type ECOption = ComposeOption<
-  | CandlestickSeriesOption
-  | BarSeriesOption
-  | CustomSeriesOption
-  | TitleComponentOption
-  | LegendComponentOption
-  | TooltipComponentOption
-  | GridComponentOption
-  | DatasetComponentOption
-  | DataZoomComponentOption
->;
 
 interface UseChartConfigProps {
   k: IFetchK[];
@@ -66,6 +44,15 @@ interface UseChartConfigProps {
   fenxingData: FenxingMappedData[];
   fenxingPlaceholders: Array<number | null>;
 }
+
+const DEFAULT_BAR_WIDTH = 20;
+
+const getBarWidth = (sizeResult: number | number[] | undefined): number => {
+  if (Array.isArray(sizeResult)) {
+    return sizeResult[0] ?? DEFAULT_BAR_WIDTH;
+  }
+  return typeof sizeResult === "number" ? sizeResult : DEFAULT_BAR_WIDTH;
+};
 
 export function useChartConfig({
   k,
@@ -156,8 +143,7 @@ export function useChartConfig({
         }
 
         // 获取 K 线柱子的宽度信息
-        const sizeResult = api.size?.([1, 0]) || [20, 0];
-        const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
+        const barWidth = getBarWidth(api.size?.([1, 0]));
 
         const halfBarWidth = barWidth * 0.4;
         // 计算矩形的位置和大小
@@ -278,8 +264,7 @@ export function useChartConfig({
         }
 
         // 获取 K 线柱子的宽度信息
-        const sizeResult = api.size?.([1, 0]) || [20, 0];
-        const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
+        const barWidth = getBarWidth(api.size?.([1, 0]));
         const halfBarWidth = barWidth * 0.4;
 
         // 计算重叠区域矩形的位置和大小
@@ -419,11 +404,9 @@ export function useChartConfig({
         }
 
         // 获取 K 线柱子的宽度信息
-        const sizeResult = api.size?.([1, 0]) || [20, 0];
-        const barWidth = Array.isArray(sizeResult) ? sizeResult[0] : sizeResult;
+        const barWidth = getBarWidth(api.size?.([1, 0]));
 
-        // 分型颜色：顶分型用蓝色，底分型用橙色
-        const color = fenxing.type === "top" ? "#2196f3" : "#ff9800";
+        const color = FENXING_COLORS[fenxing.type];
         const size = barWidth * 0.4; // 减小标记大小
         const halfSize = size / 2;
         const offset = barWidth * 1.5; // 距离K线的偏移量
@@ -490,7 +473,7 @@ export function useChartConfig({
         tooltip: {
           ...TOOLTIP_CONFIG,
           formatter: function (params: unknown) {
-            const paramsArray = params as Array<{ dataIndex: number }>;
+            const paramsArray = isKTooltipParams(params) ? params : [];
             return formatKTooltip(paramsArray, k, dates);
           },
         },

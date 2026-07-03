@@ -1,6 +1,11 @@
+import { K_PANEL_HEIGHT } from "./config/chartOptions";
+
 export default function KPanelSkeleton() {
   return (
-    <div className="w-full h-[600px] bg-background p-4 animate-pulse">
+    <div
+      className="w-full bg-background p-4 animate-pulse"
+      style={{ height: K_PANEL_HEIGHT }}
+    >
       {/* 标题骨架 */}
       <div className="h-8 w-32 bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
 

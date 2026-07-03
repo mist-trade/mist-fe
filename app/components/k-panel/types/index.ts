@@ -11,6 +11,32 @@ import {
   IMergeK,
   TrendDirection,
 } from "@/app/api/types";
+import type {
+  BarSeriesOption,
+  CandlestickSeriesOption,
+  CustomSeriesOption,
+} from "echarts/charts";
+import type {
+  DatasetComponentOption,
+  DataZoomComponentOption,
+  GridComponentOption,
+  LegendComponentOption,
+  TitleComponentOption,
+  TooltipComponentOption,
+} from "echarts/components";
+import type { ComposeOption } from "echarts/core";
+
+export type ECOption = ComposeOption<
+  | CandlestickSeriesOption
+  | BarSeriesOption
+  | CustomSeriesOption
+  | TitleComponentOption
+  | LegendComponentOption
+  | TooltipComponentOption
+  | GridComponentOption
+  | DatasetComponentOption
+  | DataZoomComponentOption
+>;
 
 export interface FenxingMappedData {
   index: number;

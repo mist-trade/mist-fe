@@ -6,6 +6,8 @@ import type {
   DataZoomComponentOption,
 } from "echarts/components";
 
+export const K_PANEL_HEIGHT = 600;
+
 // Chart title configuration
 export const TITLE_CONFIG: TitleComponentOption = {
   text: "K线图",
