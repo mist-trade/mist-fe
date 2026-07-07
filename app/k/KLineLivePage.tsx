@@ -90,12 +90,13 @@ function updateUrl(query: KLineQuery) {
 }
 
 function isDevelopmentFallbackEnabled() {
-  return process.env.NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK === "true";
+  // 临时禁用：旧 test-data 已删除，快照机制尚未接入
+  // Phase 5 后可改为读取 __fixtures__/snapshots/
+  return false;
 }
 
 async function loadDevelopmentFallbackData() {
-  const { getMockData } = await import("@/test-data");
-  return getMockData();
+  return [];
 }
 
 export default function KLineLivePage() {

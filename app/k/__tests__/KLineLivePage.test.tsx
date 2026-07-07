@@ -191,7 +191,7 @@ describe("KLineLivePage", () => {
     });
   });
 
-  it("uses explicit development fallback when enabled", async () => {
+  it("does not trigger development fallback now that test-data is removed", async () => {
     process.env.NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK = "true";
     mockedFetchK.mockRejectedValue(new Error("offline"));
     window.history.replaceState(
@@ -202,8 +202,10 @@ describe("KLineLivePage", () => {
 
     render(<KLineLivePage />);
 
-    expect(await screen.findByText("开发 fallback")).toBeInTheDocument();
-    expect(screen.getByTestId("k-panel")).toBeInTheDocument();
+    // mock fallback 已临时禁用（旧 test-data 已删除），应展示错误而非 fallback 数据
+    expect(await screen.findByText("offline")).toBeInTheDocument();
+    expect(screen.queryByText("开发 fallback")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("k-panel")).not.toBeInTheDocument();
   });
 
   it("blocks manual refresh until required parameters are selected", async () => {
