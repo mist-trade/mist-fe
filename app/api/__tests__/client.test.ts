@@ -84,7 +84,7 @@ describe("Mist frontend API client", () => {
       { code: "600519", name: "贵州茅台", type: "stock", status: 1 },
     ]);
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/mist/security/v1/all",
+      "/api/mist/v1/securities",
       expect.objectContaining({ method: "GET" })
     );
   });
@@ -144,7 +144,7 @@ describe("Mist frontend API client", () => {
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/chan/indicator/k",
+      "/api/chan/v1/indicators/k",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
@@ -179,22 +179,22 @@ describe("Mist frontend API client", () => {
 
     expect(global.fetch).toHaveBeenNthCalledWith(
       1,
-      "/api/chan/chan/merge-k",
+      "/api/chan/v1/chan/merge-k",
       expect.objectContaining({ method: "POST", body: JSON.stringify(query) })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
       2,
-      "/api/chan/chan/bi",
+      "/api/chan/v1/chan/bi",
       expect.objectContaining({ method: "POST", body: JSON.stringify(query) })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
       3,
-      "/api/chan/chan/fenxing",
+      "/api/chan/v1/chan/fenxing",
       expect.objectContaining({ method: "POST", body: JSON.stringify(query) })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
       4,
-      "/api/chan/chan/channel",
+      "/api/chan/v1/chan/channel",
       expect.objectContaining({ method: "POST", body: JSON.stringify(query) })
     );
   });
