@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint:staged": "lint-staged",
-    "prepare": "husky"
+    "prepare": "husky",
+    "snapshots:generate": "node --experimental-strip-types --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-extension-resolver.mjs\", pathToFileURL(\"./\"));' scripts/generate-snapshots.mjs"
   },
   "dependencies": {
     "echarts": "^6.0.0",
