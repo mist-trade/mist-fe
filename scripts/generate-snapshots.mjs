@@ -12,7 +12,9 @@
  * 环境变量:
  *   SNAPSHOT_BACKEND_URL  chan app 地址（默认 http://192.168.31.182:8008）
  *
- * 注意: chan app 返回裸数组（不是 {success,data} 包裹），本脚本兼容裸数组和包裹两种格式。
+ * 响应格式: chan app 修复后（commit e3188ba）统一返回 {success,data} 包裹，
+ * 与 mist app 一致。本脚本兼容裸数组和包裹两种格式（部署后端重新部署前可能仍是裸数组），
+ * 解包后存入快照的是纯数据数组。
  *
  * 运行依赖 Node --experimental-strip-types（见 package.json 的 snapshots:generate 脚本），
  * 并通过本目录下 ts-extension-resolver.mjs 解析 .ts 文件的无扩展名 import。
@@ -72,7 +74,7 @@ async function callBackend(endpoint, body) {
         : JSON.stringify(payload).slice(0, 200);
     throw new Error(`${endpoint} HTTP ${res.status}: ${msg}`);
   }
-  // chan app 返回裸数组；若返回 { success, data } 包裹则解包
+  // chan app 修复后返回 { success, data } 包裹；兼容旧版裸数组（部署未更新时）
   if (
     payload &&
     typeof payload === "object" &&
