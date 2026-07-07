@@ -20,8 +20,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@/test-data": ["./test-data/index.ts"],
-      "@/test-data/*": ["./test-data/*"]
+      "@/__fixtures__/*": ["./__fixtures__/*"]
     },
     "types": ["jest", "@testing-library/jest-dom"]
   },

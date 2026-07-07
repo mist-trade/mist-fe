@@ -17,9 +17,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint:staged": "lint-staged",
-    "prepare": "husky",
-    "sync:from-backend": "node scripts/sync-from-backend.mjs",
-    "dev:sync": "node scripts/sync-from-backend.mjs && next dev"
+    "prepare": "husky"
   },
   "dependencies": {
     "echarts": "^6.0.0",
