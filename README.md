@@ -20,6 +20,7 @@ Mist Frontend 是一个基于 Next.js 的金融图表和技术分析应用，专
 - **合并 K（合并K）**：基于包含关系对连续 K 线进行分组
 - **趋势线（笔）**：使用颜色编码状态可视化显著价格变动
 - **中枢（中枢）**：展示由交替笔形成的整理区间
+- **策略工作台**：管理策略定义、版本、信号、告警确认和 signal-level 回测
 - **实时数据处理**：客户端计算与流式传输支持
 - **错误边界**：优雅的错误处理与降级 UI
 - **环境配置**：通过环境变量灵活配置 API
@@ -66,6 +67,9 @@ app/
 │   └── ErrorBoundary.tsx # 错误边界组件
 ├── k/
 │   └── page.tsx           # K 线图页面路由
+├── strategies/
+│   ├── page.tsx           # 策略工作台页面路由
+│   └── StrategiesWorkspace.tsx
 ├── layout.tsx             # 根布局
 └── globals.css            # 全局样式
 ```
@@ -109,7 +113,12 @@ NODE_ENV=development
 pnpm dev
 ```
 
-访问 http://localhost:3000/k 查看 K 线图。
+访问 http://localhost:3000/k 查看 K 线图，访问
+http://localhost:3000/strategies 打开策略工作台。
+
+策略工作台只通过 `NEXT_PUBLIC_MIST_API_BASE_PATH` 或
+`NEXT_PUBLIC_MIST_API_BASE_URL` 访问 Mist 后端 `/v1/*` 策略 API。生产默认走
+同源 `/api/mist` 网关路径，不直连 datasource 或 raw provider 服务。
 
 ### 生产构建
 

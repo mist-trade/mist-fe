@@ -268,6 +268,19 @@ export default function KLineLivePage() {
 
   return (
     <main className="kline-page">
+      <header className="kline-header">
+        <div>
+          <h1>K 线工作台</h1>
+          <p>查询行情、刷新采集数据并检查缠论结构。</p>
+        </div>
+        <nav className="strategy-nav" aria-label="主导航">
+          <a href="/k" aria-current="page">
+            K 线
+          </a>
+          <a href="/strategies">策略</a>
+        </nav>
+      </header>
+
       <section className="kline-toolbar" aria-label="K 线查询">
         <div className="field stock-search">
           <label htmlFor="stock-filter">股票</label>
