@@ -278,7 +278,7 @@ async function requestJson<T>(
 }
 
 export const fetchSecurities = () =>
-  requestJson<SecurityOption[]>(getMistApiBase(), "/security/v1/all", {
+  requestJson<SecurityOption[]>(getMistApiBase(), "/v1/securities", {
     method: "GET",
   });
 
@@ -385,25 +385,25 @@ export const fetchStrategyBacktestSignals = (runId: number) =>
   );
 
 export const fetchK = (query: KLineQuery) =>
-  requestJson<IFetchK[]>(getAnalysisApiBase(), "/indicator/k", {
+  requestJson<IFetchK[]>(getAnalysisApiBase(), "/v1/indicators/k", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
 export const fetchMergeK = (query: KLineQuery) =>
-  requestJson<IMergeK[]>(getAnalysisApiBase(), "/chan/merge-k", {
+  requestJson<IMergeK[]>(getAnalysisApiBase(), "/v1/chan/merge-k", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
 export const fetchBi = (query: KLineQuery) =>
-  requestJson<IFetchBi[]>(getAnalysisApiBase(), "/chan/bi", {
+  requestJson<IFetchBi[]>(getAnalysisApiBase(), "/v1/chan/bi", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
 export const fetchFenxing = (query: KLineQuery) =>
-  requestJson<IFenxing[]>(getAnalysisApiBase(), "/chan/fenxing", {
+  requestJson<IFenxing[]>(getAnalysisApiBase(), "/v1/chan/fenxing", {
     method: "POST",
     body: JSON.stringify(query),
   });
@@ -411,7 +411,7 @@ export const fetchFenxing = (query: KLineQuery) =>
 export const fetchChannel = (query: KLineQuery) =>
   requestJson<IFetchChannel[]>(
     getAnalysisApiBase(),
-    "/chan/channel",
+    "/v1/chan/channel",
     {
       method: "POST",
       body: JSON.stringify(query),

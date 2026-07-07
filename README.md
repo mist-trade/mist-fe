@@ -326,13 +326,13 @@ NEXT_PUBLIC_CHAN_API_BASE_URL=http://127.0.0.1:8008
 
 | 端点 | 方法 | 描述 |
 |------|------|------|
-| `/api/mist/security/v1/all` | GET | 获取股票列表 |
+| `/api/mist/v1/securities` | GET | 获取股票列表 |
 | `/api/mist/v1/collector/collect` | POST | 触发指定股票与周期的 K 线采集 |
-| `/api/chan/indicator/k` | POST | 获取 K 线数据 |
-| `/api/chan/chan/merge-k` | POST | 计算合并 K |
-| `/api/chan/chan/bi` | POST | 计算笔 |
-| `/api/chan/chan/fenxing` | POST | 计算分型 |
-| `/api/chan/chan/channel` | POST | 计算中枢 |
+| `/api/chan/v1/indicators/k` | POST | 获取 K 线数据 |
+| `/api/chan/v1/chan/merge-k` | POST | 计算合并 K |
+| `/api/chan/v1/chan/bi` | POST | 计算笔 |
+| `/api/chan/v1/chan/fenxing` | POST | 计算分型 |
+| `/api/chan/v1/chan/channel` | POST | 计算中枢 |
 
 ### 配置
 
