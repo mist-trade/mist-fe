@@ -9,7 +9,7 @@
 export type ChanSource = "tdx";
 
 export interface ChanTestCase {
-  /** 唯一标识，用作快照目录名，如 'maotai-2026' */
+  /** 唯一标识，用作快照目录名，如 'shanghai-index-2024-2025' */
   key: string;
   /** 显示名，如 '贵州茅台 2026' */
   name: string;
@@ -27,9 +27,17 @@ export interface ChanTestCase {
   desc?: string;
 }
 
-import { maotai2026 } from "./chan/maotai-2026";
+import { shanghaiIndex2024_2025 } from "./chan/shanghai-index-2024-2025";
+import { csi300_2024_2025 } from "./chan/csi300-2024-2025";
+import { chiNext2024_2025 } from "./chan/chi-next-2024-2025";
+import { maotai2024_2025 } from "./chan/maotai-2024-2025";
 
-export const chanTestCases: ChanTestCase[] = [maotai2026];
+export const chanTestCases: ChanTestCase[] = [
+  shanghaiIndex2024_2025,
+  csi300_2024_2025,
+  chiNext2024_2025,
+  maotai2024_2025,
+];
 
 /** 按 key 查找用例 */
 export function findCase(key: string): ChanTestCase | undefined {

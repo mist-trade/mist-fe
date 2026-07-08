@@ -1,0 +1,2657 @@
+[
+  {
+    "type": "bottom",
+    "highest": 2904.46,
+    "lowest": "2867.72",
+    "leftIds": [
+      665,
+      666
+    ],
+    "middleIds": [
+      667
+    ],
+    "middleIndex": 5,
+    "rightIds": [
+      668,
+      669
+    ],
+    "middleOriginId": 667
+  },
+  {
+    "type": "top",
+    "highest": 2904.46,
+    "lowest": 2861.13,
+    "leftIds": [
+      667
+    ],
+    "middleIds": [
+      668,
+      669
+    ],
+    "middleIndex": 6,
+    "rightIds": [
+      670
+    ],
+    "middleOriginId": 669
+  },
+  {
+    "type": "bottom",
+    "highest": 2887.49,
+    "lowest": "2760.98",
+    "leftIds": [
+      671
+    ],
+    "middleIds": [
+      672
+    ],
+    "middleIndex": 9,
+    "rightIds": [
+      673
+    ],
+    "middleOriginId": 672
+  },
+  {
+    "type": "top",
+    "highest": "2849.88",
+    "lowest": 2735.37,
+    "leftIds": [
+      672
+    ],
+    "middleIds": [
+      673
+    ],
+    "middleIndex": 10,
+    "rightIds": [
+      674
+    ],
+    "middleOriginId": 673
+  },
+  {
+    "type": "bottom",
+    "highest": 2828.32,
+    "lowest": "2724.16",
+    "leftIds": [
+      674
+    ],
+    "middleIds": [
+      675
+    ],
+    "middleIndex": 12,
+    "rightIds": [
+      676
+    ],
+    "middleOriginId": 675
+  },
+  {
+    "type": "top",
+    "highest": "2924.31",
+    "lowest": 2821.71,
+    "leftIds": [
+      677
+    ],
+    "middleIds": [
+      678
+    ],
+    "middleIndex": 15,
+    "rightIds": [
+      679
+    ],
+    "middleOriginId": 678
+  },
+  {
+    "type": "bottom",
+    "highest": 2802.93,
+    "lowest": "2635.09",
+    "leftIds": [
+      683
+    ],
+    "middleIds": [
+      684
+    ],
+    "middleIndex": 21,
+    "rightIds": [
+      685
+    ],
+    "middleOriginId": 684
+  },
+  {
+    "type": "top",
+    "highest": 3031.49,
+    "lowest": 2943.62,
+    "leftIds": [
+      690,
+      691
+    ],
+    "middleIds": [
+      692,
+      693,
+      694,
+      695
+    ],
+    "middleIndex": 28,
+    "rightIds": [
+      696
+    ],
+    "middleOriginId": 695
+  },
+  {
+    "type": "bottom",
+    "highest": 3032.23,
+    "lowest": "2943.62",
+    "leftIds": [
+      692,
+      693,
+      694,
+      695
+    ],
+    "middleIds": [
+      696
+    ],
+    "middleIndex": 29,
+    "rightIds": [
+      697
+    ],
+    "middleOriginId": 696
+  },
+  {
+    "type": "top",
+    "highest": 3063.69,
+    "lowest": 3016.9,
+    "leftIds": [
+      699
+    ],
+    "middleIds": [
+      700,
+      701
+    ],
+    "middleIndex": 33,
+    "rightIds": [
+      702
+    ],
+    "middleOriginId": 701
+  },
+  {
+    "type": "bottom",
+    "highest": 3068.46,
+    "lowest": "3016.90",
+    "leftIds": [
+      700,
+      701
+    ],
+    "middleIds": [
+      702
+    ],
+    "middleIndex": 34,
+    "rightIds": [
+      703
+    ],
+    "middleOriginId": 702
+  },
+  {
+    "type": "top",
+    "highest": "3075.13",
+    "lowest": 3031.9,
+    "leftIds": [
+      703
+    ],
+    "middleIds": [
+      704
+    ],
+    "middleIndex": 36,
+    "rightIds": [
+      705
+    ],
+    "middleOriginId": 704
+  },
+  {
+    "type": "bottom",
+    "highest": 3085.31,
+    "lowest": 3020.64,
+    "leftIds": [
+      705
+    ],
+    "middleIds": [
+      706,
+      707
+    ],
+    "middleIndex": 38,
+    "rightIds": [
+      708
+    ],
+    "middleOriginId": 706
+  },
+  {
+    "type": "top",
+    "highest": "3090.05",
+    "lowest": 3055.92,
+    "leftIds": [
+      708
+    ],
+    "middleIds": [
+      709
+    ],
+    "middleIndex": 40,
+    "rightIds": [
+      710
+    ],
+    "middleOriginId": 709
+  },
+  {
+    "type": "bottom",
+    "highest": 3090.05,
+    "lowest": "3056.65",
+    "leftIds": [
+      709
+    ],
+    "middleIds": [
+      710
+    ],
+    "middleIndex": 41,
+    "rightIds": [
+      711
+    ],
+    "middleOriginId": 710
+  },
+  {
+    "type": "top",
+    "highest": "3090.05",
+    "lowest": 3027.76,
+    "leftIds": [
+      710
+    ],
+    "middleIds": [
+      711
+    ],
+    "middleIndex": 42,
+    "rightIds": [
+      712
+    ],
+    "middleOriginId": 711
+  },
+  {
+    "type": "bottom",
+    "highest": 3041.3,
+    "lowest": 2984.12,
+    "leftIds": [
+      714
+    ],
+    "middleIds": [
+      715,
+      716
+    ],
+    "middleIndex": 46,
+    "rightIds": [
+      717
+    ],
+    "middleOriginId": 716
+  },
+  {
+    "type": "top",
+    "highest": "3085.54",
+    "lowest": 3049.02,
+    "leftIds": [
+      718
+    ],
+    "middleIds": [
+      719
+    ],
+    "middleIndex": 49,
+    "rightIds": [
+      720
+    ],
+    "middleOriginId": 719
+  },
+  {
+    "type": "bottom",
+    "highest": 3071.38,
+    "lowest": 2995.54,
+    "leftIds": [
+      722
+    ],
+    "middleIds": [
+      723,
+      724,
+      725,
+      726
+    ],
+    "middleIndex": 53,
+    "rightIds": [
+      727,
+      728
+    ],
+    "middleOriginId": 726
+  },
+  {
+    "type": "top",
+    "highest": "3102.55",
+    "lowest": 3005.34,
+    "leftIds": [
+      727,
+      728
+    ],
+    "middleIds": [
+      729
+    ],
+    "middleIndex": 55,
+    "rightIds": [
+      730
+    ],
+    "middleOriginId": 729
+  },
+  {
+    "type": "bottom",
+    "highest": 3078.42,
+    "lowest": "3016.52",
+    "leftIds": [
+      731
+    ],
+    "middleIds": [
+      732
+    ],
+    "middleIndex": 58,
+    "rightIds": [
+      733
+    ],
+    "middleOriginId": 732
+  },
+  {
+    "type": "top",
+    "highest": "3151.22",
+    "lowest": 3126.17,
+    "leftIds": [
+      738
+    ],
+    "middleIds": [
+      739
+    ],
+    "middleIndex": 65,
+    "rightIds": [
+      740
+    ],
+    "middleOriginId": 739
+  },
+  {
+    "type": "bottom",
+    "highest": 3158.46,
+    "lowest": "3126.17",
+    "leftIds": [
+      739
+    ],
+    "middleIds": [
+      740
+    ],
+    "middleIndex": 66,
+    "rightIds": [
+      741
+    ],
+    "middleOriginId": 740
+  },
+  {
+    "type": "top",
+    "highest": "3163.14",
+    "lowest": 3126.17,
+    "leftIds": [
+      741
+    ],
+    "middleIds": [
+      742
+    ],
+    "middleIndex": 68,
+    "rightIds": [
+      743,
+      744
+    ],
+    "middleOriginId": 742
+  },
+  {
+    "type": "bottom",
+    "highest": 3154.03,
+    "lowest": "3116.16",
+    "leftIds": [
+      745
+    ],
+    "middleIds": [
+      746
+    ],
+    "middleIndex": 71,
+    "rightIds": [
+      747
+    ],
+    "middleOriginId": 746
+  },
+  {
+    "type": "top",
+    "highest": "3174.27",
+    "lowest": 3116.78,
+    "leftIds": [
+      747
+    ],
+    "middleIds": [
+      748
+    ],
+    "middleIndex": 73,
+    "rightIds": [
+      749
+    ],
+    "middleOriginId": 748
+  },
+  {
+    "type": "bottom",
+    "highest": 3174.27,
+    "lowest": "3148.34",
+    "leftIds": [
+      748
+    ],
+    "middleIds": [
+      749
+    ],
+    "middleIndex": 74,
+    "rightIds": [
+      750
+    ],
+    "middleOriginId": 749
+  },
+  {
+    "type": "top",
+    "highest": "3166.92",
+    "lowest": 3110.28,
+    "leftIds": [
+      749
+    ],
+    "middleIds": [
+      750
+    ],
+    "middleIndex": 75,
+    "rightIds": [
+      751
+    ],
+    "middleOriginId": 750
+  },
+  {
+    "type": "bottom",
+    "highest": 3150.63,
+    "lowest": 3087.79,
+    "leftIds": [
+      751
+    ],
+    "middleIds": [
+      752,
+      753
+    ],
+    "middleIndex": 77,
+    "rightIds": [
+      754
+    ],
+    "middleOriginId": 752
+  },
+  {
+    "type": "top",
+    "highest": "3130.31",
+    "lowest": 3087.79,
+    "leftIds": [
+      752,
+      753
+    ],
+    "middleIds": [
+      754
+    ],
+    "middleIndex": 78,
+    "rightIds": [
+      755
+    ],
+    "middleOriginId": 754
+  },
+  {
+    "type": "bottom",
+    "highest": 3040.4,
+    "lowest": 3011.58,
+    "leftIds": [
+      763,
+      764,
+      765
+    ],
+    "middleIds": [
+      766,
+      767
+    ],
+    "middleIndex": 85,
+    "rightIds": [
+      768,
+      769
+    ],
+    "middleOriginId": 766
+  },
+  {
+    "type": "top",
+    "highest": 3031.98,
+    "lowest": 3001.77,
+    "leftIds": [
+      766,
+      767
+    ],
+    "middleIds": [
+      768,
+      769
+    ],
+    "middleIndex": 86,
+    "rightIds": [
+      770
+    ],
+    "middleOriginId": 768
+  },
+  {
+    "type": "bottom",
+    "highest": 2990.64,
+    "lowest": 2933.33,
+    "leftIds": [
+      772
+    ],
+    "middleIds": [
+      773,
+      774,
+      775
+    ],
+    "middleIndex": 90,
+    "rightIds": [
+      776
+    ],
+    "middleOriginId": 774
+  },
+  {
+    "type": "top",
+    "highest": "3004.99",
+    "lowest": 2961.86,
+    "leftIds": [
+      777
+    ],
+    "middleIds": [
+      778
+    ],
+    "middleIndex": 93,
+    "rightIds": [
+      779
+    ],
+    "middleOriginId": 778
+  },
+  {
+    "type": "bottom",
+    "highest": 2958.86,
+    "lowest": 2904.04,
+    "leftIds": [
+      781
+    ],
+    "middleIds": [
+      782,
+      783
+    ],
+    "middleIndex": 97,
+    "rightIds": [
+      784
+    ],
+    "middleOriginId": 783
+  },
+  {
+    "type": "top",
+    "highest": 2977.36,
+    "lowest": 2937.9,
+    "leftIds": [
+      785
+    ],
+    "middleIds": [
+      786,
+      787,
+      788
+    ],
+    "middleIndex": 100,
+    "rightIds": [
+      789,
+      790
+    ],
+    "middleOriginId": 788
+  },
+  {
+    "type": "bottom",
+    "highest": 2986.24,
+    "lowest": 2937.9,
+    "leftIds": [
+      786,
+      787,
+      788
+    ],
+    "middleIds": [
+      789,
+      790
+    ],
+    "middleIndex": 101,
+    "rightIds": [
+      791
+    ],
+    "middleOriginId": 790
+  },
+  {
+    "type": "top",
+    "highest": "2986.24",
+    "lowest": 2937.9,
+    "leftIds": [
+      789,
+      790
+    ],
+    "middleIds": [
+      791
+    ],
+    "middleIndex": 102,
+    "rightIds": [
+      792
+    ],
+    "middleOriginId": 791
+  },
+  {
+    "type": "bottom",
+    "highest": 2922.03,
+    "lowest": "2872.85",
+    "leftIds": [
+      794
+    ],
+    "middleIds": [
+      795
+    ],
+    "middleIndex": 106,
+    "rightIds": [
+      796,
+      797
+    ],
+    "middleOriginId": 795
+  },
+  {
+    "type": "top",
+    "highest": 2899.12,
+    "lowest": 2865.15,
+    "leftIds": [
+      795
+    ],
+    "middleIds": [
+      796,
+      797
+    ],
+    "middleIndex": 107,
+    "rightIds": [
+      798
+    ],
+    "middleOriginId": 796
+  },
+  {
+    "type": "bottom",
+    "highest": 2940.59,
+    "lowest": "2865.15",
+    "leftIds": [
+      796,
+      797
+    ],
+    "middleIds": [
+      798
+    ],
+    "middleIndex": 108,
+    "rightIds": [
+      799
+    ],
+    "middleOriginId": 798
+  },
+  {
+    "type": "top",
+    "highest": "2947.88",
+    "lowest": 2876.3,
+    "leftIds": [
+      799
+    ],
+    "middleIds": [
+      800
+    ],
+    "middleIndex": 110,
+    "rightIds": [
+      801
+    ],
+    "middleOriginId": 800
+  },
+  {
+    "type": "bottom",
+    "highest": 2919.03,
+    "lowest": 2845.34,
+    "leftIds": [
+      802
+    ],
+    "middleIds": [
+      803,
+      804,
+      805
+    ],
+    "middleIndex": 113,
+    "rightIds": [
+      806
+    ],
+    "middleOriginId": 803
+  },
+  {
+    "type": "top",
+    "highest": "2887.85",
+    "lowest": 2845.34,
+    "leftIds": [
+      803,
+      804,
+      805
+    ],
+    "middleIds": [
+      806
+    ],
+    "middleIndex": 114,
+    "rightIds": [
+      807
+    ],
+    "middleOriginId": 806
+  },
+  {
+    "type": "bottom",
+    "highest": 2888.68,
+    "lowest": 2839.39,
+    "leftIds": [
+      807
+    ],
+    "middleIds": [
+      808,
+      809,
+      810
+    ],
+    "middleIndex": 116,
+    "rightIds": [
+      811
+    ],
+    "middleOriginId": 810
+  },
+  {
+    "type": "top",
+    "highest": "2905.15",
+    "lowest": 2855.33,
+    "leftIds": [
+      811
+    ],
+    "middleIds": [
+      812
+    ],
+    "middleIndex": 118,
+    "rightIds": [
+      813
+    ],
+    "middleOriginId": 812
+  },
+  {
+    "type": "bottom",
+    "highest": 2867.96,
+    "lowest": "2815.38",
+    "leftIds": [
+      819
+    ],
+    "middleIds": [
+      820
+    ],
+    "middleIndex": 124,
+    "rightIds": [
+      821
+    ],
+    "middleOriginId": 820
+  },
+  {
+    "type": "top",
+    "highest": "2867.96",
+    "lowest": 2810.37,
+    "leftIds": [
+      820
+    ],
+    "middleIds": [
+      821
+    ],
+    "middleIndex": 125,
+    "rightIds": [
+      822
+    ],
+    "middleOriginId": 821
+  },
+  {
+    "type": "bottom",
+    "highest": 2750.12,
+    "lowest": "2710.62",
+    "leftIds": [
+      828
+    ],
+    "middleIds": [
+      829
+    ],
+    "middleIndex": 132,
+    "rightIds": [
+      830
+    ],
+    "middleOriginId": 829
+  },
+  {
+    "type": "top",
+    "highest": "2734.68",
+    "lowest": 2703.37,
+    "leftIds": [
+      829
+    ],
+    "middleIds": [
+      830
+    ],
+    "middleIndex": 133,
+    "rightIds": [
+      831
+    ],
+    "middleOriginId": 830
+  },
+  {
+    "type": "bottom",
+    "highest": 2747.74,
+    "lowest": "2689.70",
+    "leftIds": [
+      831
+    ],
+    "middleIds": [
+      832
+    ],
+    "middleIndex": 135,
+    "rightIds": [
+      833,
+      834
+    ],
+    "middleOriginId": 832
+  },
+  {
+    "type": "top",
+    "highest": "3674.40",
+    "lowest": 3153.7,
+    "leftIds": [
+      840
+    ],
+    "middleIds": [
+      841
+    ],
+    "middleIndex": 142,
+    "rightIds": [
+      842
+    ],
+    "middleOriginId": 841
+  },
+  {
+    "type": "bottom",
+    "highest": 3313.98,
+    "lowest": "3167.74",
+    "leftIds": [
+      844,
+      845,
+      846
+    ],
+    "middleIds": [
+      847
+    ],
+    "middleIndex": 146,
+    "rightIds": [
+      848,
+      849,
+      850,
+      851
+    ],
+    "middleOriginId": 847
+  },
+  {
+    "type": "top",
+    "highest": "3331.08",
+    "lowest": 3255.14,
+    "leftIds": [
+      848,
+      849,
+      850,
+      851
+    ],
+    "middleIds": [
+      852
+    ],
+    "middleIndex": 148,
+    "rightIds": [
+      853
+    ],
+    "middleOriginId": 852
+  },
+  {
+    "type": "bottom",
+    "highest": 3331.08,
+    "lowest": "3266.88",
+    "leftIds": [
+      852
+    ],
+    "middleIds": [
+      853
+    ],
+    "middleIndex": 149,
+    "rightIds": [
+      854
+    ],
+    "middleOriginId": 853
+  },
+  {
+    "type": "top",
+    "highest": "3340.46",
+    "lowest": 3244.81,
+    "leftIds": [
+      855
+    ],
+    "middleIds": [
+      856
+    ],
+    "middleIndex": 152,
+    "rightIds": [
+      857
+    ],
+    "middleOriginId": 856
+  },
+  {
+    "type": "bottom",
+    "highest": 3340.46,
+    "lowest": "3244.81",
+    "leftIds": [
+      856
+    ],
+    "middleIds": [
+      857
+    ],
+    "middleIndex": 153,
+    "rightIds": [
+      858
+    ],
+    "middleOriginId": 857
+  },
+  {
+    "type": "top",
+    "highest": "3509.82",
+    "lowest": 3367.08,
+    "leftIds": [
+      862,
+      863
+    ],
+    "middleIds": [
+      864
+    ],
+    "middleIndex": 159,
+    "rightIds": [
+      865,
+      866,
+      867
+    ],
+    "middleOriginId": 864
+  },
+  {
+    "type": "bottom",
+    "highest": 3386.9,
+    "lowest": "3284.13",
+    "leftIds": [
+      870
+    ],
+    "middleIds": [
+      871
+    ],
+    "middleIndex": 164,
+    "rightIds": [
+      872
+    ],
+    "middleOriginId": 871
+  },
+  {
+    "type": "top",
+    "highest": "3378.52",
+    "lowest": 3267.19,
+    "leftIds": [
+      872
+    ],
+    "middleIds": [
+      873
+    ],
+    "middleIndex": 166,
+    "rightIds": [
+      874
+    ],
+    "middleOriginId": 873
+  },
+  {
+    "type": "bottom",
+    "highest": 3372,
+    "lowest": 3227.36,
+    "leftIds": [
+      874
+    ],
+    "middleIds": [
+      875,
+      876,
+      877
+    ],
+    "middleIndex": 168,
+    "rightIds": [
+      878
+    ],
+    "middleOriginId": 877
+  },
+  {
+    "type": "top",
+    "highest": "3494.87",
+    "lowest": 3385.96,
+    "leftIds": [
+      885
+    ],
+    "middleIds": [
+      886
+    ],
+    "middleIndex": 176,
+    "rightIds": [
+      887
+    ],
+    "middleOriginId": 886
+  },
+  {
+    "type": "bottom",
+    "highest": 3494.87,
+    "lowest": "3416.09",
+    "leftIds": [
+      886
+    ],
+    "middleIds": [
+      887
+    ],
+    "middleIndex": 177,
+    "rightIds": [
+      888
+    ],
+    "middleOriginId": 887
+  },
+  {
+    "type": "top",
+    "highest": "3464.12",
+    "lowest": 3390.75,
+    "leftIds": [
+      887
+    ],
+    "middleIds": [
+      888
+    ],
+    "middleIndex": 178,
+    "rightIds": [
+      889
+    ],
+    "middleOriginId": 888
+  },
+  {
+    "type": "bottom",
+    "highest": 3401.93,
+    "lowest": "3357.77",
+    "leftIds": [
+      890
+    ],
+    "middleIds": [
+      891
+    ],
+    "middleIndex": 181,
+    "rightIds": [
+      892
+    ],
+    "middleOriginId": 891
+  },
+  {
+    "type": "top",
+    "highest": "3396.46",
+    "lowest": 3346.47,
+    "leftIds": [
+      891
+    ],
+    "middleIds": [
+      892
+    ],
+    "middleIndex": 182,
+    "rightIds": [
+      893
+    ],
+    "middleOriginId": 892
+  },
+  {
+    "type": "bottom",
+    "highest": 3396.46,
+    "lowest": "3346.47",
+    "leftIds": [
+      892
+    ],
+    "middleIds": [
+      893
+    ],
+    "middleIndex": 183,
+    "rightIds": [
+      894
+    ],
+    "middleOriginId": 893
+  },
+  {
+    "type": "top",
+    "highest": "3390.62",
+    "lowest": 3346.47,
+    "leftIds": [
+      893
+    ],
+    "middleIds": [
+      894
+    ],
+    "middleIndex": 184,
+    "rightIds": [
+      895
+    ],
+    "middleOriginId": 894
+  },
+  {
+    "type": "bottom",
+    "highest": 3394.9,
+    "lowest": "3348.28",
+    "leftIds": [
+      894
+    ],
+    "middleIds": [
+      895
+    ],
+    "middleIndex": 185,
+    "rightIds": [
+      896
+    ],
+    "middleOriginId": 895
+  },
+  {
+    "type": "top",
+    "highest": 3418.95,
+    "lowest": 3351.76,
+    "leftIds": [
+      897,
+      898
+    ],
+    "middleIds": [
+      899,
+      900
+    ],
+    "middleIndex": 188,
+    "rightIds": [
+      901
+    ],
+    "middleOriginId": 899
+  },
+  {
+    "type": "bottom",
+    "highest": 3273.57,
+    "lowest": "3185.46",
+    "leftIds": [
+      903
+    ],
+    "middleIds": [
+      904
+    ],
+    "middleIndex": 192,
+    "rightIds": [
+      905,
+      906,
+      907
+    ],
+    "middleOriginId": 904
+  },
+  {
+    "type": "top",
+    "highest": 3246.29,
+    "lowest": 3168.52,
+    "leftIds": [
+      904
+    ],
+    "middleIds": [
+      905,
+      906,
+      907
+    ],
+    "middleIndex": 193,
+    "rightIds": [
+      908
+    ],
+    "middleOriginId": 906
+  },
+  {
+    "type": "bottom",
+    "highest": 3245.22,
+    "lowest": "3140.98",
+    "leftIds": [
+      908
+    ],
+    "middleIds": [
+      909
+    ],
+    "middleIndex": 195,
+    "rightIds": [
+      910
+    ],
+    "middleOriginId": 909
+  },
+  {
+    "type": "top",
+    "highest": 3265.28,
+    "lowest": 3159.43,
+    "leftIds": [
+      910
+    ],
+    "middleIds": [
+      911,
+      912
+    ],
+    "middleIndex": 197,
+    "rightIds": [
+      913
+    ],
+    "middleOriginId": 912
+  },
+  {
+    "type": "bottom",
+    "highest": 3268.26,
+    "lowest": "3219.77",
+    "leftIds": [
+      911,
+      912
+    ],
+    "middleIds": [
+      913
+    ],
+    "middleIndex": 198,
+    "rightIds": [
+      914
+    ],
+    "middleOriginId": 913
+  },
+  {
+    "type": "top",
+    "highest": "3268.26",
+    "lowest": 3219.77,
+    "leftIds": [
+      913
+    ],
+    "middleIds": [
+      914
+    ],
+    "middleIndex": 199,
+    "rightIds": [
+      915
+    ],
+    "middleOriginId": 914
+  },
+  {
+    "type": "bottom",
+    "highest": 3273.52,
+    "lowest": "3203.38",
+    "leftIds": [
+      915
+    ],
+    "middleIds": [
+      916
+    ],
+    "middleIndex": 201,
+    "rightIds": [
+      917
+    ],
+    "middleOriginId": 916
+  },
+  {
+    "type": "top",
+    "highest": "3273.52",
+    "lowest": 3203.38,
+    "leftIds": [
+      916
+    ],
+    "middleIds": [
+      917
+    ],
+    "middleIndex": 202,
+    "rightIds": [
+      918
+    ],
+    "middleOriginId": 917
+  },
+  {
+    "type": "bottom",
+    "highest": 3274.39,
+    "lowest": "3221.71",
+    "leftIds": [
+      917
+    ],
+    "middleIds": [
+      918
+    ],
+    "middleIndex": 203,
+    "rightIds": [
+      919
+    ],
+    "middleOriginId": 918
+  },
+  {
+    "type": "top",
+    "highest": "3274.39",
+    "lowest": 3220.28,
+    "leftIds": [
+      918
+    ],
+    "middleIds": [
+      919
+    ],
+    "middleIndex": 204,
+    "rightIds": [
+      920
+    ],
+    "middleOriginId": 919
+  },
+  {
+    "type": "bottom",
+    "highest": 3274.39,
+    "lowest": "3220.28",
+    "leftIds": [
+      919
+    ],
+    "middleIds": [
+      920
+    ],
+    "middleIndex": 205,
+    "rightIds": [
+      921
+    ],
+    "middleOriginId": 920
+  },
+  {
+    "type": "top",
+    "highest": "3359.18",
+    "lowest": 3310.39,
+    "leftIds": [
+      925
+    ],
+    "middleIds": [
+      926
+    ],
+    "middleIndex": 210,
+    "rightIds": [
+      927
+    ],
+    "middleOriginId": 926
+  },
+  {
+    "type": "bottom",
+    "highest": 3366.01,
+    "lowest": "3322.53",
+    "leftIds": [
+      926
+    ],
+    "middleIds": [
+      927
+    ],
+    "middleIndex": 211,
+    "rightIds": [
+      928,
+      929
+    ],
+    "middleOriginId": 927
+  },
+  {
+    "type": "top",
+    "highest": 3366.01,
+    "lowest": 3320.58,
+    "leftIds": [
+      927
+    ],
+    "middleIds": [
+      928,
+      929
+    ],
+    "middleIndex": 212,
+    "rightIds": [
+      930
+    ],
+    "middleOriginId": 929
+  },
+  {
+    "type": "bottom",
+    "highest": 3366.01,
+    "lowest": "3320.58",
+    "leftIds": [
+      928,
+      929
+    ],
+    "middleIds": [
+      930
+    ],
+    "middleIndex": 213,
+    "rightIds": [
+      931
+    ],
+    "middleOriginId": 930
+  },
+  {
+    "type": "top",
+    "highest": "3384.81",
+    "lowest": 3337.84,
+    "leftIds": [
+      932
+    ],
+    "middleIds": [
+      933
+    ],
+    "middleIndex": 216,
+    "rightIds": [
+      934
+    ],
+    "middleOriginId": 933
+  },
+  {
+    "type": "bottom",
+    "highest": 3384.81,
+    "lowest": "3337.84",
+    "leftIds": [
+      933
+    ],
+    "middleIds": [
+      934
+    ],
+    "middleIndex": 217,
+    "rightIds": [
+      935
+    ],
+    "middleOriginId": 934
+  },
+  {
+    "type": "top",
+    "highest": "3388.78",
+    "lowest": 3318.72,
+    "leftIds": [
+      935
+    ],
+    "middleIds": [
+      936
+    ],
+    "middleIndex": 219,
+    "rightIds": [
+      937
+    ],
+    "middleOriginId": 936
+  },
+  {
+    "type": "bottom",
+    "highest": 3349.02,
+    "lowest": "3297.53",
+    "leftIds": [
+      938
+    ],
+    "middleIds": [
+      939
+    ],
+    "middleIndex": 222,
+    "rightIds": [
+      940
+    ],
+    "middleOriginId": 939
+  },
+  {
+    "type": "top",
+    "highest": "3390.94",
+    "lowest": 3334.83,
+    "leftIds": [
+      941
+    ],
+    "middleIds": [
+      942
+    ],
+    "middleIndex": 225,
+    "rightIds": [
+      943,
+      944
+    ],
+    "middleOriginId": 942
+  },
+  {
+    "type": "bottom",
+    "highest": 3392.41,
+    "lowest": 3334.83,
+    "leftIds": [
+      942
+    ],
+    "middleIds": [
+      943,
+      944
+    ],
+    "middleIndex": 226,
+    "rightIds": [
+      945
+    ],
+    "middleOriginId": 944
+  },
+  {
+    "type": "top",
+    "highest": "3392.41",
+    "lowest": 3334.83,
+    "leftIds": [
+      943,
+      944
+    ],
+    "middleIds": [
+      945
+    ],
+    "middleIndex": 227,
+    "rightIds": [
+      946
+    ],
+    "middleOriginId": 945
+  },
+  {
+    "type": "bottom",
+    "highest": 3421.23,
+    "lowest": "3341.12",
+    "leftIds": [
+      945
+    ],
+    "middleIds": [
+      946
+    ],
+    "middleIndex": 228,
+    "rightIds": [
+      947
+    ],
+    "middleOriginId": 946
+  },
+  {
+    "type": "top",
+    "highest": 3439.05,
+    "lowest": 3404.66,
+    "leftIds": [
+      948
+    ],
+    "middleIds": [
+      949,
+      950
+    ],
+    "middleIndex": 231,
+    "rightIds": [
+      951
+    ],
+    "middleOriginId": 950
+  },
+  {
+    "type": "bottom",
+    "highest": 3414.71,
+    "lowest": "3340.24",
+    "leftIds": [
+      952
+    ],
+    "middleIds": [
+      953
+    ],
+    "middleIndex": 234,
+    "rightIds": [
+      954
+    ],
+    "middleOriginId": 953
+  },
+  {
+    "type": "top",
+    "highest": 3394.03,
+    "lowest": 3346.08,
+    "leftIds": [
+      954
+    ],
+    "middleIds": [
+      955,
+      956
+    ],
+    "middleIndex": 236,
+    "rightIds": [
+      957
+    ],
+    "middleOriginId": 956
+  },
+  {
+    "type": "bottom",
+    "highest": 3375.05,
+    "lowest": 3317.74,
+    "leftIds": [
+      957
+    ],
+    "middleIds": [
+      958,
+      959
+    ],
+    "middleIndex": 238,
+    "rightIds": [
+      960
+    ],
+    "middleOriginId": 958
+  },
+  {
+    "type": "top",
+    "highest": "3361.13",
+    "lowest": 3317.74,
+    "leftIds": [
+      958,
+      959
+    ],
+    "middleIds": [
+      960
+    ],
+    "middleIndex": 239,
+    "rightIds": [
+      961
+    ],
+    "middleOriginId": 960
+  },
+  {
+    "type": "bottom",
+    "highest": 3358.43,
+    "lowest": 3040.69,
+    "leftIds": [
+      961
+    ],
+    "middleIds": [
+      962,
+      963
+    ],
+    "middleIndex": 241,
+    "rightIds": [
+      964
+    ],
+    "middleOriginId": 962
+  },
+  {
+    "type": "top",
+    "highest": 3313.51,
+    "lowest": 3288.33,
+    "leftIds": [
+      973
+    ],
+    "middleIds": [
+      974,
+      975
+    ],
+    "middleIndex": 249,
+    "rightIds": [
+      976
+    ],
+    "middleOriginId": 975
+  },
+  {
+    "type": "bottom",
+    "highest": 3316.45,
+    "lowest": "3277.55",
+    "leftIds": [
+      978
+    ],
+    "middleIds": [
+      979
+    ],
+    "middleIndex": 253,
+    "rightIds": [
+      980
+    ],
+    "middleOriginId": 979
+  },
+  {
+    "type": "top",
+    "highest": 3417.31,
+    "lowest": 3344.27,
+    "leftIds": [
+      984
+    ],
+    "middleIds": [
+      985,
+      986,
+      987
+    ],
+    "middleIndex": 258,
+    "rightIds": [
+      988
+    ],
+    "middleOriginId": 986
+  },
+  {
+    "type": "bottom",
+    "highest": 3387.8,
+    "lowest": "3356.65",
+    "leftIds": [
+      988
+    ],
+    "middleIds": [
+      989
+    ],
+    "middleIndex": 260,
+    "rightIds": [
+      990
+    ],
+    "middleOriginId": 989
+  },
+  {
+    "type": "top",
+    "highest": "3394.75",
+    "lowest": 3369.96,
+    "leftIds": [
+      990
+    ],
+    "middleIds": [
+      991
+    ],
+    "middleIndex": 262,
+    "rightIds": [
+      992
+    ],
+    "middleOriginId": 991
+  },
+  {
+    "type": "bottom",
+    "highest": 3368.63,
+    "lowest": 3332.49,
+    "leftIds": [
+      994
+    ],
+    "middleIds": [
+      995,
+      996
+    ],
+    "middleIndex": 266,
+    "rightIds": [
+      997,
+      998
+    ],
+    "middleOriginId": 995
+  },
+  {
+    "type": "top",
+    "highest": 3368.63,
+    "lowest": 3332.49,
+    "leftIds": [
+      995,
+      996
+    ],
+    "middleIds": [
+      997,
+      998
+    ],
+    "middleIndex": 267,
+    "rightIds": [
+      999
+    ],
+    "middleOriginId": 997
+  },
+  {
+    "type": "bottom",
+    "highest": 3379.64,
+    "lowest": "3340.07",
+    "leftIds": [
+      997,
+      998
+    ],
+    "middleIds": [
+      999
+    ],
+    "middleIndex": 268,
+    "rightIds": [
+      1000
+    ],
+    "middleOriginId": 999
+  },
+  {
+    "type": "top",
+    "highest": 3413.51,
+    "lowest": 3370.59,
+    "leftIds": [
+      1003,
+      1004
+    ],
+    "middleIds": [
+      1005,
+      1006
+    ],
+    "middleIndex": 273,
+    "rightIds": [
+      1007
+    ],
+    "middleOriginId": 1005
+  },
+  {
+    "type": "bottom",
+    "highest": 3401.55,
+    "lowest": "3368.88",
+    "leftIds": [
+      1007
+    ],
+    "middleIds": [
+      1008
+    ],
+    "middleIndex": 275,
+    "rightIds": [
+      1009
+    ],
+    "middleOriginId": 1008
+  },
+  {
+    "type": "top",
+    "highest": "3393.31",
+    "lowest": 3368.88,
+    "leftIds": [
+      1008
+    ],
+    "middleIds": [
+      1009
+    ],
+    "middleIndex": 276,
+    "rightIds": [
+      1010
+    ],
+    "middleOriginId": 1009
+  },
+  {
+    "type": "bottom",
+    "highest": 3423.78,
+    "lowest": 3347.65,
+    "leftIds": [
+      1010
+    ],
+    "middleIds": [
+      1011,
+      1012,
+      1013
+    ],
+    "middleIndex": 278,
+    "rightIds": [
+      1014
+    ],
+    "middleOriginId": 1013
+  },
+  {
+    "type": "top",
+    "highest": "3462.75",
+    "lowest": 3417.41,
+    "leftIds": [
+      1015
+    ],
+    "middleIds": [
+      1016
+    ],
+    "middleIndex": 281,
+    "rightIds": [
+      1017
+    ],
+    "middleOriginId": 1016
+  },
+  {
+    "type": "bottom",
+    "highest": 3462.63,
+    "lowest": "3420.11",
+    "leftIds": [
+      1017
+    ],
+    "middleIds": [
+      1018
+    ],
+    "middleIndex": 283,
+    "rightIds": [
+      1019
+    ],
+    "middleOriginId": 1018
+  },
+  {
+    "type": "top",
+    "highest": 3555.22,
+    "lowest": 3483.38,
+    "leftIds": [
+      1026
+    ],
+    "middleIds": [
+      1027,
+      1028
+    ],
+    "middleIndex": 290,
+    "rightIds": [
+      1029,
+      1030
+    ],
+    "middleOriginId": 1027
+  },
+  {
+    "type": "bottom",
+    "highest": 3555.22,
+    "lowest": 3483.38,
+    "leftIds": [
+      1027,
+      1028
+    ],
+    "middleIds": [
+      1029,
+      1030
+    ],
+    "middleIndex": 291,
+    "rightIds": [
+      1031
+    ],
+    "middleOriginId": 1029
+  },
+  {
+    "type": "top",
+    "highest": "3613.02",
+    "lowest": 3547.25,
+    "leftIds": [
+      1034
+    ],
+    "middleIds": [
+      1035
+    ],
+    "middleIndex": 296,
+    "rightIds": [
+      1036
+    ],
+    "middleOriginId": 1035
+  },
+  {
+    "type": "bottom",
+    "highest": 3613.02,
+    "lowest": "3577.11",
+    "leftIds": [
+      1035
+    ],
+    "middleIds": [
+      1036
+    ],
+    "middleIndex": 297,
+    "rightIds": [
+      1037
+    ],
+    "middleOriginId": 1036
+  },
+  {
+    "type": "top",
+    "highest": "3610.03",
+    "lowest": 3577.11,
+    "leftIds": [
+      1036
+    ],
+    "middleIds": [
+      1037
+    ],
+    "middleIndex": 298,
+    "rightIds": [
+      1038
+    ],
+    "middleOriginId": 1037
+  },
+  {
+    "type": "bottom",
+    "highest": 3611.35,
+    "lowest": "3582.15",
+    "leftIds": [
+      1037
+    ],
+    "middleIds": [
+      1038
+    ],
+    "middleIndex": 299,
+    "rightIds": [
+      1039
+    ],
+    "middleOriginId": 1038
+  },
+  {
+    "type": "top",
+    "highest": "3636.17",
+    "lowest": 3562.61,
+    "leftIds": [
+      1039
+    ],
+    "middleIds": [
+      1040
+    ],
+    "middleIndex": 301,
+    "rightIds": [
+      1041
+    ],
+    "middleOriginId": 1040
+  },
+  {
+    "type": "bottom",
+    "highest": 3617.6,
+    "lowest": 3547.16,
+    "leftIds": [
+      1041
+    ],
+    "middleIds": [
+      1042,
+      1043
+    ],
+    "middleIndex": 303,
+    "rightIds": [
+      1044
+    ],
+    "middleOriginId": 1043
+  },
+  {
+    "type": "top",
+    "highest": 3704.77,
+    "lowest": 3647.96,
+    "leftIds": [
+      1049
+    ],
+    "middleIds": [
+      1050,
+      1051
+    ],
+    "middleIndex": 310,
+    "rightIds": [
+      1052
+    ],
+    "middleOriginId": 1051
+  },
+  {
+    "type": "bottom",
+    "highest": 3745.94,
+    "lowest": "3658.38",
+    "leftIds": [
+      1050,
+      1051
+    ],
+    "middleIds": [
+      1052
+    ],
+    "middleIndex": 311,
+    "rightIds": [
+      1053
+    ],
+    "middleOriginId": 1052
+  },
+  {
+    "type": "top",
+    "highest": "3888.60",
+    "lowest": 3800.35,
+    "leftIds": [
+      1058
+    ],
+    "middleIds": [
+      1059
+    ],
+    "middleIndex": 317,
+    "rightIds": [
+      1060
+    ],
+    "middleOriginId": 1059
+  },
+  {
+    "type": "bottom",
+    "highest": 3887.2,
+    "lowest": "3761.42",
+    "leftIds": [
+      1060
+    ],
+    "middleIds": [
+      1061
+    ],
+    "middleIndex": 319,
+    "rightIds": [
+      1062
+    ],
+    "middleOriginId": 1061
+  },
+  {
+    "type": "top",
+    "highest": 3885.31,
+    "lowest": 3794.88,
+    "leftIds": [
+      1062
+    ],
+    "middleIds": [
+      1063,
+      1064
+    ],
+    "middleIndex": 321,
+    "rightIds": [
+      1065
+    ],
+    "middleOriginId": 1064
+  },
+  {
+    "type": "bottom",
+    "highest": 3868.39,
+    "lowest": "3732.84",
+    "leftIds": [
+      1065
+    ],
+    "middleIds": [
+      1066
+    ],
+    "middleIndex": 323,
+    "rightIds": [
+      1067
+    ],
+    "middleOriginId": 1066
+  },
+  {
+    "type": "top",
+    "highest": 3834.67,
+    "lowest": 3745.31,
+    "leftIds": [
+      1067
+    ],
+    "middleIds": [
+      1068,
+      1069
+    ],
+    "middleIndex": 325,
+    "rightIds": [
+      1070
+    ],
+    "middleOriginId": 1069
+  },
+  {
+    "type": "bottom",
+    "highest": 3875.31,
+    "lowest": "3794.06",
+    "leftIds": [
+      1068,
+      1069
+    ],
+    "middleIds": [
+      1070
+    ],
+    "middleIndex": 326,
+    "rightIds": [
+      1071
+    ],
+    "middleOriginId": 1070
+  },
+  {
+    "type": "top",
+    "highest": "3892.74",
+    "lowest": 3796.43,
+    "leftIds": [
+      1071
+    ],
+    "middleIds": [
+      1072
+    ],
+    "middleIndex": 328,
+    "rightIds": [
+      1073
+    ],
+    "middleOriginId": 1072
+  },
+  {
+    "type": "bottom",
+    "highest": 3899.96,
+    "lowest": "3838.65",
+    "leftIds": [
+      1073
+    ],
+    "middleIds": [
+      1074
+    ],
+    "middleIndex": 330,
+    "rightIds": [
+      1075,
+      1076
+    ],
+    "middleOriginId": 1074
+  },
+  {
+    "type": "top",
+    "highest": 3899.96,
+    "lowest": 3811.9,
+    "leftIds": [
+      1074
+    ],
+    "middleIds": [
+      1075,
+      1076
+    ],
+    "middleIndex": 331,
+    "rightIds": [
+      1077
+    ],
+    "middleOriginId": 1076
+  },
+  {
+    "type": "bottom",
+    "highest": 3854.92,
+    "lowest": 3774.53,
+    "leftIds": [
+      1077
+    ],
+    "middleIds": [
+      1078,
+      1079
+    ],
+    "middleIndex": 333,
+    "rightIds": [
+      1080
+    ],
+    "middleOriginId": 1079
+  },
+  {
+    "type": "top",
+    "highest": "3866.11",
+    "lowest": 3804.33,
+    "leftIds": [
+      1080
+    ],
+    "middleIds": [
+      1081
+    ],
+    "middleIndex": 335,
+    "rightIds": [
+      1082,
+      1083
+    ],
+    "middleOriginId": 1081
+  },
+  {
+    "type": "bottom",
+    "highest": 3887.57,
+    "lowest": 3809.54,
+    "leftIds": [
+      1081
+    ],
+    "middleIds": [
+      1082,
+      1083
+    ],
+    "middleIndex": 336,
+    "rightIds": [
+      1084
+    ],
+    "middleOriginId": 1083
+  },
+  {
+    "type": "top",
+    "highest": 3936.58,
+    "lowest": 3800.11,
+    "leftIds": [
+      1084
+    ],
+    "middleIds": [
+      1085,
+      1086
+    ],
+    "middleIndex": 338,
+    "rightIds": [
+      1087
+    ],
+    "middleOriginId": 1085
+  },
+  {
+    "type": "bottom",
+    "highest": 3936.58,
+    "lowest": "3800.11",
+    "leftIds": [
+      1085,
+      1086
+    ],
+    "middleIds": [
+      1087
+    ],
+    "middleIndex": 339,
+    "rightIds": [
+      1088,
+      1089
+    ],
+    "middleOriginId": 1087
+  },
+  {
+    "type": "top",
+    "highest": "3931.05",
+    "lowest": 3835.36,
+    "leftIds": [
+      1088,
+      1089
+    ],
+    "middleIds": [
+      1090
+    ],
+    "middleIndex": 341,
+    "rightIds": [
+      1091,
+      1092
+    ],
+    "middleOriginId": 1090
+  },
+  {
+    "type": "bottom",
+    "highest": 3931.05,
+    "lowest": 3835.36,
+    "leftIds": [
+      1090
+    ],
+    "middleIds": [
+      1091,
+      1092
+    ],
+    "middleIndex": 342,
+    "rightIds": [
+      1093,
+      1094,
+      1095
+    ],
+    "middleOriginId": 1091
+  },
+  {
+    "type": "top",
+    "highest": 4025.7,
+    "lowest": 3951.73,
+    "leftIds": [
+      1098
+    ],
+    "middleIds": [
+      1099,
+      1100
+    ],
+    "middleIndex": 347,
+    "rightIds": [
+      1101
+    ],
+    "middleOriginId": 1100
+  },
+  {
+    "type": "bottom",
+    "highest": 3986.74,
+    "lowest": "3937.02",
+    "leftIds": [
+      1101
+    ],
+    "middleIds": [
+      1102
+    ],
+    "middleIndex": 349,
+    "rightIds": [
+      1103
+    ],
+    "middleOriginId": 1102
+  },
+  {
+    "type": "top",
+    "highest": "3985.88",
+    "lowest": 3922.58,
+    "leftIds": [
+      1102
+    ],
+    "middleIds": [
+      1103
+    ],
+    "middleIndex": 350,
+    "rightIds": [
+      1104
+    ],
+    "middleOriginId": 1103
+  },
+  {
+    "type": "bottom",
+    "highest": 4008.8,
+    "lowest": "3922.58",
+    "leftIds": [
+      1103
+    ],
+    "middleIds": [
+      1104
+    ],
+    "middleIndex": 351,
+    "rightIds": [
+      1105
+    ],
+    "middleOriginId": 1104
+  },
+  {
+    "type": "top",
+    "highest": 4024.94,
+    "lowest": 3973.35,
+    "leftIds": [
+      1105
+    ],
+    "middleIds": [
+      1106,
+      1107,
+      1108
+    ],
+    "middleIndex": 353,
+    "rightIds": [
+      1109
+    ],
+    "middleOriginId": 1108
+  },
+  {
+    "type": "bottom",
+    "highest": 4034.08,
+    "lowest": "3980.68",
+    "leftIds": [
+      1106,
+      1107,
+      1108
+    ],
+    "middleIds": [
+      1109
+    ],
+    "middleIndex": 354,
+    "rightIds": [
+      1110,
+      1111
+    ],
+    "middleOriginId": 1109
+  },
+  {
+    "type": "top",
+    "highest": 4034.08,
+    "lowest": 3958.95,
+    "leftIds": [
+      1109
+    ],
+    "middleIds": [
+      1110,
+      1111
+    ],
+    "middleIndex": 355,
+    "rightIds": [
+      1112
+    ],
+    "middleOriginId": 1111
+  },
+  {
+    "type": "bottom",
+    "highest": 3992.4,
+    "lowest": 3926.59,
+    "leftIds": [
+      1112
+    ],
+    "middleIds": [
+      1113,
+      1114
+    ],
+    "middleIndex": 357,
+    "rightIds": [
+      1115
+    ],
+    "middleOriginId": 1113
+  },
+  {
+    "type": "top",
+    "highest": "3967.97",
+    "lowest": 3834.75,
+    "leftIds": [
+      1113,
+      1114
+    ],
+    "middleIds": [
+      1115
+    ],
+    "middleIndex": 358,
+    "rightIds": [
+      1116
+    ],
+    "middleOriginId": 1115
+  },
+  {
+    "type": "bottom",
+    "highest": 3912.01,
+    "lowest": "3816.58",
+    "leftIds": [
+      1116
+    ],
+    "middleIds": [
+      1117
+    ],
+    "middleIndex": 360,
+    "rightIds": [
+      1118,
+      1119
+    ],
+    "middleOriginId": 1117
+  },
+  {
+    "type": "top",
+    "highest": "3895.59",
+    "lowest": 3856.25,
+    "leftIds": [
+      1118,
+      1119
+    ],
+    "middleIds": [
+      1120
+    ],
+    "middleIndex": 362,
+    "rightIds": [
+      1121
+    ],
+    "middleOriginId": 1120
+  },
+  {
+    "type": "bottom",
+    "highest": 3914.46,
+    "lowest": "3856.25",
+    "leftIds": [
+      1120
+    ],
+    "middleIds": [
+      1121
+    ],
+    "middleIndex": 363,
+    "rightIds": [
+      1122
+    ],
+    "middleOriginId": 1121
+  },
+  {
+    "type": "top",
+    "highest": "3914.46",
+    "lowest": 3856.25,
+    "leftIds": [
+      1121
+    ],
+    "middleIds": [
+      1122
+    ],
+    "middleIndex": 364,
+    "rightIds": [
+      1123
+    ],
+    "middleOriginId": 1122
+  },
+  {
+    "type": "bottom",
+    "highest": 3907.78,
+    "lowest": "3859.05",
+    "leftIds": [
+      1124
+    ],
+    "middleIds": [
+      1125
+    ],
+    "middleIndex": 367,
+    "rightIds": [
+      1126
+    ],
+    "middleOriginId": 1125
+  },
+  {
+    "type": "top",
+    "highest": "3936.31",
+    "lowest": 3863.31,
+    "leftIds": [
+      1126
+    ],
+    "middleIds": [
+      1127
+    ],
+    "middleIndex": 369,
+    "rightIds": [
+      1128
+    ],
+    "middleOriginId": 1127
+  },
+  {
+    "type": "bottom",
+    "highest": 3904.96,
+    "lowest": "3850.60",
+    "leftIds": [
+      1130
+    ],
+    "middleIds": [
+      1131
+    ],
+    "middleIndex": 373,
+    "rightIds": [
+      1132
+    ],
+    "middleOriginId": 1131
+  },
+  {
+    "type": "top",
+    "highest": "3896.98",
+    "lowest": 3815.84,
+    "leftIds": [
+      1131
+    ],
+    "middleIds": [
+      1132
+    ],
+    "middleIndex": 374,
+    "rightIds": [
+      1133
+    ],
+    "middleOriginId": 1132
+  },
+  {
+    "type": "bottom",
+    "highest": 3896.98,
+    "lowest": "3815.84",
+    "leftIds": [
+      1132
+    ],
+    "middleIds": [
+      1133
+    ],
+    "middleIndex": 375,
+    "rightIds": [
+      1134
+    ],
+    "middleOriginId": 1133
+  },
+  {
+    "type": "top",
+    "highest": "3983.98",
+    "lowest": 3945.52,
+    "leftIds": [
+      1141
+    ],
+    "middleIds": [
+      1142
+    ],
+    "middleIndex": 384,
+    "rightIds": [
+      1143,
+      1144
+    ],
+    "middleOriginId": 1142
+  }
+]
