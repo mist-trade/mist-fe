@@ -1,0 +1,20 @@
+{
+  "key": "shanghai-index-2024-2025",
+  "name": "上证指数 2024-2025",
+  "generatedAt": "2026-07-08T15:48:29.369Z",
+  "backendUrl": "http://192.168.31.182:8008",
+  "testCase": {
+    "code": "000001",
+    "source": "tdx",
+    "period": 1440,
+    "startDate": "2024-01-01",
+    "endDate": "2025-12-31"
+  },
+  "stats": {
+    "kCount": 485,
+    "mergeKCount": 386,
+    "biCount": 54,
+    "channelCount": 0,
+    "fenxingCount": 158
+  }
+}
