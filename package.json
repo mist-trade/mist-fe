@@ -18,7 +18,7 @@
     "test:coverage": "jest --coverage",
     "lint:staged": "lint-staged",
     "prepare": "husky",
-    "snapshots:generate": "node --experimental-strip-types --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./scripts/ts-extension-resolver.mjs\", pathToFileURL(\"./\"));' scripts/generate-snapshots.mjs"
+    "snapshots:generate": "tsx scripts/generate-snapshots.mjs"
   },
   "dependencies": {
     "echarts": "^6.0.0",
@@ -41,6 +41,7 @@
     "jest-environment-jsdom": "^30.2.0",
     "lint-staged": "^17.0.8",
     "tailwindcss": "^4",
+    "tsx": "^4.23.0",
     "typescript": "^5"
   },
   "lint-staged": {
