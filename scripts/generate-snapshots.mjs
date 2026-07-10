@@ -19,6 +19,7 @@
  * 以便直接 import __fixtures__/cases/index.ts。
  */
 
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -27,6 +28,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const REPO_ROOT = path.resolve(__dirname, "..");
+const BACKEND_ROOT = path.resolve(REPO_ROOT, "..", "mist");
 const CASES_ENTRY = path.join(REPO_ROOT, "__fixtures__", "cases", "index.ts");
 const SNAPSHOTS_DIR = path.join(REPO_ROOT, "__fixtures__", "snapshots", "chan");
 
@@ -39,6 +41,7 @@ const BACKEND_URL = (
 const args = process.argv.slice(2);
 const caseArg = args.find((a) => a.startsWith("--case="));
 const filterKey = caseArg ? caseArg.split("=")[1] : null;
+const biFromMergeK = args.includes("--bi-from-merge-k");
 
 // ---- 加载用例 ----
 // cases/index.ts 是 TS，通过 --experimental-strip-types 加载（剥离类型注解）。
@@ -101,6 +104,35 @@ function buildQuery(testCase) {
   };
 }
 
+function normalizeBiPayload(value) {
+  if (Array.isArray(value)) return { phaseA: value, phaseB: value };
+  if (
+    value &&
+    typeof value === "object" &&
+    Array.isArray(value.phaseA) &&
+    Array.isArray(value.phaseB)
+  ) {
+    return { phaseA: value.phaseA, phaseB: value.phaseB };
+  }
+  throw new Error("/v1/chan/bi 必须返回数组，或包含 phaseA 和 phaseB 数组的对象");
+}
+
+function readSnapshotFile(outDir, file) {
+  return JSON.parse(fs.readFileSync(path.join(outDir, file), "utf8"));
+}
+
+function exportBiFromMergeK(outDir) {
+  const output = execFileSync(
+    process.execPath,
+    [
+      path.join(BACKEND_ROOT, "tools", "export-chan-bi-phases.cjs"),
+      path.join(outDir, "merge-k.json"),
+    ],
+    { cwd: BACKEND_ROOT, encoding: "utf8" },
+  );
+  return normalizeBiPayload(JSON.parse(output));
+}
+
 // ---- 生成单个用例快照 ----
 async function generateSnapshot(testCase) {
   const outDir = path.join(SNAPSHOTS_DIR, testCase.key);
@@ -112,11 +144,21 @@ async function generateSnapshot(testCase) {
     `  ${testCase.name} | ${testCase.code} | ${testCase.source} | period=${testCase.period} | ${testCase.startDate} ~ ${testCase.endDate}`
   );
 
-  const k = await callBackend("/v1/indicators/k", query);
-  const mergeK = await callBackend("/v1/chan/merge-k", query);
-  const bi = await callBackend("/v1/chan/bi", query);
-  const fenxing = await callBackend("/v1/chan/fenxing", query);
-  const channel = await callBackend("/v1/chan/channel", query);
+  const snapshot = biFromMergeK
+    ? {
+        k: readSnapshotFile(outDir, "k.json"),
+        mergeK: readSnapshotFile(outDir, "merge-k.json"),
+        bi: exportBiFromMergeK(outDir),
+        fenxing: readSnapshotFile(outDir, "fenxing.json"),
+        channel: readSnapshotFile(outDir, "channel.json"),
+      }
+    : {
+        k: await callBackend("/v1/indicators/k", query),
+        mergeK: await callBackend("/v1/chan/merge-k", query),
+        bi: normalizeBiPayload(await callBackend("/v1/chan/bi", query)),
+        fenxing: await callBackend("/v1/chan/fenxing", query),
+        channel: await callBackend("/v1/chan/channel", query),
+      };
 
   const meta = {
     key: testCase.key,
@@ -131,23 +173,42 @@ async function generateSnapshot(testCase) {
       endDate: testCase.endDate,
     },
     stats: {
-      kCount: Array.isArray(k) ? k.length : 0,
-      mergeKCount: Array.isArray(mergeK) ? mergeK.length : 0,
-      biCount: Array.isArray(bi) ? bi.length : 0,
-      channelCount: Array.isArray(channel) ? channel.length : 0,
-      fenxingCount: Array.isArray(fenxing) ? fenxing.length : 0,
+      kCount: Array.isArray(snapshot.k) ? snapshot.k.length : 0,
+      mergeKCount: Array.isArray(snapshot.mergeK) ? snapshot.mergeK.length : 0,
+      biCount: snapshot.bi.phaseB.length,
+      phaseABiCount: snapshot.bi.phaseA.length,
+      phaseBBiCount: snapshot.bi.phaseB.length,
+      channelCount: Array.isArray(snapshot.channel) ? snapshot.channel.length : 0,
+      fenxingCount: Array.isArray(snapshot.fenxing) ? snapshot.fenxing.length : 0,
     },
   };
 
   fs.writeFileSync(path.join(outDir, "meta.json"), JSON.stringify(meta, null, 2) + "\n");
-  fs.writeFileSync(path.join(outDir, "k.json"), JSON.stringify(k, null, 2) + "\n");
-  fs.writeFileSync(path.join(outDir, "merge-k.json"), JSON.stringify(mergeK, null, 2) + "\n");
-  fs.writeFileSync(path.join(outDir, "bi.json"), JSON.stringify(bi, null, 2) + "\n");
-  fs.writeFileSync(path.join(outDir, "fenxing.json"), JSON.stringify(fenxing, null, 2) + "\n");
-  fs.writeFileSync(path.join(outDir, "channel.json"), JSON.stringify(channel, null, 2) + "\n");
+  fs.writeFileSync(
+    path.join(outDir, "bi.json"),
+    JSON.stringify(snapshot.bi, null, 2) + "\n",
+  );
+  if (!biFromMergeK) {
+    fs.writeFileSync(
+      path.join(outDir, "k.json"),
+      JSON.stringify(snapshot.k, null, 2) + "\n",
+    );
+    fs.writeFileSync(
+      path.join(outDir, "merge-k.json"),
+      JSON.stringify(snapshot.mergeK, null, 2) + "\n",
+    );
+    fs.writeFileSync(
+      path.join(outDir, "fenxing.json"),
+      JSON.stringify(snapshot.fenxing, null, 2) + "\n",
+    );
+    fs.writeFileSync(
+      path.join(outDir, "channel.json"),
+      JSON.stringify(snapshot.channel, null, 2) + "\n",
+    );
+  }
 
   console.log(
-    `  ✅ ${meta.stats.kCount} K线 → ${meta.stats.mergeKCount} 合并K → ${meta.stats.biCount} 笔 → ${meta.stats.channelCount} 中枢 / ${meta.stats.fenxingCount} 分型`
+    `  ✅ ${meta.stats.kCount} K线 → ${meta.stats.mergeKCount} 合并K → Phase A ${meta.stats.phaseABiCount} / Phase B ${meta.stats.phaseBBiCount} 笔 → ${meta.stats.channelCount} 中枢 / ${meta.stats.fenxingCount} 分型`
   );
 
   if (meta.stats.kCount === 0) {
@@ -159,6 +220,7 @@ async function generateSnapshot(testCase) {
 async function main() {
   console.log(`后端地址: ${BACKEND_URL}`);
   console.log(`快照目录: ${SNAPSHOTS_DIR}`);
+  if (biFromMergeK) console.log("Bi 来源: 已提交的 merge-k.json（不调用后端）");
 
   const cases = await loadCases();
   const targets = filterKey
