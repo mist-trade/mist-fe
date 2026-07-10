@@ -467,7 +467,7 @@ openspec validate preview-chan-bi-phases --strict
 
 Expected: Change preview-chan-bi-phases is valid.
 
-- [ ] **Step 5: Commit OpenSpec evidence and execution plan**
+- [x] **Step 5: Commit OpenSpec evidence and execution plan**
 
 ~~~bash
 cd ../mist
