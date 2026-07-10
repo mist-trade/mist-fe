@@ -18,10 +18,15 @@ import type { SnapshotData } from "./load-snapshot";
  * 快照是后端 API 原样返回，字段名一致，仅需把 string enum / string date 归一化。
  */
 
+export interface ChartBiPhases {
+  phaseA: IFetchBi[];
+  phaseB: IFetchBi[];
+}
+
 export interface ChartData {
   k: IFetchK[];
   mergeK: IMergeK[];
-  bi: IFetchBi[];
+  bi: ChartBiPhases;
   fenxing: IFenxing[];
   channel: IFetchChannel[];
 }
@@ -85,7 +90,10 @@ export function snapshotToChart(snap: SnapshotData): ChartData {
     trend: asTrend(x.trend),
     mergedData: (x.mergedData ?? []).map((d) => ({ ...d })),
   }));
-  const bi = (snap.bi as IFetchBi[]).map(asBi);
+  const bi = {
+    phaseA: (snap.bi.phaseA as IFetchBi[]).map(asBi),
+    phaseB: (snap.bi.phaseB as IFetchBi[]).map(asBi),
+  };
   const fenxing = (snap.fenxing as IFenxing[]).map((x) => ({
     ...x,
     type: asFenxingType(x.type),

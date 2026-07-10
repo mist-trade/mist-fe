@@ -66,7 +66,7 @@ function KPanelChartFromSnapshot({ snap }: { snap: SnapshotData }) {
     <KPanel
       k={chart.k}
       mergeK={Promise.resolve(chart.mergeK)}
-      bi={Promise.resolve(chart.bi)}
+      bi={Promise.resolve(chart.bi.phaseB)}
       fenxing={Promise.resolve(chart.fenxing)}
       channel={Promise.resolve(chart.channel)}
     />
