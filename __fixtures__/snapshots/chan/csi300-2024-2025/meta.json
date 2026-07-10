@@ -1,7 +1,7 @@
 {
   "key": "csi300-2024-2025",
   "name": "沪深300 2024-2025",
-  "generatedAt": "2026-07-08T15:48:29.706Z",
+  "generatedAt": "2026-07-10T18:02:00.544Z",
   "backendUrl": "http://192.168.31.182:8008",
   "testCase": {
     "code": "000300",
@@ -13,7 +13,9 @@
   "stats": {
     "kCount": 485,
     "mergeKCount": 388,
-    "biCount": 59,
+    "biCount": 33,
+    "phaseABiCount": 57,
+    "phaseBBiCount": 33,
     "channelCount": 0,
     "fenxingCount": 179
   }

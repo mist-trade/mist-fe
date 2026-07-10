@@ -1,7 +1,7 @@
 {
   "key": "shanghai-index-2024-2025",
   "name": "上证指数 2024-2025",
-  "generatedAt": "2026-07-08T15:48:29.369Z",
+  "generatedAt": "2026-07-10T18:01:58.671Z",
   "backendUrl": "http://192.168.31.182:8008",
   "testCase": {
     "code": "000001",
@@ -13,7 +13,9 @@
   "stats": {
     "kCount": 485,
     "mergeKCount": 386,
-    "biCount": 54,
+    "biCount": 25,
+    "phaseABiCount": 47,
+    "phaseBBiCount": 25,
     "channelCount": 0,
     "fenxingCount": 158
   }

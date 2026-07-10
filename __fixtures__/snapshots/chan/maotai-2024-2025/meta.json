@@ -1,7 +1,7 @@
 {
   "key": "maotai-2024-2025",
   "name": "贵州茅台 2024-2025",
-  "generatedAt": "2026-07-08T15:48:30.373Z",
+  "generatedAt": "2026-07-10T18:02:04.221Z",
   "backendUrl": "http://192.168.31.182:8008",
   "testCase": {
     "code": "600519",
@@ -13,7 +13,9 @@
   "stats": {
     "kCount": 485,
     "mergeKCount": 380,
-    "biCount": 57,
+    "biCount": 32,
+    "phaseABiCount": 58,
+    "phaseBBiCount": 32,
     "channelCount": 0,
     "fenxingCount": 176
   }
