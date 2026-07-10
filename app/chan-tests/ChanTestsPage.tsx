@@ -13,10 +13,13 @@ interface ChanTestsPageProps {
   snapshots: Record<string, SnapshotData>;
 }
 
+type BiPhase = "phaseA" | "phaseB";
+
 export function ChanTestsPage({ cases, snapshots }: ChanTestsPageProps) {
   const [selectedKey, setSelectedKey] = useState<string | null>(
     cases[0]?.testCase.key ?? null
   );
+  const [selectedPhase, setSelectedPhase] = useState<BiPhase>("phaseB");
 
   const selectedCase = useMemo(
     () => cases.find((c) => c.testCase.key === selectedKey) ?? null,
@@ -43,11 +46,38 @@ export function ChanTestsPage({ cases, snapshots }: ChanTestsPageProps) {
               {selectedCase.testCase.name} · {selectedCase.testCase.code}
             </p>
           )}
+          <div
+            aria-label="笔归约阶段"
+            role="group"
+            style={{ display: "flex", gap: 8, marginTop: 12 }}
+          >
+            {([
+              ["phaseA", "Phase A 原始"],
+              ["phaseB", "Phase B 归约"],
+            ] as const).map(([phase, label]) => (
+              <button
+                aria-pressed={selectedPhase === phase}
+                key={phase}
+                onClick={() => setSelectedPhase(phase)}
+                style={{
+                  background: selectedPhase === phase ? "#2563eb" : "#f3f4f6",
+                  border: "none",
+                  borderRadius: 6,
+                  color: selectedPhase === phase ? "#fff" : "#374151",
+                  cursor: "pointer",
+                  padding: "6px 10px",
+                }}
+                type="button"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </header>
         <StatsPanel meta={meta} />
         <div style={{ flex: 1, padding: 16, overflow: "auto" }}>
           {snap ? (
-            <KPanelChartFromSnapshot snap={snap} />
+            <KPanelChartFromSnapshot snap={snap} selectedPhase={selectedPhase} />
           ) : (
             <div style={{ color: "#9ca3af" }}>该用例暂无快照数据。</div>
           )}
@@ -58,7 +88,13 @@ export function ChanTestsPage({ cases, snapshots }: ChanTestsPageProps) {
 }
 
 /** 用快照数据驱动 KPanel */
-function KPanelChartFromSnapshot({ snap }: { snap: SnapshotData }) {
+function KPanelChartFromSnapshot({
+  snap,
+  selectedPhase,
+}: {
+  snap: SnapshotData;
+  selectedPhase: BiPhase;
+}) {
   const chart = useMemo(() => snapshotToChart(snap), [snap]);
   // KPanel 期望 mergeK/bi/fenxing/channel 为 Promise（实时页是异步获取）。
   // 快照已就绪，直接包成已 resolve 的 Promise。
@@ -66,7 +102,7 @@ function KPanelChartFromSnapshot({ snap }: { snap: SnapshotData }) {
     <KPanel
       k={chart.k}
       mergeK={Promise.resolve(chart.mergeK)}
-      bi={Promise.resolve(chart.bi.phaseB)}
+      bi={Promise.resolve(chart.bi[selectedPhase])}
       fenxing={Promise.resolve(chart.fenxing)}
       channel={Promise.resolve(chart.channel)}
     />

@@ -16,12 +16,15 @@ export function StatsPanel({ meta }: StatsPanelProps) {
     );
   }
   const s = meta.stats;
+  const phaseABiCount = s.phaseABiCount ?? s.biCount;
+  const phaseBBiCount = s.phaseBBiCount ?? s.biCount;
   return (
     <div style={{ padding: 16, borderBottom: "1px solid #e5e7eb" }}>
       <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
         <Stat label="K线" value={s.kCount} />
         <Stat label="合并K" value={s.mergeKCount} />
-        <Stat label="笔" value={s.biCount} />
+        <Stat label="笔（Phase A）" value={phaseABiCount} />
+        <Stat label="笔（Phase B）" value={phaseBBiCount} />
         <Stat label="中枢" value={s.channelCount} />
         <Stat label="分型" value={s.fenxingCount} />
       </div>
