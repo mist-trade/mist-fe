@@ -25,6 +25,7 @@
 **Files:**
 - Modify: mist-fe/app/chan-tests/lib/load-snapshot.ts
 - Modify: mist-fe/app/chan-tests/lib/snapshot-to-chart.ts
+- Modify: mist-fe/app/chan-tests/ChanTestsPage.tsx
 - Create: mist-fe/app/chan-tests/lib/__tests__/load-snapshot.test.ts
 - Create: mist-fe/app/chan-tests/lib/__tests__/snapshot-to-chart.test.ts
 
@@ -32,7 +33,7 @@
 - Consumes: legacy unknown[] fixture data or canonical object payloads.
 - Produces: SnapshotBiData, normalizeSnapshotBiData(value), and ChartData.bi with independently normalized phaseA and phaseB IFetchBi arrays.
 
-- [ ] **Step 1: Write failing loader normalization tests**
+- [x] **Step 1: Write failing loader normalization tests**
 
 ~~~ts
 import { normalizeSnapshotBiData } from "../load-snapshot";
@@ -61,13 +62,13 @@ describe("normalizeSnapshotBiData", () => {
 });
 ~~~
 
-- [ ] **Step 2: Run the loader test before implementation**
+- [x] **Step 2: Run the loader test before implementation**
 
 Run: pnpm exec jest --runInBand --watchman=false app/chan-tests/lib/__tests__/load-snapshot.test.ts
 
 Expected: FAIL because normalizeSnapshotBiData does not exist.
 
-- [ ] **Step 3: Add the typed normalization boundary**
+- [x] **Step 3: Add the typed normalization boundary**
 
 Add to load-snapshot.ts and make SnapshotData.bi use SnapshotBiData:
 
@@ -94,7 +95,7 @@ export function normalizeSnapshotBiData(value: unknown): SnapshotBiData {
 
 Make readJson generic over unknown and call normalizeSnapshotBiData(readJson(dir, "bi.json")). Add optional phaseABiCount and phaseBBiCount fields to SnapshotStats.
 
-- [ ] **Step 4: Write failing two-phase conversion coverage**
+- [x] **Step 4: Write failing two-phase conversion coverage**
 
 In snapshot-to-chart.test.ts, construct a complete minimal SnapshotData and assert:
 
@@ -114,7 +115,7 @@ expect(chart.bi.phaseB[0]).toMatchObject({
 });
 ~~~
 
-- [ ] **Step 5: Convert each phase through the existing asBi normalizer**
+- [x] **Step 5: Convert each phase through the existing asBi normalizer**
 
 Replace the single Bi array in snapshot-to-chart.ts with:
 
@@ -138,13 +139,18 @@ const bi = {
 };
 ~~~
 
-- [ ] **Step 6: Run the data-boundary tests**
+Keep the already-rendered page type-correct before Task 2 adds controls by
+changing its existing KPanel call to `bi={Promise.resolve(chart.bi.phaseB)}`.
+This preserves the existing one-overlay UI while making Phase B its explicit
+default; Task 2 replaces this fixed selection with component state.
+
+- [x] **Step 6: Run the data-boundary tests**
 
 Run: pnpm exec jest --runInBand --watchman=false app/chan-tests/lib/__tests__/load-snapshot.test.ts app/chan-tests/lib/__tests__/snapshot-to-chart.test.ts
 
 Expected: PASS with legacy, canonical, malformed, and two-phase conversion coverage.
 
-- [ ] **Step 7: Commit the data-boundary deliverable**
+- [x] **Step 7: Commit the data-boundary deliverable**
 
 ~~~bash
 git add app/chan-tests/lib/load-snapshot.ts app/chan-tests/lib/snapshot-to-chart.ts app/chan-tests/lib/__tests__/load-snapshot.test.ts app/chan-tests/lib/__tests__/snapshot-to-chart.test.ts
@@ -162,7 +168,7 @@ git commit -m "feat(chan-tests): normalize phase-aware bi snapshots"
 - Consumes: SnapshotData.bi.phaseA, SnapshotData.bi.phaseB, and optional phase-specific SnapshotStats counts.
 - Produces: aria-pressed phase controls and one selected Bi promise for KPanel.
 
-- [ ] **Step 1: Write a failing KPanel-probe component test**
+- [x] **Step 1: Write a failing KPanel-probe component test**
 
 ~~~tsx
 let latestBi: Promise<IFetchBi[]> | undefined;
@@ -198,13 +204,13 @@ it("defaults to Phase B and switches KPanel to Phase A", async () => {
 
 In the same test, expect labels 笔（Phase A） and 笔（Phase B） to show 47 and 25 when phase-specific metadata is supplied. Add a second test that selects Phase A, clicks a different case-list button, and verifies Phase A remains pressed.
 
-- [ ] **Step 2: Run the component test before controls exist**
+- [x] **Step 2: Run the component test before controls exist**
 
 Run: pnpm exec jest --runInBand --watchman=false app/chan-tests/__tests__/ChanTestsPage.test.tsx
 
 Expected: FAIL because the page has no phase buttons and ChartData has no phase map.
 
-- [ ] **Step 3: Add phase state and accessible controls without changing KPanel**
+- [x] **Step 3: Add phase state and accessible controls without changing KPanel**
 
 Add:
 
@@ -244,7 +250,7 @@ Render this group below the selected-case description:
 
 Pass selectedPhase to KPanelChartFromSnapshot. Preserve its KPanel call as one prop: bi={Promise.resolve(chart.bi[selectedPhase])}.
 
-- [ ] **Step 4: Render phase counts with the legacy fallback**
+- [x] **Step 4: Render phase counts with the legacy fallback**
 
 Replace the single Bi stat in StatsPanel.tsx with:
 
@@ -256,13 +262,13 @@ const phaseBBiCount = s.phaseBBiCount ?? s.biCount;
 <Stat label="笔（Phase B）" value={phaseBBiCount} />
 ~~~
 
-- [ ] **Step 5: Run the component test**
+- [x] **Step 5: Run the component test**
 
 Run: pnpm exec jest --runInBand --watchman=false app/chan-tests/__tests__/ChanTestsPage.test.tsx
 
 Expected: PASS, proving Phase B is default, Phase A changes KPanel's Bi input, counts render, and the selection survives a case change.
 
-- [ ] **Step 6: Commit the console UI deliverable**
+- [x] **Step 6: Commit the console UI deliverable**
 
 ~~~bash
 git add app/chan-tests/ChanTestsPage.tsx app/chan-tests/components/StatsPanel.tsx app/chan-tests/__tests__/ChanTestsPage.test.tsx
@@ -282,7 +288,7 @@ git commit -m "feat(chan-tests): add phase a and b preview selector"
 - Consumes: one committed merge-k.json array or a live /v1/chan/bi response.
 - Produces: canonical phase arrays, biCount equal to Phase B length, phaseABiCount, and phaseBBiCount.
 
-- [ ] **Step 1: Write a failing Shanghai fixture contract**
+- [x] **Step 1: Write a failing Shanghai fixture contract**
 
 ~~~ts
 import { BiStatus } from "@/app/api/types";
@@ -309,13 +315,13 @@ it("keeps the leading invalid Phase A Bi and long valid Phase B Bi", () => {
 });
 ~~~
 
-- [ ] **Step 2: Run the contract before fixture regeneration**
+- [x] **Step 2: Run the contract before fixture regeneration**
 
 Run: pnpm exec jest --runInBand --watchman=false app/chan-tests/lib/__tests__/shanghai-phase-fixture.test.ts
 
 Expected: FAIL because legacy Phase A and Phase B are identical and omit the retained invalid candidate.
 
-- [ ] **Step 3: Add the backend JSON-only phase exporter**
+- [x] **Step 3: Add the backend JSON-only phase exporter**
 
 Create mist/tools/export-chan-bi-phases.cjs:
 
@@ -355,7 +361,7 @@ process.stdout.write(JSON.stringify(new BiService().getBi(data), null, 2) + "\n"
 
 The script emits only JSON to stdout so the frontend generator can parse it.
 
-- [ ] **Step 4: Add explicit --bi-from-merge-k generator mode**
+- [x] **Step 4: Add explicit --bi-from-merge-k generator mode**
 
 In scripts/generate-snapshots.mjs:
 1. import execFileSync from node:child_process;
@@ -364,10 +370,11 @@ In scripts/generate-snapshots.mjs:
 4. in biFromMergeK mode, read the existing merge-k.json and run:
 
 ~~~js
+const BACKEND_ROOT = path.resolve(REPO_ROOT, "..", "mist");
 const output = execFileSync(process.execPath, [
-  path.resolve(REPO_ROOT, "..", "mist", "tools", "export-chan-bi-phases.cjs"),
+  path.join(BACKEND_ROOT, "tools", "export-chan-bi-phases.cjs"),
   path.join(outDir, "merge-k.json"),
-], { encoding: "utf8" });
+], { cwd: BACKEND_ROOT, encoding: "utf8" });
 const bi = normalizeBiPayload(JSON.parse(output));
 ~~~
 
@@ -382,7 +389,7 @@ phaseBBiCount: bi.phaseB.length,
 
 The bi-from-merge-k mode must not call backend endpoints or write k.json, merge-k.json, fenxing.json, or channel.json.
 
-- [ ] **Step 5: Regenerate all four Bi fixtures deterministically**
+- [x] **Step 5: Regenerate all four Bi fixtures deterministically**
 
 Run from mist-fe:
 
@@ -392,7 +399,7 @@ pnpm run snapshots:generate -- --bi-from-merge-k
 
 Expected: four bi.json files become canonical objects; only four meta.json files change among metadata; Shanghai reports Phase A 47 and Phase B 25.
 
-- [ ] **Step 6: Run fixture contract and inspect the snapshot diff**
+- [x] **Step 6: Run fixture contract and inspect the snapshot diff**
 
 Run: pnpm exec jest --runInBand --watchman=false app/chan-tests/lib/__tests__/shanghai-phase-fixture.test.ts
 
@@ -402,7 +409,7 @@ Run: git diff --stat -- __fixtures__/snapshots/chan
 
 Expected: only four bi.json and four meta.json files are listed.
 
-- [ ] **Step 7: Commit exporter, generator, and fixtures**
+- [x] **Step 7: Commit exporter, generator, and fixtures**
 
 ~~~bash
 cd ../mist
@@ -423,7 +430,7 @@ git commit -m "test(chan-tests): regenerate phase-aware bi fixtures"
 - Consumes: completed implementation and local Next development server at http://localhost:3000/chan-tests.
 - Produces: evidence that canonical fixtures, selector, and Phase B default work end to end.
 
-- [ ] **Step 1: Run all focused Chan test-console tests**
+- [x] **Step 1: Run all focused Chan test-console tests**
 
 ~~~bash
 pnpm exec jest --runInBand --watchman=false app/chan-tests/lib/__tests__/load-snapshot.test.ts app/chan-tests/lib/__tests__/snapshot-to-chart.test.ts app/chan-tests/__tests__/ChanTestsPage.test.tsx app/chan-tests/lib/__tests__/shanghai-phase-fixture.test.ts
@@ -431,7 +438,7 @@ pnpm exec jest --runInBand --watchman=false app/chan-tests/lib/__tests__/load-sn
 
 Expected: PASS.
 
-- [ ] **Step 2: Run static and production checks**
+- [x] **Step 2: Run static and production checks**
 
 ~~~bash
 pnpm run typecheck
@@ -441,7 +448,7 @@ pnpm run build
 
 Expected: each command exits 0.
 
-- [ ] **Step 3: Verify the page in the local browser**
+- [x] **Step 3: Verify the page in the local browser**
 
 At http://localhost:3000/chan-tests inspect the Shanghai case:
 - Phase B 归约 has aria-pressed=true on initial load.
@@ -449,7 +456,7 @@ At http://localhost:3000/chan-tests inspect the Shanghai case:
 - Clicking Phase A 原始 makes it the pressed control.
 - No browser console errors appear after either switch.
 
-- [ ] **Step 4: Mark verified OpenSpec tasks complete and validate**
+- [x] **Step 4: Mark verified OpenSpec tasks complete and validate**
 
 Replace each completed checkbox in mist/openspec/changes/preview-chan-bi-phases/tasks.md with - [x], then run:
 
@@ -470,4 +477,3 @@ cd ../mist-fe
 git add docs/superpowers/plans/2026-07-11-chan-tests-phase-b-preview.md
 git commit -m "docs: record chan tests phase preview plan"
 ~~~
-
