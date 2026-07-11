@@ -13,16 +13,21 @@ import {
   fetchSecurities,
   fetchStrategyAlertEvents,
   fetchStrategyBacktestRun,
+  fetchStrategyBacktestOrders,
+  fetchStrategyBacktestPositions,
   fetchStrategyBacktestSignals,
+  fetchStrategyBacktestTrades,
   fetchStrategySignals,
   getAnalysisApiBase,
   getMistApiBase,
   listStrategies,
+  listStrategyBacktests,
   listStrategyVersions,
   runStrategyScan,
   updateStrategyDefinition,
   unwrapApiResponse,
 } from "../client";
+import * as strategyClient from "../client";
 
 const originalEnv = process.env;
 
@@ -297,12 +302,18 @@ describe("Mist frontend API client", () => {
       targetUniverse: ["600519"],
       periods: [1440],
       sources: ["tdx" as const],
-      rule: { field: "k.close", operator: "gt", value: 100 },
+      entryRule: { field: "k.close", operator: "gt", value: 100 },
+      exitRule: { field: "k.close", operator: "lt", value: 90 },
+      lookbackBars: 1,
+      backtestEnabled: false,
     };
 
     await listStrategies();
     await createStrategyDefinition(strategyPayload);
-    await updateStrategyDefinition(3, { name: "突破策略 v2", rule: strategyPayload.rule });
+    await updateStrategyDefinition(3, {
+      name: "突破策略 v2",
+      entryRule: strategyPayload.entryRule,
+    });
     await enableStrategyDefinition(3);
     await disableStrategyDefinition(3);
     await listStrategyVersions(3);
@@ -358,6 +369,7 @@ describe("Mist frontend API client", () => {
     await acknowledgeStrategyAlertEvent(9);
     await runStrategyScan({ strategyDefinitionId: 3, period: 1440, source: "tdx" });
     await createStrategyBacktest({
+      strategyDefinitionId: 3,
       strategyVersionId: 5,
       targetUniverse: ["600519"],
       period: 1440,
@@ -416,6 +428,7 @@ describe("Mist frontend API client", () => {
     await listStrategies();
     await fetchStrategyAlertEvents();
     await createStrategyBacktest({
+      strategyDefinitionId: 3,
       strategyVersionId: 5,
       targetUniverse: ["600519"],
       period: 1440,
@@ -430,5 +443,65 @@ describe("Mist frontend API client", () => {
       expect(url).not.toContain("datasource");
       expect(url).not.toContain("provider");
     }
+  });
+
+  it("preserves cursor pagination for portfolio run and fact queries", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, data: { items: [], nextCursor: null } }),
+    });
+
+    await listStrategyBacktests({
+      strategyDefinitionId: 3,
+      cursor: "run-cursor",
+      limit: 25,
+    });
+    await fetchStrategyBacktestSignals(11, { cursor: "signal-cursor", limit: 5 });
+    await fetchStrategyBacktestOrders(11, { cursor: "order-cursor", limit: 10 });
+    await fetchStrategyBacktestTrades(11, { cursor: "trade-cursor", limit: 15 });
+    await fetchStrategyBacktestPositions(11, {
+      asOf: "2026-06-30",
+      cursor: "position-cursor",
+      limit: 20,
+    });
+
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      1,
+      "/api/mist/v1/strategy-backtests?strategyDefinitionId=3&cursor=run-cursor&limit=25",
+      expect.objectContaining({ method: "GET" })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      2,
+      "/api/mist/v1/strategy-backtests/11/signals?cursor=signal-cursor&limit=5",
+      expect.objectContaining({ method: "GET" })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      3,
+      "/api/mist/v1/strategy-backtests/11/orders?cursor=order-cursor&limit=10",
+      expect.objectContaining({ method: "GET" })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      4,
+      "/api/mist/v1/strategy-backtests/11/trades?cursor=trade-cursor&limit=15",
+      expect.objectContaining({ method: "GET" })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      5,
+      "/api/mist/v1/strategy-backtests/11/positions?asOf=2026-06-30&cursor=position-cursor&limit=20",
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("exposes the asynchronous portfolio result API family", () => {
+    expect(strategyClient).toEqual(
+      expect.objectContaining({
+        cancelStrategyBacktest: expect.any(Function),
+        fetchStrategyBacktestEquity: expect.any(Function),
+        fetchStrategyBacktestOrders: expect.any(Function),
+        fetchStrategyBacktestTrades: expect.any(Function),
+        fetchStrategyBacktestPositions: expect.any(Function),
+        listStrategyBacktests: expect.any(Function),
+      })
+    );
   });
 });
