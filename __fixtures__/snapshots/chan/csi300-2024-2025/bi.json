@@ -2088,9 +2088,9 @@
     },
     {
       "startTime": "2024-07-18T16:00:00.000Z",
-      "endTime": "2024-08-14T16:00:00.000Z",
+      "endTime": "2024-09-17T16:00:00.000Z",
       "highest": 3545.34,
-      "lowest": 3297.97,
+      "lowest": 3145.79,
       "trend": "down",
       "type": "complete",
       "status": 1,
@@ -2114,7 +2114,29 @@
         1777,
         1778,
         1779,
-        1780
+        1780,
+        1781,
+        1782,
+        1783,
+        1784,
+        1785,
+        1786,
+        1787,
+        1788,
+        1789,
+        1790,
+        1791,
+        1792,
+        1793,
+        1794,
+        1795,
+        1796,
+        1797,
+        1798,
+        1799,
+        1800,
+        1801,
+        1802
       ],
       "originData": [
         {
@@ -2336,81 +2358,6 @@
           "lowest": 3297.97,
           "close": 3341.95,
           "amount": 14924934
-        }
-      ],
-      "independentCount": 20,
-      "startFenxing": {
-        "type": "top",
-        "highest": 3545.34,
-        "lowest": 3439.88,
-        "leftIds": [
-          1759,
-          1760
-        ],
-        "middleIds": [
-          1761,
-          1762
-        ],
-        "middleIndex": 106,
-        "rightIds": [
-          1763
-        ],
-        "middleOriginId": 1761
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3356.91,
-        "lowest": 3297.97,
-        "leftIds": [
-          1778
-        ],
-        "middleIds": [
-          1779,
-          1780
-        ],
-        "middleIndex": 121,
-        "rightIds": [
-          1781
-        ],
-        "middleOriginId": 1780
-      }
-    },
-    {
-      "startTime": "2024-08-14T16:00:00.000Z",
-      "endTime": "2024-08-18T16:00:00.000Z",
-      "highest": 3375.96,
-      "lowest": 3297.97,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1779,
-        1780,
-        1781,
-        1782
-      ],
-      "originData": [
-        {
-          "id": 1779,
-          "symbol": "000300",
-          "time": "2024-08-13T16:00:00.000Z",
-          "timestamp": 1723564800000,
-          "open": 3332.79,
-          "highest": 3332.79,
-          "lowest": 3309.1,
-          "close": 3309.24,
-          "amount": 11818195
-        },
-        {
-          "id": 1780,
-          "symbol": "000300",
-          "time": "2024-08-14T16:00:00.000Z",
-          "timestamp": 1723651200000,
-          "open": 3301.45,
-          "highest": 3356.76,
-          "lowest": 3297.97,
-          "close": 3341.95,
-          "amount": 14924934
         },
         {
           "id": 1781,
@@ -2423,85 +2370,6 @@
           "close": 3345.63,
           "amount": 13588532
         },
-        {
-          "id": 1782,
-          "symbol": "000300",
-          "time": "2024-08-18T16:00:00.000Z",
-          "timestamp": 1723996800000,
-          "open": 3344.26,
-          "highest": 3375.96,
-          "lowest": 3343.71,
-          "close": 3356.97,
-          "amount": 14342167
-        }
-      ],
-      "independentCount": 4,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3356.91,
-        "lowest": 3297.97,
-        "leftIds": [
-          1778
-        ],
-        "middleIds": [
-          1779,
-          1780
-        ],
-        "middleIndex": 121,
-        "rightIds": [
-          1781
-        ],
-        "middleOriginId": 1780
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3375.96",
-        "lowest": 3321.64,
-        "leftIds": [
-          1781
-        ],
-        "middleIds": [
-          1782
-        ],
-        "middleIndex": 123,
-        "rightIds": [
-          1783
-        ],
-        "middleOriginId": 1782
-      }
-    },
-    {
-      "startTime": "2024-08-18T16:00:00.000Z",
-      "endTime": "2024-09-17T16:00:00.000Z",
-      "highest": 3375.96,
-      "lowest": 3145.79,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1782,
-        1783,
-        1784,
-        1785,
-        1786,
-        1787,
-        1788,
-        1789,
-        1790,
-        1791,
-        1792,
-        1793,
-        1794,
-        1795,
-        1796,
-        1797,
-        1798,
-        1799,
-        1800,
-        1801,
-        1802
-      ],
-      "originData": [
         {
           "id": 1782,
           "symbol": "000300",
@@ -2734,22 +2602,24 @@
           "amount": 12345215
         }
       ],
-      "independentCount": 21,
+      "independentCount": 42,
       "startFenxing": {
         "type": "top",
-        "highest": "3375.96",
-        "lowest": 3321.64,
+        "highest": 3545.34,
+        "lowest": 3439.88,
         "leftIds": [
-          1781
+          1759,
+          1760
         ],
         "middleIds": [
-          1782
+          1761,
+          1762
         ],
-        "middleIndex": 123,
+        "middleIndex": 106,
         "rightIds": [
-          1783
+          1763
         ],
-        "middleOriginId": 1782
+        "middleOriginId": 1761
       },
       "endFenxing": {
         "type": "bottom",
@@ -3095,19 +2965,31 @@
     },
     {
       "startTime": "2024-10-17T16:00:00.000Z",
-      "endTime": "2024-10-22T16:00:00.000Z",
-      "highest": 4012.18,
+      "endTime": "2024-11-07T16:00:00.000Z",
+      "highest": 4200.91,
       "lowest": 3765.16,
       "trend": "up",
       "type": "complete",
-      "status": 2,
+      "status": 1,
       "originIds": [
         1817,
         1818,
         1819,
         1820,
         1821,
-        1822
+        1822,
+        1823,
+        1824,
+        1825,
+        1826,
+        1827,
+        1828,
+        1829,
+        1830,
+        1831,
+        1832,
+        1833,
+        1834
       ],
       "originData": [
         {
@@ -3175,69 +3057,6 @@
           "lowest": 3939.1,
           "close": 3973.21,
           "amount": 46912080
-        }
-      ],
-      "independentCount": 6,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3979.26,
-        "lowest": 3765.16,
-        "leftIds": [
-          1816
-        ],
-        "middleIds": [
-          1817,
-          1818,
-          1819
-        ],
-        "middleIndex": 154,
-        "rightIds": [
-          1820,
-          1821
-        ],
-        "middleOriginId": 1819
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4012.18",
-        "lowest": 3914.09,
-        "leftIds": [
-          1820,
-          1821
-        ],
-        "middleIds": [
-          1822
-        ],
-        "middleIndex": 156,
-        "rightIds": [
-          1823
-        ],
-        "middleOriginId": 1822
-      }
-    },
-    {
-      "startTime": "2024-10-22T16:00:00.000Z",
-      "endTime": "2024-10-23T16:00:00.000Z",
-      "highest": 4012.18,
-      "lowest": 3914.09,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1822,
-        1823
-      ],
-      "originData": [
-        {
-          "id": 1822,
-          "symbol": "000300",
-          "time": "2024-10-22T16:00:00.000Z",
-          "timestamp": 1729612800000,
-          "open": 3955.32,
-          "highest": 4012.18,
-          "lowest": 3939.1,
-          "close": 3973.21,
-          "amount": 46912080
         },
         {
           "id": 1823,
@@ -3249,129 +3068,7 @@
           "lowest": 3914.09,
           "close": 3928.83,
           "amount": 34048688
-        }
-      ],
-      "independentCount": 2,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4012.18",
-        "lowest": 3914.09,
-        "leftIds": [
-          1820,
-          1821
-        ],
-        "middleIds": [
-          1822
-        ],
-        "middleIndex": 156,
-        "rightIds": [
-          1823
-        ],
-        "middleOriginId": 1822
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4012.18,
-        "lowest": "3914.09",
-        "leftIds": [
-          1822
-        ],
-        "middleIds": [
-          1823
-        ],
-        "middleIndex": 157,
-        "rightIds": [
-          1824
-        ],
-        "middleOriginId": 1823
-      }
-    },
-    {
-      "startTime": "2024-10-23T16:00:00.000Z",
-      "endTime": "2024-10-24T16:00:00.000Z",
-      "highest": 3992.89,
-      "lowest": 3914.09,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1823,
-        1824
-      ],
-      "originData": [
-        {
-          "id": 1823,
-          "symbol": "000300",
-          "time": "2024-10-23T16:00:00.000Z",
-          "timestamp": 1729699200000,
-          "open": 3950.9,
-          "highest": 3957.98,
-          "lowest": 3914.09,
-          "close": 3928.83,
-          "amount": 34048688
         },
-        {
-          "id": 1824,
-          "symbol": "000300",
-          "time": "2024-10-24T16:00:00.000Z",
-          "timestamp": 1729785600000,
-          "open": 3931.32,
-          "highest": 3992.89,
-          "lowest": 3921.94,
-          "close": 3956.42,
-          "amount": 41223136
-        }
-      ],
-      "independentCount": 2,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4012.18,
-        "lowest": "3914.09",
-        "leftIds": [
-          1822
-        ],
-        "middleIds": [
-          1823
-        ],
-        "middleIndex": 157,
-        "rightIds": [
-          1824
-        ],
-        "middleOriginId": 1823
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3992.89",
-        "lowest": 3914.09,
-        "leftIds": [
-          1823
-        ],
-        "middleIds": [
-          1824
-        ],
-        "middleIndex": 158,
-        "rightIds": [
-          1825
-        ],
-        "middleOriginId": 1824
-      }
-    },
-    {
-      "startTime": "2024-10-24T16:00:00.000Z",
-      "endTime": "2024-10-30T16:00:00.000Z",
-      "highest": 3992.89,
-      "lowest": 3859.11,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1824,
-        1825,
-        1826,
-        1827,
-        1828
-      ],
-      "originData": [
         {
           "id": 1824,
           "symbol": "000300",
@@ -3416,70 +3113,6 @@
           "close": 3889.45,
           "amount": 38501060
         },
-        {
-          "id": 1828,
-          "symbol": "000300",
-          "time": "2024-10-30T16:00:00.000Z",
-          "timestamp": 1730304000000,
-          "open": 3888.42,
-          "highest": 3923.9,
-          "lowest": 3859.11,
-          "close": 3891.04,
-          "amount": 51553384
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3992.89",
-        "lowest": 3914.09,
-        "leftIds": [
-          1823
-        ],
-        "middleIds": [
-          1824
-        ],
-        "middleIndex": 158,
-        "rightIds": [
-          1825
-        ],
-        "middleOriginId": 1824
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3933.22,
-        "lowest": "3859.11",
-        "leftIds": [
-          1827
-        ],
-        "middleIds": [
-          1828
-        ],
-        "middleIndex": 162,
-        "rightIds": [
-          1829
-        ],
-        "middleOriginId": 1828
-      }
-    },
-    {
-      "startTime": "2024-10-30T16:00:00.000Z",
-      "endTime": "2024-11-07T16:00:00.000Z",
-      "highest": 4200.91,
-      "lowest": 3859.11,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1828,
-        1829,
-        1830,
-        1831,
-        1832,
-        1833,
-        1834
-      ],
-      "originData": [
         {
           "id": 1828,
           "symbol": "000300",
@@ -3558,22 +3191,25 @@
           "amount": 68844656
         }
       ],
-      "independentCount": 7,
+      "independentCount": 18,
       "startFenxing": {
         "type": "bottom",
-        "highest": 3933.22,
-        "lowest": "3859.11",
+        "highest": 3979.26,
+        "lowest": 3765.16,
         "leftIds": [
-          1827
+          1816
         ],
         "middleIds": [
-          1828
+          1817,
+          1818,
+          1819
         ],
-        "middleIndex": 162,
+        "middleIndex": 154,
         "rightIds": [
-          1829
+          1820,
+          1821
         ],
-        "middleOriginId": 1828
+        "middleOriginId": 1819
       },
       "endFenxing": {
         "type": "top",
@@ -4442,9 +4078,9 @@
     },
     {
       "startTime": "2025-01-12T16:00:00.000Z",
-      "endTime": "2025-07-29T16:00:00.000Z",
-      "highest": 4185.21,
-      "lowest": 3514.12,
+      "endTime": "2025-02-23T16:00:00.000Z",
+      "highest": 3995.95,
+      "lowest": 3704.11,
       "trend": "up",
       "type": "complete",
       "status": 1,
@@ -4473,114 +4109,7 @@
         1900,
         1901,
         1902,
-        1903,
-        1904,
-        1905,
-        1906,
-        1907,
-        1908,
-        1909,
-        1910,
-        1911,
-        1912,
-        1913,
-        1914,
-        1915,
-        1916,
-        1917,
-        1918,
-        1919,
-        1920,
-        1921,
-        1922,
-        1923,
-        1924,
-        1925,
-        1926,
-        1927,
-        1928,
-        1929,
-        1930,
-        1931,
-        1932,
-        1933,
-        1934,
-        1935,
-        1936,
-        1937,
-        1938,
-        1939,
-        1940,
-        1941,
-        1942,
-        1943,
-        1944,
-        1945,
-        1946,
-        1947,
-        1948,
-        1949,
-        1950,
-        1951,
-        1952,
-        1953,
-        1954,
-        1955,
-        1956,
-        1957,
-        1958,
-        1959,
-        1960,
-        1961,
-        1962,
-        1963,
-        1964,
-        1965,
-        1966,
-        1967,
-        1968,
-        1969,
-        1970,
-        1971,
-        1972,
-        1973,
-        1974,
-        1975,
-        1976,
-        1977,
-        1978,
-        1979,
-        1980,
-        1981,
-        1982,
-        1983,
-        1984,
-        1985,
-        1986,
-        1987,
-        1988,
-        1989,
-        1990,
-        1991,
-        1992,
-        1993,
-        1994,
-        1995,
-        1996,
-        1997,
-        1998,
-        1999,
-        2000,
-        2001,
-        2002,
-        2003,
-        2004,
-        2005,
-        2006,
-        2007,
-        2008,
-        2009,
-        2010
+        1903
       ],
       "originData": [
         {
@@ -4857,6 +4386,72 @@
           "lowest": 3949.23,
           "close": 3969.72,
           "amount": 45508872
+        }
+      ],
+      "independentCount": 25,
+      "startFenxing": {
+        "type": "bottom",
+        "highest": 3842.95,
+        "lowest": "3704.11",
+        "leftIds": [
+          1878
+        ],
+        "middleIds": [
+          1879
+        ],
+        "middleIndex": 206,
+        "rightIds": [
+          1880,
+          1881,
+          1882
+        ],
+        "middleOriginId": 1879
+      },
+      "endFenxing": {
+        "type": "top",
+        "highest": "3995.95",
+        "lowest": 3915.65,
+        "leftIds": [
+          1902
+        ],
+        "middleIds": [
+          1903
+        ],
+        "middleIndex": 222,
+        "rightIds": [
+          1904
+        ],
+        "middleOriginId": 1903
+      }
+    },
+    {
+      "startTime": "2025-02-23T16:00:00.000Z",
+      "endTime": "2025-03-03T16:00:00.000Z",
+      "highest": 3995.95,
+      "lowest": 3855.73,
+      "trend": "down",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        1903,
+        1904,
+        1905,
+        1906,
+        1907,
+        1908,
+        1909
+      ],
+      "originData": [
+        {
+          "id": 1903,
+          "symbol": "000300",
+          "time": "2025-02-23T16:00:00.000Z",
+          "timestamp": 1740326400000,
+          "open": 3972.48,
+          "highest": 3995.95,
+          "lowest": 3949.23,
+          "close": 3969.72,
+          "amount": 45508872
         },
         {
           "id": 1904,
@@ -4913,6 +4508,75 @@
           "close": 3888.47,
           "amount": 35605776
         },
+        {
+          "id": 1909,
+          "symbol": "000300",
+          "time": "2025-03-03T16:00:00.000Z",
+          "timestamp": 1741017600000,
+          "open": 3865.99,
+          "highest": 3890.42,
+          "lowest": 3855.73,
+          "close": 3885.22,
+          "amount": 29773926
+        }
+      ],
+      "independentCount": 7,
+      "startFenxing": {
+        "type": "top",
+        "highest": "3995.95",
+        "lowest": 3915.65,
+        "leftIds": [
+          1902
+        ],
+        "middleIds": [
+          1903
+        ],
+        "middleIndex": 222,
+        "rightIds": [
+          1904
+        ],
+        "middleOriginId": 1903
+      },
+      "endFenxing": {
+        "type": "bottom",
+        "highest": 3930,
+        "lowest": "3855.73",
+        "leftIds": [
+          1908
+        ],
+        "middleIds": [
+          1909
+        ],
+        "middleIndex": 228,
+        "rightIds": [
+          1910
+        ],
+        "middleOriginId": 1909
+      }
+    },
+    {
+      "startTime": "2025-03-03T16:00:00.000Z",
+      "endTime": "2025-03-18T16:00:00.000Z",
+      "highest": 4025.3,
+      "lowest": 3855.73,
+      "trend": "up",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        1909,
+        1910,
+        1911,
+        1912,
+        1913,
+        1914,
+        1915,
+        1916,
+        1917,
+        1918,
+        1919,
+        1920
+      ],
+      "originData": [
         {
           "id": 1909,
           "symbol": "000300",
@@ -5012,6 +4676,103 @@
           "close": 4006.56,
           "amount": 45089528
         },
+        {
+          "id": 1918,
+          "symbol": "000300",
+          "time": "2025-03-16T16:00:00.000Z",
+          "timestamp": 1742140800000,
+          "open": 4020.64,
+          "highest": 4021.73,
+          "lowest": 3992.26,
+          "close": 3996.79,
+          "amount": 31890440
+        },
+        {
+          "id": 1919,
+          "symbol": "000300",
+          "time": "2025-03-17T16:00:00.000Z",
+          "timestamp": 1742227200000,
+          "open": 4011.78,
+          "highest": 4016.87,
+          "lowest": 3995.96,
+          "close": 4007.72,
+          "amount": 29273932
+        },
+        {
+          "id": 1920,
+          "symbol": "000300",
+          "time": "2025-03-18T16:00:00.000Z",
+          "timestamp": 1742313600000,
+          "open": 4004.83,
+          "highest": 4025.3,
+          "lowest": 3989.51,
+          "close": 4010.17,
+          "amount": 28607528
+        }
+      ],
+      "independentCount": 12,
+      "startFenxing": {
+        "type": "bottom",
+        "highest": 3930,
+        "lowest": "3855.73",
+        "leftIds": [
+          1908
+        ],
+        "middleIds": [
+          1909
+        ],
+        "middleIndex": 228,
+        "rightIds": [
+          1910
+        ],
+        "middleOriginId": 1909
+      },
+      "endFenxing": {
+        "type": "top",
+        "highest": 4025.3,
+        "lowest": 3919.62,
+        "leftIds": [
+          1917
+        ],
+        "middleIds": [
+          1918,
+          1919,
+          1920
+        ],
+        "middleIndex": 237,
+        "rightIds": [
+          1921
+        ],
+        "middleOriginId": 1920
+      }
+    },
+    {
+      "startTime": "2025-03-18T16:00:00.000Z",
+      "endTime": "2025-04-06T16:00:00.000Z",
+      "highest": 4025.3,
+      "lowest": 3514.12,
+      "trend": "down",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        1918,
+        1919,
+        1920,
+        1921,
+        1922,
+        1923,
+        1924,
+        1925,
+        1926,
+        1927,
+        1928,
+        1929,
+        1930,
+        1931,
+        1932,
+        1933
+      ],
+      "originData": [
         {
           "id": 1918,
           "symbol": "000300",
@@ -5166,6 +4927,103 @@
           "close": 3861.5,
           "amount": 26368468
         },
+        {
+          "id": 1932,
+          "symbol": "000300",
+          "time": "2025-04-06T16:00:00.000Z",
+          "timestamp": 1743955200000,
+          "open": 3675.2,
+          "highest": 3707.78,
+          "lowest": 3514.12,
+          "close": 3589.44,
+          "amount": 51297180
+        },
+        {
+          "id": 1933,
+          "symbol": "000300",
+          "time": "2025-04-07T16:00:00.000Z",
+          "timestamp": 1744041600000,
+          "open": 3597.99,
+          "highest": 3650.76,
+          "lowest": 3583.87,
+          "close": 3650.76,
+          "amount": 46402108
+        }
+      ],
+      "independentCount": 16,
+      "startFenxing": {
+        "type": "top",
+        "highest": 4025.3,
+        "lowest": 3919.62,
+        "leftIds": [
+          1917
+        ],
+        "middleIds": [
+          1918,
+          1919,
+          1920
+        ],
+        "middleIndex": 237,
+        "rightIds": [
+          1921
+        ],
+        "middleOriginId": 1920
+      },
+      "endFenxing": {
+        "type": "bottom",
+        "highest": 3883.7,
+        "lowest": 3514.12,
+        "leftIds": [
+          1931
+        ],
+        "middleIds": [
+          1932,
+          1933
+        ],
+        "middleIndex": 244,
+        "rightIds": [
+          1934
+        ],
+        "middleOriginId": 1932
+      }
+    },
+    {
+      "startTime": "2025-04-06T16:00:00.000Z",
+      "endTime": "2025-05-13T16:00:00.000Z",
+      "highest": 3960.52,
+      "lowest": 3514.12,
+      "trend": "up",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        1932,
+        1933,
+        1934,
+        1935,
+        1936,
+        1937,
+        1938,
+        1939,
+        1940,
+        1941,
+        1942,
+        1943,
+        1944,
+        1945,
+        1946,
+        1947,
+        1948,
+        1949,
+        1950,
+        1951,
+        1952,
+        1953,
+        1954,
+        1955,
+        1956,
+        1957
+      ],
+      "originData": [
         {
           "id": 1932,
           "symbol": "000300",
@@ -5419,6 +5277,117 @@
           "close": 3890.61,
           "amount": 29612294
         },
+        {
+          "id": 1955,
+          "symbol": "000300",
+          "time": "2025-05-12T16:00:00.000Z",
+          "timestamp": 1747065600000,
+          "open": 3915.59,
+          "highest": 3915.59,
+          "lowest": 3890.69,
+          "close": 3896.26,
+          "amount": 26758640
+        },
+        {
+          "id": 1956,
+          "symbol": "000300",
+          "time": "2025-05-13T16:00:00.000Z",
+          "timestamp": 1747152000000,
+          "open": 3894.84,
+          "highest": 3960.52,
+          "lowest": 3890.65,
+          "close": 3943.21,
+          "amount": 31946522
+        },
+        {
+          "id": 1957,
+          "symbol": "000300",
+          "time": "2025-05-14T16:00:00.000Z",
+          "timestamp": 1747238400000,
+          "open": 3934.03,
+          "highest": 3936.47,
+          "lowest": 3904.91,
+          "close": 3907.2,
+          "amount": 24146496
+        }
+      ],
+      "independentCount": 26,
+      "startFenxing": {
+        "type": "bottom",
+        "highest": 3883.7,
+        "lowest": 3514.12,
+        "leftIds": [
+          1931
+        ],
+        "middleIds": [
+          1932,
+          1933
+        ],
+        "middleIndex": 244,
+        "rightIds": [
+          1934
+        ],
+        "middleOriginId": 1932
+      },
+      "endFenxing": {
+        "type": "top",
+        "highest": 3960.52,
+        "lowest": 3859.03,
+        "leftIds": [
+          1954
+        ],
+        "middleIds": [
+          1955,
+          1956,
+          1957
+        ],
+        "middleIndex": 262,
+        "rightIds": [
+          1958
+        ],
+        "middleOriginId": 1956
+      }
+    },
+    {
+      "startTime": "2025-05-13T16:00:00.000Z",
+      "endTime": "2025-06-22T16:00:00.000Z",
+      "highest": 3960.52,
+      "lowest": 3827.08,
+      "trend": "down",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        1955,
+        1956,
+        1957,
+        1958,
+        1959,
+        1960,
+        1961,
+        1962,
+        1963,
+        1964,
+        1965,
+        1966,
+        1967,
+        1968,
+        1969,
+        1970,
+        1971,
+        1972,
+        1973,
+        1974,
+        1975,
+        1976,
+        1977,
+        1978,
+        1979,
+        1980,
+        1981,
+        1982,
+        1983
+      ],
+      "originData": [
         {
           "id": 1955,
           "symbol": "000300",
@@ -5705,6 +5674,180 @@
           "close": 3874.97,
           "amount": 23055386
         },
+        {
+          "id": 1981,
+          "symbol": "000300",
+          "time": "2025-06-18T16:00:00.000Z",
+          "timestamp": 1750262400000,
+          "open": 3870.05,
+          "highest": 3872.94,
+          "lowest": 3834.95,
+          "close": 3843.09,
+          "amount": 23484018
+        },
+        {
+          "id": 1982,
+          "symbol": "000300",
+          "time": "2025-06-19T16:00:00.000Z",
+          "timestamp": 1750348800000,
+          "open": 3839.78,
+          "highest": 3856.48,
+          "lowest": 3839.78,
+          "close": 3846.64,
+          "amount": 21352282
+        },
+        {
+          "id": 1983,
+          "symbol": "000300",
+          "time": "2025-06-22T16:00:00.000Z",
+          "timestamp": 1750608000000,
+          "open": 3831.17,
+          "highest": 3867.59,
+          "lowest": 3827.08,
+          "close": 3857.9,
+          "amount": 23248220
+        }
+      ],
+      "independentCount": 29,
+      "startFenxing": {
+        "type": "top",
+        "highest": 3960.52,
+        "lowest": 3859.03,
+        "leftIds": [
+          1954
+        ],
+        "middleIds": [
+          1955,
+          1956,
+          1957
+        ],
+        "middleIndex": 262,
+        "rightIds": [
+          1958
+        ],
+        "middleOriginId": 1956
+      },
+      "endFenxing": {
+        "type": "bottom",
+        "highest": 3914.16,
+        "lowest": 3827.08,
+        "leftIds": [
+          1979,
+          1980
+        ],
+        "middleIds": [
+          1981,
+          1982,
+          1983
+        ],
+        "middleIndex": 279,
+        "rightIds": [
+          1984
+        ],
+        "middleOriginId": 1983
+      }
+    },
+    {
+      "startTime": "2025-06-22T16:00:00.000Z",
+      "endTime": "2025-10-29T16:00:00.000Z",
+      "highest": 4761.83,
+      "lowest": 3827.08,
+      "trend": "up",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        1981,
+        1982,
+        1983,
+        1984,
+        1985,
+        1986,
+        1987,
+        1988,
+        1989,
+        1990,
+        1991,
+        1992,
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026,
+        2027,
+        2028,
+        2029,
+        2030,
+        2031,
+        2032,
+        2033,
+        2034,
+        2035,
+        2036,
+        2037,
+        2038,
+        2039,
+        2040,
+        2041,
+        2042,
+        2043,
+        2044,
+        2045,
+        2046,
+        2047,
+        2048,
+        2049,
+        2050,
+        2051,
+        2052,
+        2053,
+        2054,
+        2055,
+        2056,
+        2057,
+        2058,
+        2059,
+        2060,
+        2061,
+        2062,
+        2063,
+        2064,
+        2065,
+        2066,
+        2067,
+        2068,
+        2069,
+        2070
+      ],
+      "originData": [
         {
           "id": 1981,
           "symbol": "000300",
@@ -6034,1932 +6177,6 @@
           "lowest": 4127.43,
           "close": 4151.24,
           "amount": 44516844
-        }
-      ],
-      "independentCount": 132,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3842.95,
-        "lowest": "3704.11",
-        "leftIds": [
-          1878
-        ],
-        "middleIds": [
-          1879
-        ],
-        "middleIndex": 206,
-        "rightIds": [
-          1880,
-          1881,
-          1882
-        ],
-        "middleOriginId": 1879
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4185.21",
-        "lowest": 4063.67,
-        "leftIds": [
-          2009
-        ],
-        "middleIds": [
-          2010
-        ],
-        "middleIndex": 302,
-        "rightIds": [
-          2011
-        ],
-        "middleOriginId": 2010
-      }
-    },
-    {
-      "startTime": "2025-02-23T16:00:00.000Z",
-      "endTime": "2025-03-03T16:00:00.000Z",
-      "highest": 3995.95,
-      "lowest": 3855.73,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1903,
-        1904,
-        1905,
-        1906,
-        1907,
-        1908,
-        1909
-      ],
-      "originData": [
-        {
-          "id": 1903,
-          "symbol": "000300",
-          "time": "2025-02-23T16:00:00.000Z",
-          "timestamp": 1740326400000,
-          "open": 3972.48,
-          "highest": 3995.95,
-          "lowest": 3949.23,
-          "close": 3969.72,
-          "amount": 45508872
-        },
-        {
-          "id": 1904,
-          "symbol": "000300",
-          "time": "2025-02-24T16:00:00.000Z",
-          "timestamp": 1740412800000,
-          "open": 3933.64,
-          "highest": 3955.43,
-          "lowest": 3915.65,
-          "close": 3925.65,
-          "amount": 37798144
-        },
-        {
-          "id": 1905,
-          "symbol": "000300",
-          "time": "2025-02-25T16:00:00.000Z",
-          "timestamp": 1740499200000,
-          "open": 3931.84,
-          "highest": 3960.33,
-          "lowest": 3925.37,
-          "close": 3959.94,
-          "amount": 38645820
-        },
-        {
-          "id": 1906,
-          "symbol": "000300",
-          "time": "2025-02-26T16:00:00.000Z",
-          "timestamp": 1740585600000,
-          "open": 3961.06,
-          "highest": 3973.93,
-          "lowest": 3933.46,
-          "close": 3968.12,
-          "amount": 42827276
-        },
-        {
-          "id": 1907,
-          "symbol": "000300",
-          "time": "2025-02-27T16:00:00.000Z",
-          "timestamp": 1740672000000,
-          "open": 3950.19,
-          "highest": 3972.48,
-          "lowest": 3886.4,
-          "close": 3890.05,
-          "amount": 42030804
-        },
-        {
-          "id": 1908,
-          "symbol": "000300",
-          "time": "2025-03-02T16:00:00.000Z",
-          "timestamp": 1740931200000,
-          "open": 3899.7,
-          "highest": 3930,
-          "lowest": 3872.59,
-          "close": 3888.47,
-          "amount": 35605776
-        },
-        {
-          "id": 1909,
-          "symbol": "000300",
-          "time": "2025-03-03T16:00:00.000Z",
-          "timestamp": 1741017600000,
-          "open": 3865.99,
-          "highest": 3890.42,
-          "lowest": 3855.73,
-          "close": 3885.22,
-          "amount": 29773926
-        }
-      ],
-      "independentCount": 7,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3995.95",
-        "lowest": 3915.65,
-        "leftIds": [
-          1902
-        ],
-        "middleIds": [
-          1903
-        ],
-        "middleIndex": 222,
-        "rightIds": [
-          1904
-        ],
-        "middleOriginId": 1903
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3930,
-        "lowest": "3855.73",
-        "leftIds": [
-          1908
-        ],
-        "middleIds": [
-          1909
-        ],
-        "middleIndex": 228,
-        "rightIds": [
-          1910
-        ],
-        "middleOriginId": 1909
-      }
-    },
-    {
-      "startTime": "2025-03-03T16:00:00.000Z",
-      "endTime": "2025-03-06T16:00:00.000Z",
-      "highest": 3967.07,
-      "lowest": 3855.73,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1909,
-        1910,
-        1911,
-        1912
-      ],
-      "originData": [
-        {
-          "id": 1909,
-          "symbol": "000300",
-          "time": "2025-03-03T16:00:00.000Z",
-          "timestamp": 1741017600000,
-          "open": 3865.99,
-          "highest": 3890.42,
-          "lowest": 3855.73,
-          "close": 3885.22,
-          "amount": 29773926
-        },
-        {
-          "id": 1910,
-          "symbol": "000300",
-          "time": "2025-03-04T16:00:00.000Z",
-          "timestamp": 1741104000000,
-          "open": 3887.8,
-          "highest": 3906.42,
-          "lowest": 3877.02,
-          "close": 3902.57,
-          "amount": 29086050
-        },
-        {
-          "id": 1911,
-          "symbol": "000300",
-          "time": "2025-03-05T16:00:00.000Z",
-          "timestamp": 1741190400000,
-          "open": 3923.38,
-          "highest": 3964.49,
-          "lowest": 3917.08,
-          "close": 3956.24,
-          "amount": 39741940
-        },
-        {
-          "id": 1912,
-          "symbol": "000300",
-          "time": "2025-03-06T16:00:00.000Z",
-          "timestamp": 1741276800000,
-          "open": 3944.91,
-          "highest": 3967.07,
-          "lowest": 3935.05,
-          "close": 3944.01,
-          "amount": 34062672
-        }
-      ],
-      "independentCount": 4,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3930,
-        "lowest": "3855.73",
-        "leftIds": [
-          1908
-        ],
-        "middleIds": [
-          1909
-        ],
-        "middleIndex": 228,
-        "rightIds": [
-          1910
-        ],
-        "middleOriginId": 1909
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3967.07",
-        "lowest": 3905.13,
-        "leftIds": [
-          1911
-        ],
-        "middleIds": [
-          1912
-        ],
-        "middleIndex": 231,
-        "rightIds": [
-          1913
-        ],
-        "middleOriginId": 1912
-      }
-    },
-    {
-      "startTime": "2025-03-06T16:00:00.000Z",
-      "endTime": "2025-03-10T16:00:00.000Z",
-      "highest": 3967.07,
-      "lowest": 3889.43,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1912,
-        1913,
-        1914
-      ],
-      "originData": [
-        {
-          "id": 1912,
-          "symbol": "000300",
-          "time": "2025-03-06T16:00:00.000Z",
-          "timestamp": 1741276800000,
-          "open": 3944.91,
-          "highest": 3967.07,
-          "lowest": 3935.05,
-          "close": 3944.01,
-          "amount": 34062672
-        },
-        {
-          "id": 1913,
-          "symbol": "000300",
-          "time": "2025-03-09T16:00:00.000Z",
-          "timestamp": 1741536000000,
-          "open": 3945.58,
-          "highest": 3949.14,
-          "lowest": 3905.13,
-          "close": 3928.8,
-          "amount": 29257498
-        },
-        {
-          "id": 1914,
-          "symbol": "000300",
-          "time": "2025-03-10T16:00:00.000Z",
-          "timestamp": 1741622400000,
-          "open": 3890.43,
-          "highest": 3941.42,
-          "lowest": 3889.43,
-          "close": 3941.42,
-          "amount": 28748044
-        }
-      ],
-      "independentCount": 3,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3967.07",
-        "lowest": 3905.13,
-        "leftIds": [
-          1911
-        ],
-        "middleIds": [
-          1912
-        ],
-        "middleIndex": 231,
-        "rightIds": [
-          1913
-        ],
-        "middleOriginId": 1912
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3953.61,
-        "lowest": "3889.43",
-        "leftIds": [
-          1913
-        ],
-        "middleIds": [
-          1914
-        ],
-        "middleIndex": 233,
-        "rightIds": [
-          1915
-        ],
-        "middleOriginId": 1914
-      }
-    },
-    {
-      "startTime": "2025-03-10T16:00:00.000Z",
-      "endTime": "2025-03-18T16:00:00.000Z",
-      "highest": 4025.3,
-      "lowest": 3889.43,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1914,
-        1915,
-        1916,
-        1917,
-        1918,
-        1919,
-        1920
-      ],
-      "originData": [
-        {
-          "id": 1914,
-          "symbol": "000300",
-          "time": "2025-03-10T16:00:00.000Z",
-          "timestamp": 1741622400000,
-          "open": 3890.43,
-          "highest": 3941.42,
-          "lowest": 3889.43,
-          "close": 3941.42,
-          "amount": 28748044
-        },
-        {
-          "id": 1915,
-          "symbol": "000300",
-          "time": "2025-03-11T16:00:00.000Z",
-          "timestamp": 1741708800000,
-          "open": 3946.86,
-          "highest": 3953.61,
-          "lowest": 3921.47,
-          "close": 3927.23,
-          "amount": 30962726
-        },
-        {
-          "id": 1916,
-          "symbol": "000300",
-          "time": "2025-03-12T16:00:00.000Z",
-          "timestamp": 1741795200000,
-          "open": 3925.74,
-          "highest": 3939.29,
-          "lowest": 3897.38,
-          "close": 3911.58,
-          "amount": 29517312
-        },
-        {
-          "id": 1917,
-          "symbol": "000300",
-          "time": "2025-03-13T16:00:00.000Z",
-          "timestamp": 1741881600000,
-          "open": 3919.62,
-          "highest": 4014.16,
-          "lowest": 3919.62,
-          "close": 4006.56,
-          "amount": 45089528
-        },
-        {
-          "id": 1918,
-          "symbol": "000300",
-          "time": "2025-03-16T16:00:00.000Z",
-          "timestamp": 1742140800000,
-          "open": 4020.64,
-          "highest": 4021.73,
-          "lowest": 3992.26,
-          "close": 3996.79,
-          "amount": 31890440
-        },
-        {
-          "id": 1919,
-          "symbol": "000300",
-          "time": "2025-03-17T16:00:00.000Z",
-          "timestamp": 1742227200000,
-          "open": 4011.78,
-          "highest": 4016.87,
-          "lowest": 3995.96,
-          "close": 4007.72,
-          "amount": 29273932
-        },
-        {
-          "id": 1920,
-          "symbol": "000300",
-          "time": "2025-03-18T16:00:00.000Z",
-          "timestamp": 1742313600000,
-          "open": 4004.83,
-          "highest": 4025.3,
-          "lowest": 3989.51,
-          "close": 4010.17,
-          "amount": 28607528
-        }
-      ],
-      "independentCount": 7,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3953.61,
-        "lowest": "3889.43",
-        "leftIds": [
-          1913
-        ],
-        "middleIds": [
-          1914
-        ],
-        "middleIndex": 233,
-        "rightIds": [
-          1915
-        ],
-        "middleOriginId": 1914
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 4025.3,
-        "lowest": 3919.62,
-        "leftIds": [
-          1917
-        ],
-        "middleIds": [
-          1918,
-          1919,
-          1920
-        ],
-        "middleIndex": 237,
-        "rightIds": [
-          1921
-        ],
-        "middleOriginId": 1920
-      }
-    },
-    {
-      "startTime": "2025-03-18T16:00:00.000Z",
-      "endTime": "2025-04-06T16:00:00.000Z",
-      "highest": 4025.3,
-      "lowest": 3514.12,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1918,
-        1919,
-        1920,
-        1921,
-        1922,
-        1923,
-        1924,
-        1925,
-        1926,
-        1927,
-        1928,
-        1929,
-        1930,
-        1931,
-        1932,
-        1933
-      ],
-      "originData": [
-        {
-          "id": 1918,
-          "symbol": "000300",
-          "time": "2025-03-16T16:00:00.000Z",
-          "timestamp": 1742140800000,
-          "open": 4020.64,
-          "highest": 4021.73,
-          "lowest": 3992.26,
-          "close": 3996.79,
-          "amount": 31890440
-        },
-        {
-          "id": 1919,
-          "symbol": "000300",
-          "time": "2025-03-17T16:00:00.000Z",
-          "timestamp": 1742227200000,
-          "open": 4011.78,
-          "highest": 4016.87,
-          "lowest": 3995.96,
-          "close": 4007.72,
-          "amount": 29273932
-        },
-        {
-          "id": 1920,
-          "symbol": "000300",
-          "time": "2025-03-18T16:00:00.000Z",
-          "timestamp": 1742313600000,
-          "open": 4004.83,
-          "highest": 4025.3,
-          "lowest": 3989.51,
-          "close": 4010.17,
-          "amount": 28607528
-        },
-        {
-          "id": 1921,
-          "symbol": "000300",
-          "time": "2025-03-19T16:00:00.000Z",
-          "timestamp": 1742400000000,
-          "open": 4011.06,
-          "highest": 4012.04,
-          "lowest": 3969.93,
-          "close": 3974.99,
-          "amount": 26002068
-        },
-        {
-          "id": 1922,
-          "symbol": "000300",
-          "time": "2025-03-20T16:00:00.000Z",
-          "timestamp": 1742486400000,
-          "open": 3966.51,
-          "highest": 3983.15,
-          "lowest": 3904.77,
-          "close": 3914.7,
-          "amount": 30934860
-        },
-        {
-          "id": 1923,
-          "symbol": "000300",
-          "time": "2025-03-23T16:00:00.000Z",
-          "timestamp": 1742745600000,
-          "open": 3916.11,
-          "highest": 3938.18,
-          "lowest": 3907.2,
-          "close": 3934.85,
-          "amount": 26605144
-        },
-        {
-          "id": 1924,
-          "symbol": "000300",
-          "time": "2025-03-24T16:00:00.000Z",
-          "timestamp": 1742832000000,
-          "open": 3937.9,
-          "highest": 3946.36,
-          "lowest": 3921.53,
-          "close": 3932.3,
-          "amount": 23924632
-        },
-        {
-          "id": 1925,
-          "symbol": "000300",
-          "time": "2025-03-25T16:00:00.000Z",
-          "timestamp": 1742918400000,
-          "open": 3930.21,
-          "highest": 3942.03,
-          "lowest": 3916.86,
-          "close": 3919.36,
-          "amount": 22094318
-        },
-        {
-          "id": 1926,
-          "symbol": "000300",
-          "time": "2025-03-26T16:00:00.000Z",
-          "timestamp": 1743004800000,
-          "open": 3911.38,
-          "highest": 3952.99,
-          "lowest": 3903.65,
-          "close": 3932.41,
-          "amount": 23217362
-        },
-        {
-          "id": 1927,
-          "symbol": "000300",
-          "time": "2025-03-27T16:00:00.000Z",
-          "timestamp": 1743091200000,
-          "open": 3930.78,
-          "highest": 3934.23,
-          "lowest": 3907.38,
-          "close": 3915.17,
-          "amount": 21337918
-        },
-        {
-          "id": 1928,
-          "symbol": "000300",
-          "time": "2025-03-30T16:00:00.000Z",
-          "timestamp": 1743350400000,
-          "open": 3905.98,
-          "highest": 3928.45,
-          "lowest": 3872.4,
-          "close": 3887.31,
-          "amount": 26848032
-        },
-        {
-          "id": 1929,
-          "symbol": "000300",
-          "time": "2025-03-31T16:00:00.000Z",
-          "timestamp": 1743436800000,
-          "open": 3892.78,
-          "highest": 3905.26,
-          "lowest": 3882.4,
-          "close": 3887.68,
-          "amount": 24604168
-        },
-        {
-          "id": 1930,
-          "symbol": "000300",
-          "time": "2025-04-01T16:00:00.000Z",
-          "timestamp": 1743523200000,
-          "open": 3884.42,
-          "highest": 3900.49,
-          "lowest": 3877.16,
-          "close": 3884.39,
-          "amount": 19826752
-        },
-        {
-          "id": 1931,
-          "symbol": "000300",
-          "time": "2025-04-02T16:00:00.000Z",
-          "timestamp": 1743609600000,
-          "open": 3843.42,
-          "highest": 3883.7,
-          "lowest": 3843.42,
-          "close": 3861.5,
-          "amount": 26368468
-        },
-        {
-          "id": 1932,
-          "symbol": "000300",
-          "time": "2025-04-06T16:00:00.000Z",
-          "timestamp": 1743955200000,
-          "open": 3675.2,
-          "highest": 3707.78,
-          "lowest": 3514.12,
-          "close": 3589.44,
-          "amount": 51297180
-        },
-        {
-          "id": 1933,
-          "symbol": "000300",
-          "time": "2025-04-07T16:00:00.000Z",
-          "timestamp": 1744041600000,
-          "open": 3597.99,
-          "highest": 3650.76,
-          "lowest": 3583.87,
-          "close": 3650.76,
-          "amount": 46402108
-        }
-      ],
-      "independentCount": 16,
-      "startFenxing": {
-        "type": "top",
-        "highest": 4025.3,
-        "lowest": 3919.62,
-        "leftIds": [
-          1917
-        ],
-        "middleIds": [
-          1918,
-          1919,
-          1920
-        ],
-        "middleIndex": 237,
-        "rightIds": [
-          1921
-        ],
-        "middleOriginId": 1920
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3883.7,
-        "lowest": 3514.12,
-        "leftIds": [
-          1931
-        ],
-        "middleIds": [
-          1932,
-          1933
-        ],
-        "middleIndex": 244,
-        "rightIds": [
-          1934
-        ],
-        "middleOriginId": 1932
-      }
-    },
-    {
-      "startTime": "2025-04-06T16:00:00.000Z",
-      "endTime": "2025-04-22T16:00:00.000Z",
-      "highest": 3807.95,
-      "lowest": 3514.12,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1932,
-        1933,
-        1934,
-        1935,
-        1936,
-        1937,
-        1938,
-        1939,
-        1940,
-        1941,
-        1942,
-        1943,
-        1944
-      ],
-      "originData": [
-        {
-          "id": 1932,
-          "symbol": "000300",
-          "time": "2025-04-06T16:00:00.000Z",
-          "timestamp": 1743955200000,
-          "open": 3675.2,
-          "highest": 3707.78,
-          "lowest": 3514.12,
-          "close": 3589.44,
-          "amount": 51297180
-        },
-        {
-          "id": 1933,
-          "symbol": "000300",
-          "time": "2025-04-07T16:00:00.000Z",
-          "timestamp": 1744041600000,
-          "open": 3597.99,
-          "highest": 3650.76,
-          "lowest": 3583.87,
-          "close": 3650.76,
-          "amount": 46402108
-        },
-        {
-          "id": 1934,
-          "symbol": "000300",
-          "time": "2025-04-08T16:00:00.000Z",
-          "timestamp": 1744128000000,
-          "open": 3606.1,
-          "highest": 3686.79,
-          "lowest": 3587.34,
-          "close": 3686.79,
-          "amount": 45503108
-        },
-        {
-          "id": 1935,
-          "symbol": "000300",
-          "time": "2025-04-09T16:00:00.000Z",
-          "timestamp": 1744214400000,
-          "open": 3749.13,
-          "highest": 3756.14,
-          "lowest": 3708.82,
-          "close": 3735.12,
-          "amount": 40384256
-        },
-        {
-          "id": 1936,
-          "symbol": "000300",
-          "time": "2025-04-10T16:00:00.000Z",
-          "timestamp": 1744300800000,
-          "open": 3730.31,
-          "highest": 3762.37,
-          "lowest": 3708.46,
-          "close": 3750.52,
-          "amount": 31853514
-        },
-        {
-          "id": 1937,
-          "symbol": "000300",
-          "time": "2025-04-13T16:00:00.000Z",
-          "timestamp": 1744560000000,
-          "open": 3772.04,
-          "highest": 3776.63,
-          "lowest": 3754.03,
-          "close": 3759.14,
-          "amount": 29257128
-        },
-        {
-          "id": 1938,
-          "symbol": "000300",
-          "time": "2025-04-14T16:00:00.000Z",
-          "timestamp": 1744646400000,
-          "open": 3756.48,
-          "highest": 3764.49,
-          "lowest": 3737.85,
-          "close": 3761.23,
-          "amount": 22860462
-        },
-        {
-          "id": 1939,
-          "symbol": "000300",
-          "time": "2025-04-15T16:00:00.000Z",
-          "timestamp": 1744732800000,
-          "open": 3757.88,
-          "highest": 3775.17,
-          "lowest": 3721.6,
-          "close": 3772.82,
-          "amount": 26171110
-        },
-        {
-          "id": 1940,
-          "symbol": "000300",
-          "time": "2025-04-16T16:00:00.000Z",
-          "timestamp": 1744819200000,
-          "open": 3755.09,
-          "highest": 3779.13,
-          "lowest": 3749.5,
-          "close": 3772.22,
-          "amount": 20901232
-        },
-        {
-          "id": 1941,
-          "symbol": "000300",
-          "time": "2025-04-17T16:00:00.000Z",
-          "timestamp": 1744905600000,
-          "open": 3760.04,
-          "highest": 3782.04,
-          "lowest": 3754.41,
-          "close": 3772.52,
-          "amount": 17310938
-        },
-        {
-          "id": 1942,
-          "symbol": "000300",
-          "time": "2025-04-20T16:00:00.000Z",
-          "timestamp": 1745164800000,
-          "open": 3768.14,
-          "highest": 3790.18,
-          "lowest": 3763.14,
-          "close": 3784.88,
-          "amount": 20808568
-        },
-        {
-          "id": 1943,
-          "symbol": "000300",
-          "time": "2025-04-21T16:00:00.000Z",
-          "timestamp": 1745251200000,
-          "open": 3780.11,
-          "highest": 3799.23,
-          "lowest": 3778.08,
-          "close": 3783.95,
-          "amount": 21020070
-        },
-        {
-          "id": 1944,
-          "symbol": "000300",
-          "time": "2025-04-22T16:00:00.000Z",
-          "timestamp": 1745337600000,
-          "open": 3803.43,
-          "highest": 3807.95,
-          "lowest": 3780.52,
-          "close": 3786.88,
-          "amount": 24711738
-        }
-      ],
-      "independentCount": 13,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3883.7,
-        "lowest": 3514.12,
-        "leftIds": [
-          1931
-        ],
-        "middleIds": [
-          1932,
-          1933
-        ],
-        "middleIndex": 244,
-        "rightIds": [
-          1934
-        ],
-        "middleOriginId": 1932
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3807.95",
-        "lowest": 3775.21,
-        "leftIds": [
-          1943
-        ],
-        "middleIds": [
-          1944
-        ],
-        "middleIndex": 253,
-        "rightIds": [
-          1945,
-          1946
-        ],
-        "middleOriginId": 1944
-      }
-    },
-    {
-      "startTime": "2025-04-22T16:00:00.000Z",
-      "endTime": "2025-04-28T16:00:00.000Z",
-      "highest": 3807.95,
-      "lowest": 3768.03,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1944,
-        1945,
-        1946,
-        1947,
-        1948
-      ],
-      "originData": [
-        {
-          "id": 1944,
-          "symbol": "000300",
-          "time": "2025-04-22T16:00:00.000Z",
-          "timestamp": 1745337600000,
-          "open": 3803.43,
-          "highest": 3807.95,
-          "lowest": 3780.52,
-          "close": 3786.88,
-          "amount": 24711738
-        },
-        {
-          "id": 1945,
-          "symbol": "000300",
-          "time": "2025-04-23T16:00:00.000Z",
-          "timestamp": 1745424000000,
-          "open": 3787.46,
-          "highest": 3807.26,
-          "lowest": 3775.21,
-          "close": 3784.36,
-          "amount": 20548304
-        },
-        {
-          "id": 1946,
-          "symbol": "000300",
-          "time": "2025-04-24T16:00:00.000Z",
-          "timestamp": 1745510400000,
-          "open": 3792.08,
-          "highest": 3801.58,
-          "lowest": 3780.78,
-          "close": 3786.99,
-          "amount": 22053504
-        },
-        {
-          "id": 1947,
-          "symbol": "000300",
-          "time": "2025-04-27T16:00:00.000Z",
-          "timestamp": 1745769600000,
-          "open": 3786.39,
-          "highest": 3792.01,
-          "lowest": 3772.8,
-          "close": 3781.62,
-          "amount": 21063532
-        },
-        {
-          "id": 1948,
-          "symbol": "000300",
-          "time": "2025-04-28T16:00:00.000Z",
-          "timestamp": 1745856000000,
-          "open": 3776,
-          "highest": 3785.32,
-          "lowest": 3768.03,
-          "close": 3775.08,
-          "amount": 19746274
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3807.95",
-        "lowest": 3775.21,
-        "leftIds": [
-          1943
-        ],
-        "middleIds": [
-          1944
-        ],
-        "middleIndex": 253,
-        "rightIds": [
-          1945,
-          1946
-        ],
-        "middleOriginId": 1944
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3792.01,
-        "lowest": "3768.03",
-        "leftIds": [
-          1947
-        ],
-        "middleIds": [
-          1948
-        ],
-        "middleIndex": 256,
-        "rightIds": [
-          1949
-        ],
-        "middleOriginId": 1948
-      }
-    },
-    {
-      "startTime": "2025-04-28T16:00:00.000Z",
-      "endTime": "2025-05-13T16:00:00.000Z",
-      "highest": 3960.52,
-      "lowest": 3768.03,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1948,
-        1949,
-        1950,
-        1951,
-        1952,
-        1953,
-        1954,
-        1955,
-        1956,
-        1957
-      ],
-      "originData": [
-        {
-          "id": 1948,
-          "symbol": "000300",
-          "time": "2025-04-28T16:00:00.000Z",
-          "timestamp": 1745856000000,
-          "open": 3776,
-          "highest": 3785.32,
-          "lowest": 3768.03,
-          "close": 3775.08,
-          "amount": 19746274
-        },
-        {
-          "id": 1949,
-          "symbol": "000300",
-          "time": "2025-04-29T16:00:00.000Z",
-          "timestamp": 1745942400000,
-          "open": 3775.83,
-          "highest": 3787.56,
-          "lowest": 3768.76,
-          "close": 3770.57,
-          "amount": 24482046
-        },
-        {
-          "id": 1950,
-          "symbol": "000300",
-          "time": "2025-05-05T16:00:00.000Z",
-          "timestamp": 1746460800000,
-          "open": 3794.38,
-          "highest": 3809.09,
-          "lowest": 3782.78,
-          "close": 3808.54,
-          "amount": 26793708
-        },
-        {
-          "id": 1951,
-          "symbol": "000300",
-          "time": "2025-05-06T16:00:00.000Z",
-          "timestamp": 1746547200000,
-          "open": 3861.58,
-          "highest": 3863.68,
-          "lowest": 3814.99,
-          "close": 3831.63,
-          "amount": 28601074
-        },
-        {
-          "id": 1952,
-          "symbol": "000300",
-          "time": "2025-05-07T16:00:00.000Z",
-          "timestamp": 1746633600000,
-          "open": 3820.55,
-          "highest": 3867.33,
-          "lowest": 3816.26,
-          "close": 3852.9,
-          "amount": 24698728
-        },
-        {
-          "id": 1953,
-          "symbol": "000300",
-          "time": "2025-05-08T16:00:00.000Z",
-          "timestamp": 1746720000000,
-          "open": 3848.62,
-          "highest": 3853.66,
-          "lowest": 3836.53,
-          "close": 3846.16,
-          "amount": 21669794
-        },
-        {
-          "id": 1954,
-          "symbol": "000300",
-          "time": "2025-05-11T16:00:00.000Z",
-          "timestamp": 1746979200000,
-          "open": 3866.53,
-          "highest": 3890.73,
-          "lowest": 3859.03,
-          "close": 3890.61,
-          "amount": 29612294
-        },
-        {
-          "id": 1955,
-          "symbol": "000300",
-          "time": "2025-05-12T16:00:00.000Z",
-          "timestamp": 1747065600000,
-          "open": 3915.59,
-          "highest": 3915.59,
-          "lowest": 3890.69,
-          "close": 3896.26,
-          "amount": 26758640
-        },
-        {
-          "id": 1956,
-          "symbol": "000300",
-          "time": "2025-05-13T16:00:00.000Z",
-          "timestamp": 1747152000000,
-          "open": 3894.84,
-          "highest": 3960.52,
-          "lowest": 3890.65,
-          "close": 3943.21,
-          "amount": 31946522
-        },
-        {
-          "id": 1957,
-          "symbol": "000300",
-          "time": "2025-05-14T16:00:00.000Z",
-          "timestamp": 1747238400000,
-          "open": 3934.03,
-          "highest": 3936.47,
-          "lowest": 3904.91,
-          "close": 3907.2,
-          "amount": 24146496
-        }
-      ],
-      "independentCount": 10,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3792.01,
-        "lowest": "3768.03",
-        "leftIds": [
-          1947
-        ],
-        "middleIds": [
-          1948
-        ],
-        "middleIndex": 256,
-        "rightIds": [
-          1949
-        ],
-        "middleOriginId": 1948
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 3960.52,
-        "lowest": 3859.03,
-        "leftIds": [
-          1954
-        ],
-        "middleIds": [
-          1955,
-          1956,
-          1957
-        ],
-        "middleIndex": 262,
-        "rightIds": [
-          1958
-        ],
-        "middleOriginId": 1956
-      }
-    },
-    {
-      "startTime": "2025-05-13T16:00:00.000Z",
-      "endTime": "2025-05-29T16:00:00.000Z",
-      "highest": 3960.52,
-      "lowest": 3829.25,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1955,
-        1956,
-        1957,
-        1958,
-        1959,
-        1960,
-        1961,
-        1962,
-        1963,
-        1964,
-        1965,
-        1966,
-        1967,
-        1968
-      ],
-      "originData": [
-        {
-          "id": 1955,
-          "symbol": "000300",
-          "time": "2025-05-12T16:00:00.000Z",
-          "timestamp": 1747065600000,
-          "open": 3915.59,
-          "highest": 3915.59,
-          "lowest": 3890.69,
-          "close": 3896.26,
-          "amount": 26758640
-        },
-        {
-          "id": 1956,
-          "symbol": "000300",
-          "time": "2025-05-13T16:00:00.000Z",
-          "timestamp": 1747152000000,
-          "open": 3894.84,
-          "highest": 3960.52,
-          "lowest": 3890.65,
-          "close": 3943.21,
-          "amount": 31946522
-        },
-        {
-          "id": 1957,
-          "symbol": "000300",
-          "time": "2025-05-14T16:00:00.000Z",
-          "timestamp": 1747238400000,
-          "open": 3934.03,
-          "highest": 3936.47,
-          "lowest": 3904.91,
-          "close": 3907.2,
-          "amount": 24146496
-        },
-        {
-          "id": 1958,
-          "symbol": "000300",
-          "time": "2025-05-15T16:00:00.000Z",
-          "timestamp": 1747324800000,
-          "open": 3898.67,
-          "highest": 3903.85,
-          "lowest": 3874.86,
-          "close": 3889.09,
-          "amount": 20883566
-        },
-        {
-          "id": 1959,
-          "symbol": "000300",
-          "time": "2025-05-18T16:00:00.000Z",
-          "timestamp": 1747584000000,
-          "open": 3882.57,
-          "highest": 3885.59,
-          "lowest": 3866.57,
-          "close": 3877.15,
-          "amount": 18488816
-        },
-        {
-          "id": 1960,
-          "symbol": "000300",
-          "time": "2025-05-19T16:00:00.000Z",
-          "timestamp": 1747670400000,
-          "open": 3883.1,
-          "highest": 3911.47,
-          "lowest": 3881.74,
-          "close": 3898.17,
-          "amount": 20163670
-        },
-        {
-          "id": 1961,
-          "symbol": "000300",
-          "time": "2025-05-20T16:00:00.000Z",
-          "timestamp": 1747756800000,
-          "open": 3899.44,
-          "highest": 3928.63,
-          "lowest": 3899.44,
-          "close": 3916.38,
-          "amount": 21703774
-        },
-        {
-          "id": 1962,
-          "symbol": "000300",
-          "time": "2025-05-21T16:00:00.000Z",
-          "timestamp": 1747843200000,
-          "open": 3912.6,
-          "highest": 3923.02,
-          "lowest": 3903.09,
-          "close": 3913.87,
-          "amount": 19751142
-        },
-        {
-          "id": 1963,
-          "symbol": "000300",
-          "time": "2025-05-22T16:00:00.000Z",
-          "timestamp": 1747929600000,
-          "open": 3910.37,
-          "highest": 3931.55,
-          "lowest": 3882.27,
-          "close": 3882.27,
-          "amount": 23294538
-        },
-        {
-          "id": 1964,
-          "symbol": "000300",
-          "time": "2025-05-25T16:00:00.000Z",
-          "timestamp": 1748188800000,
-          "open": 3875.79,
-          "highest": 3884.54,
-          "lowest": 3849.04,
-          "close": 3860.11,
-          "amount": 20887680
-        },
-        {
-          "id": 1965,
-          "symbol": "000300",
-          "time": "2025-05-26T16:00:00.000Z",
-          "timestamp": 1748275200000,
-          "open": 3857.63,
-          "highest": 3865.43,
-          "lowest": 3834.85,
-          "close": 3839.4,
-          "amount": 17846676
-        },
-        {
-          "id": 1966,
-          "symbol": "000300",
-          "time": "2025-05-27T16:00:00.000Z",
-          "timestamp": 1748361600000,
-          "open": 3843.07,
-          "highest": 3849.74,
-          "lowest": 3833.96,
-          "close": 3836.24,
-          "amount": 16249636
-        },
-        {
-          "id": 1967,
-          "symbol": "000300",
-          "time": "2025-05-28T16:00:00.000Z",
-          "timestamp": 1748448000000,
-          "open": 3838.01,
-          "highest": 3869.79,
-          "lowest": 3831.46,
-          "close": 3858.7,
-          "amount": 20945960
-        },
-        {
-          "id": 1968,
-          "symbol": "000300",
-          "time": "2025-05-29T16:00:00.000Z",
-          "timestamp": 1748534400000,
-          "open": 3850.49,
-          "highest": 3858.61,
-          "lowest": 3829.25,
-          "close": 3840.23,
-          "amount": 19938976
-        }
-      ],
-      "independentCount": 14,
-      "startFenxing": {
-        "type": "top",
-        "highest": 3960.52,
-        "lowest": 3859.03,
-        "leftIds": [
-          1954
-        ],
-        "middleIds": [
-          1955,
-          1956,
-          1957
-        ],
-        "middleIndex": 262,
-        "rightIds": [
-          1958
-        ],
-        "middleOriginId": 1956
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3865.43,
-        "lowest": 3829.25,
-        "leftIds": [
-          1965
-        ],
-        "middleIds": [
-          1966,
-          1967,
-          1968
-        ],
-        "middleIndex": 269,
-        "rightIds": [
-          1969
-        ],
-        "middleOriginId": 1968
-      }
-    },
-    {
-      "startTime": "2025-05-29T16:00:00.000Z",
-      "endTime": "2025-06-10T16:00:00.000Z",
-      "highest": 3911.61,
-      "lowest": 3829.25,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1966,
-        1967,
-        1968,
-        1969,
-        1970,
-        1971,
-        1972,
-        1973,
-        1974,
-        1975
-      ],
-      "originData": [
-        {
-          "id": 1966,
-          "symbol": "000300",
-          "time": "2025-05-27T16:00:00.000Z",
-          "timestamp": 1748361600000,
-          "open": 3843.07,
-          "highest": 3849.74,
-          "lowest": 3833.96,
-          "close": 3836.24,
-          "amount": 16249636
-        },
-        {
-          "id": 1967,
-          "symbol": "000300",
-          "time": "2025-05-28T16:00:00.000Z",
-          "timestamp": 1748448000000,
-          "open": 3838.01,
-          "highest": 3869.79,
-          "lowest": 3831.46,
-          "close": 3858.7,
-          "amount": 20945960
-        },
-        {
-          "id": 1968,
-          "symbol": "000300",
-          "time": "2025-05-29T16:00:00.000Z",
-          "timestamp": 1748534400000,
-          "open": 3850.49,
-          "highest": 3858.61,
-          "lowest": 3829.25,
-          "close": 3840.23,
-          "amount": 19938976
-        },
-        {
-          "id": 1969,
-          "symbol": "000300",
-          "time": "2025-06-02T16:00:00.000Z",
-          "timestamp": 1748880000000,
-          "open": 3833.46,
-          "highest": 3863.3,
-          "lowest": 3832.72,
-          "close": 3852.01,
-          "amount": 22678278
-        },
-        {
-          "id": 1970,
-          "symbol": "000300",
-          "time": "2025-06-03T16:00:00.000Z",
-          "timestamp": 1748966400000,
-          "open": 3855.49,
-          "highest": 3875.86,
-          "lowest": 3855.49,
-          "close": 3868.74,
-          "amount": 21173618
-        },
-        {
-          "id": 1971,
-          "symbol": "000300",
-          "time": "2025-06-04T16:00:00.000Z",
-          "timestamp": 1749052800000,
-          "open": 3872.64,
-          "highest": 3883.13,
-          "lowest": 3861.27,
-          "close": 3877.56,
-          "amount": 23174928
-        },
-        {
-          "id": 1972,
-          "symbol": "000300",
-          "time": "2025-06-05T16:00:00.000Z",
-          "timestamp": 1749139200000,
-          "open": 3878.1,
-          "highest": 3889.46,
-          "lowest": 3869.39,
-          "close": 3873.98,
-          "amount": 20203474
-        },
-        {
-          "id": 1973,
-          "symbol": "000300",
-          "time": "2025-06-08T16:00:00.000Z",
-          "timestamp": 1749398400000,
-          "open": 3877.8,
-          "highest": 3894.65,
-          "lowest": 3871.99,
-          "close": 3885.25,
-          "amount": 26202368
-        },
-        {
-          "id": 1974,
-          "symbol": "000300",
-          "time": "2025-06-09T16:00:00.000Z",
-          "timestamp": 1749484800000,
-          "open": 3887.55,
-          "highest": 3897.46,
-          "lowest": 3850.47,
-          "close": 3865.47,
-          "amount": 26364756
-        },
-        {
-          "id": 1975,
-          "symbol": "000300",
-          "time": "2025-06-10T16:00:00.000Z",
-          "timestamp": 1749571200000,
-          "open": 3870.67,
-          "highest": 3911.61,
-          "lowest": 3870.67,
-          "close": 3894.63,
-          "amount": 25721770
-        }
-      ],
-      "independentCount": 10,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3865.43,
-        "lowest": 3829.25,
-        "leftIds": [
-          1965
-        ],
-        "middleIds": [
-          1966,
-          1967,
-          1968
-        ],
-        "middleIndex": 269,
-        "rightIds": [
-          1969
-        ],
-        "middleOriginId": 1968
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 3911.61,
-        "lowest": 3869.39,
-        "leftIds": [
-          1972
-        ],
-        "middleIds": [
-          1973,
-          1974,
-          1975
-        ],
-        "middleIndex": 274,
-        "rightIds": [
-          1976
-        ],
-        "middleOriginId": 1975
-      }
-    },
-    {
-      "startTime": "2025-06-10T16:00:00.000Z",
-      "endTime": "2025-06-22T16:00:00.000Z",
-      "highest": 3911.61,
-      "lowest": 3827.08,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1973,
-        1974,
-        1975,
-        1976,
-        1977,
-        1978,
-        1979,
-        1980,
-        1981,
-        1982,
-        1983
-      ],
-      "originData": [
-        {
-          "id": 1973,
-          "symbol": "000300",
-          "time": "2025-06-08T16:00:00.000Z",
-          "timestamp": 1749398400000,
-          "open": 3877.8,
-          "highest": 3894.65,
-          "lowest": 3871.99,
-          "close": 3885.25,
-          "amount": 26202368
-        },
-        {
-          "id": 1974,
-          "symbol": "000300",
-          "time": "2025-06-09T16:00:00.000Z",
-          "timestamp": 1749484800000,
-          "open": 3887.55,
-          "highest": 3897.46,
-          "lowest": 3850.47,
-          "close": 3865.47,
-          "amount": 26364756
-        },
-        {
-          "id": 1975,
-          "symbol": "000300",
-          "time": "2025-06-10T16:00:00.000Z",
-          "timestamp": 1749571200000,
-          "open": 3870.67,
-          "highest": 3911.61,
-          "lowest": 3870.67,
-          "close": 3894.63,
-          "amount": 25721770
-        },
-        {
-          "id": 1976,
-          "symbol": "000300",
-          "time": "2025-06-11T16:00:00.000Z",
-          "timestamp": 1749657600000,
-          "open": 3885.52,
-          "highest": 3900.04,
-          "lowest": 3870.38,
-          "close": 3892.2,
-          "amount": 26023958
-        },
-        {
-          "id": 1977,
-          "symbol": "000300",
-          "time": "2025-06-12T16:00:00.000Z",
-          "timestamp": 1749744000000,
-          "open": 3881.49,
-          "highest": 3889.16,
-          "lowest": 3853.82,
-          "close": 3864.18,
-          "amount": 30917234
-        },
-        {
-          "id": 1978,
-          "symbol": "000300",
-          "time": "2025-06-15T16:00:00.000Z",
-          "timestamp": 1750003200000,
-          "open": 3853.62,
-          "highest": 3876.17,
-          "lowest": 3853.62,
-          "close": 3873.8,
-          "amount": 24686098
-        },
-        {
-          "id": 1979,
-          "symbol": "000300",
-          "time": "2025-06-16T16:00:00.000Z",
-          "timestamp": 1750089600000,
-          "open": 3875.18,
-          "highest": 3880.42,
-          "lowest": 3860.41,
-          "close": 3870.38,
-          "amount": 22039982
-        },
-        {
-          "id": 1980,
-          "symbol": "000300",
-          "time": "2025-06-17T16:00:00.000Z",
-          "timestamp": 1750176000000,
-          "open": 3871.65,
-          "highest": 3881.35,
-          "lowest": 3854.66,
-          "close": 3874.97,
-          "amount": 23055386
-        },
-        {
-          "id": 1981,
-          "symbol": "000300",
-          "time": "2025-06-18T16:00:00.000Z",
-          "timestamp": 1750262400000,
-          "open": 3870.05,
-          "highest": 3872.94,
-          "lowest": 3834.95,
-          "close": 3843.09,
-          "amount": 23484018
-        },
-        {
-          "id": 1982,
-          "symbol": "000300",
-          "time": "2025-06-19T16:00:00.000Z",
-          "timestamp": 1750348800000,
-          "open": 3839.78,
-          "highest": 3856.48,
-          "lowest": 3839.78,
-          "close": 3846.64,
-          "amount": 21352282
-        },
-        {
-          "id": 1983,
-          "symbol": "000300",
-          "time": "2025-06-22T16:00:00.000Z",
-          "timestamp": 1750608000000,
-          "open": 3831.17,
-          "highest": 3867.59,
-          "lowest": 3827.08,
-          "close": 3857.9,
-          "amount": 23248220
-        }
-      ],
-      "independentCount": 11,
-      "startFenxing": {
-        "type": "top",
-        "highest": 3911.61,
-        "lowest": 3869.39,
-        "leftIds": [
-          1972
-        ],
-        "middleIds": [
-          1973,
-          1974,
-          1975
-        ],
-        "middleIndex": 274,
-        "rightIds": [
-          1976
-        ],
-        "middleOriginId": 1975
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3914.16,
-        "lowest": 3827.08,
-        "leftIds": [
-          1979,
-          1980
-        ],
-        "middleIds": [
-          1981,
-          1982,
-          1983
-        ],
-        "middleIndex": 279,
-        "rightIds": [
-          1984
-        ],
-        "middleOriginId": 1983
-      }
-    },
-    {
-      "startTime": "2025-06-22T16:00:00.000Z",
-      "endTime": "2025-06-26T16:00:00.000Z",
-      "highest": 3969.26,
-      "lowest": 3827.08,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1981,
-        1982,
-        1983,
-        1984,
-        1985,
-        1986,
-        1987
-      ],
-      "originData": [
-        {
-          "id": 1981,
-          "symbol": "000300",
-          "time": "2025-06-18T16:00:00.000Z",
-          "timestamp": 1750262400000,
-          "open": 3870.05,
-          "highest": 3872.94,
-          "lowest": 3834.95,
-          "close": 3843.09,
-          "amount": 23484018
-        },
-        {
-          "id": 1982,
-          "symbol": "000300",
-          "time": "2025-06-19T16:00:00.000Z",
-          "timestamp": 1750348800000,
-          "open": 3839.78,
-          "highest": 3856.48,
-          "lowest": 3839.78,
-          "close": 3846.64,
-          "amount": 21352282
-        },
-        {
-          "id": 1983,
-          "symbol": "000300",
-          "time": "2025-06-22T16:00:00.000Z",
-          "timestamp": 1750608000000,
-          "open": 3831.17,
-          "highest": 3867.59,
-          "lowest": 3827.08,
-          "close": 3857.9,
-          "amount": 23248220
-        },
-        {
-          "id": 1984,
-          "symbol": "000300",
-          "time": "2025-06-23T16:00:00.000Z",
-          "timestamp": 1750694400000,
-          "open": 3862.39,
-          "highest": 3914.16,
-          "lowest": 3862.39,
-          "close": 3904.03,
-          "amount": 29422872
-        },
-        {
-          "id": 1985,
-          "symbol": "000300",
-          "time": "2025-06-24T16:00:00.000Z",
-          "timestamp": 1750780800000,
-          "open": 3907.07,
-          "highest": 3963.04,
-          "lowest": 3902.18,
-          "close": 3960.07,
-          "amount": 36172728
-        },
-        {
-          "id": 1986,
-          "symbol": "000300",
-          "time": "2025-06-25T16:00:00.000Z",
-          "timestamp": 1750867200000,
-          "open": 3953.16,
-          "highest": 3964.48,
-          "lowest": 3945.26,
-          "close": 3946.02,
-          "amount": 32810284
-        },
-        {
-          "id": 1987,
-          "symbol": "000300",
-          "time": "2025-06-26T16:00:00.000Z",
-          "timestamp": 1750953600000,
-          "open": 3949.79,
-          "highest": 3969.26,
-          "lowest": 3918.2,
-          "close": 3921.76,
-          "amount": 34346824
-        }
-      ],
-      "independentCount": 7,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3914.16,
-        "lowest": 3827.08,
-        "leftIds": [
-          1979,
-          1980
-        ],
-        "middleIds": [
-          1981,
-          1982,
-          1983
-        ],
-        "middleIndex": 279,
-        "rightIds": [
-          1984
-        ],
-        "middleOriginId": 1983
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 3969.26,
-        "lowest": 3902.18,
-        "leftIds": [
-          1985
-        ],
-        "middleIds": [
-          1986,
-          1987
-        ],
-        "middleIndex": 282,
-        "rightIds": [
-          1988
-        ],
-        "middleOriginId": 1987
-      }
-    },
-    {
-      "startTime": "2025-07-29T16:00:00.000Z",
-      "endTime": "2025-08-03T16:00:00.000Z",
-      "highest": 4185.21,
-      "lowest": 4037.94,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2010,
-        2011,
-        2012,
-        2013
-      ],
-      "originData": [
-        {
-          "id": 2010,
-          "symbol": "000300",
-          "time": "2025-07-29T16:00:00.000Z",
-          "timestamp": 1753804800000,
-          "open": 4148.94,
-          "highest": 4185.21,
-          "lowest": 4127.43,
-          "close": 4151.24,
-          "amount": 44516844
         },
         {
           "id": 2011,
@@ -7983,85 +6200,6 @@
           "close": 4054.93,
           "amount": 35968516
         },
-        {
-          "id": 2013,
-          "symbol": "000300",
-          "time": "2025-08-03T16:00:00.000Z",
-          "timestamp": 1754236800000,
-          "open": 4037.94,
-          "highest": 4070.7,
-          "lowest": 4037.94,
-          "close": 4070.7,
-          "amount": 29597682
-        }
-      ],
-      "independentCount": 4,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4185.21",
-        "lowest": 4063.67,
-        "leftIds": [
-          2009
-        ],
-        "middleIds": [
-          2010
-        ],
-        "middleIndex": 302,
-        "rightIds": [
-          2011
-        ],
-        "middleOriginId": 2010
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4106.3,
-        "lowest": "4037.94",
-        "leftIds": [
-          2012
-        ],
-        "middleIds": [
-          2013
-        ],
-        "middleIndex": 305,
-        "rightIds": [
-          2014
-        ],
-        "middleOriginId": 2013
-      }
-    },
-    {
-      "startTime": "2025-08-03T16:00:00.000Z",
-      "endTime": "2025-09-01T16:00:00.000Z",
-      "highest": 4548.89,
-      "lowest": 4037.94,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        2013,
-        2014,
-        2015,
-        2016,
-        2017,
-        2018,
-        2019,
-        2020,
-        2021,
-        2022,
-        2023,
-        2024,
-        2025,
-        2026,
-        2027,
-        2028,
-        2029,
-        2030,
-        2031,
-        2032,
-        2033,
-        2034
-      ],
-      "originData": [
         {
           "id": 2013,
           "symbol": "000300",
@@ -8303,79 +6441,6 @@
           "lowest": 4454.42,
           "close": 4490.45,
           "amount": 77799928
-        }
-      ],
-      "independentCount": 22,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4106.3,
-        "lowest": "4037.94",
-        "leftIds": [
-          2012
-        ],
-        "middleIds": [
-          2013
-        ],
-        "middleIndex": 305,
-        "rightIds": [
-          2014
-        ],
-        "middleOriginId": 2013
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 4548.89,
-        "lowest": 4427.52,
-        "leftIds": [
-          2032
-        ],
-        "middleIds": [
-          2033,
-          2034
-        ],
-        "middleIndex": 322,
-        "rightIds": [
-          2035
-        ],
-        "middleOriginId": 2034
-      }
-    },
-    {
-      "startTime": "2025-09-01T16:00:00.000Z",
-      "endTime": "2025-09-03T16:00:00.000Z",
-      "highest": 4548.89,
-      "lowest": 4327.51,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2033,
-        2034,
-        2035,
-        2036
-      ],
-      "originData": [
-        {
-          "id": 2033,
-          "symbol": "000300",
-          "time": "2025-08-31T16:00:00.000Z",
-          "timestamp": 1756656000000,
-          "open": 4516.88,
-          "highest": 4528.13,
-          "lowest": 4487.53,
-          "close": 4523.71,
-          "amount": 77037832
-        },
-        {
-          "id": 2034,
-          "symbol": "000300",
-          "time": "2025-09-01T16:00:00.000Z",
-          "timestamp": 1756742400000,
-          "open": 4521.98,
-          "highest": 4548.89,
-          "lowest": 4454.42,
-          "close": 4490.45,
-          "amount": 77799928
         },
         {
           "id": 2035,
@@ -8388,84 +6453,6 @@
           "close": 4459.83,
           "amount": 65569712
         },
-        {
-          "id": 2036,
-          "symbol": "000300",
-          "time": "2025-09-03T16:00:00.000Z",
-          "timestamp": 1756915200000,
-          "open": 4461.25,
-          "highest": 4465.5,
-          "lowest": 4327.51,
-          "close": 4365.21,
-          "amount": 77312456
-        }
-      ],
-      "independentCount": 4,
-      "startFenxing": {
-        "type": "top",
-        "highest": 4548.89,
-        "lowest": 4427.52,
-        "leftIds": [
-          2032
-        ],
-        "middleIds": [
-          2033,
-          2034
-        ],
-        "middleIndex": 322,
-        "rightIds": [
-          2035
-        ],
-        "middleOriginId": 2034
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4510.73,
-        "lowest": "4327.51",
-        "leftIds": [
-          2035
-        ],
-        "middleIds": [
-          2036
-        ],
-        "middleIndex": 324,
-        "rightIds": [
-          2037
-        ],
-        "middleOriginId": 2036
-      }
-    },
-    {
-      "startTime": "2025-09-03T16:00:00.000Z",
-      "endTime": "2025-10-08T16:00:00.000Z",
-      "highest": 4726.34,
-      "lowest": 4327.51,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        2036,
-        2037,
-        2038,
-        2039,
-        2040,
-        2041,
-        2042,
-        2043,
-        2044,
-        2045,
-        2046,
-        2047,
-        2048,
-        2049,
-        2050,
-        2051,
-        2052,
-        2053,
-        2054,
-        2055
-      ],
-      "originData": [
         {
           "id": 2036,
           "symbol": "000300",
@@ -8685,66 +6672,6 @@
           "lowest": 4651.99,
           "close": 4709.48,
           "amount": 86220800
-        }
-      ],
-      "independentCount": 20,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4510.73,
-        "lowest": "4327.51",
-        "leftIds": [
-          2035
-        ],
-        "middleIds": [
-          2036
-        ],
-        "middleIndex": 324,
-        "rightIds": [
-          2037
-        ],
-        "middleOriginId": 2036
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4726.34",
-        "lowest": 4600.96,
-        "leftIds": [
-          2054
-        ],
-        "middleIds": [
-          2055
-        ],
-        "middleIndex": 339,
-        "rightIds": [
-          2056
-        ],
-        "middleOriginId": 2055
-      }
-    },
-    {
-      "startTime": "2025-10-08T16:00:00.000Z",
-      "endTime": "2025-10-12T16:00:00.000Z",
-      "highest": 4726.34,
-      "lowest": 4490.87,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2055,
-        2056,
-        2057
-      ],
-      "originData": [
-        {
-          "id": 2055,
-          "symbol": "000300",
-          "time": "2025-10-08T16:00:00.000Z",
-          "timestamp": 1759939200000,
-          "open": 4662.11,
-          "highest": 4726.34,
-          "lowest": 4651.99,
-          "close": 4709.48,
-          "amount": 86220800
         },
         {
           "id": 2056,
@@ -8757,68 +6684,6 @@
           "close": 4616.83,
           "amount": 79274304
         },
-        {
-          "id": 2057,
-          "symbol": "000300",
-          "time": "2025-10-12T16:00:00.000Z",
-          "timestamp": 1760284800000,
-          "open": 4490.87,
-          "highest": 4601.81,
-          "lowest": 4490.87,
-          "close": 4593.98,
-          "amount": 71400160
-        }
-      ],
-      "independentCount": 3,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4726.34",
-        "lowest": 4600.96,
-        "leftIds": [
-          2054
-        ],
-        "middleIds": [
-          2055
-        ],
-        "middleIndex": 339,
-        "rightIds": [
-          2056
-        ],
-        "middleOriginId": 2055
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4692.59,
-        "lowest": "4490.87",
-        "leftIds": [
-          2056
-        ],
-        "middleIds": [
-          2057
-        ],
-        "middleIndex": 341,
-        "rightIds": [
-          2058,
-          2059
-        ],
-        "middleOriginId": 2057
-      }
-    },
-    {
-      "startTime": "2025-10-12T16:00:00.000Z",
-      "endTime": "2025-10-15T16:00:00.000Z",
-      "highest": 4645.1,
-      "lowest": 4490.87,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2057,
-        2058,
-        2059,
-        2060
-      ],
-      "originData": [
         {
           "id": 2057,
           "symbol": "000300",
@@ -8862,152 +6727,7 @@
           "lowest": 4586.28,
           "close": 4618.42,
           "amount": 56056724
-        }
-      ],
-      "independentCount": 4,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4692.59,
-        "lowest": "4490.87",
-        "leftIds": [
-          2056
-        ],
-        "middleIds": [
-          2057
-        ],
-        "middleIndex": 341,
-        "rightIds": [
-          2058,
-          2059
-        ],
-        "middleOriginId": 2057
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4645.10",
-        "lowest": 4509.33,
-        "leftIds": [
-          2058,
-          2059
-        ],
-        "middleIds": [
-          2060
-        ],
-        "middleIndex": 343,
-        "rightIds": [
-          2061,
-          2062
-        ],
-        "middleOriginId": 2060
-      }
-    },
-    {
-      "startTime": "2025-10-15T16:00:00.000Z",
-      "endTime": "2025-10-16T16:00:00.000Z",
-      "highest": 4645.1,
-      "lowest": 4509.33,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2060,
-        2061,
-        2062
-      ],
-      "originData": [
-        {
-          "id": 2060,
-          "symbol": "000300",
-          "time": "2025-10-15T16:00:00.000Z",
-          "timestamp": 1760544000000,
-          "open": 4588.92,
-          "highest": 4645.1,
-          "lowest": 4586.28,
-          "close": 4618.42,
-          "amount": 56056724
         },
-        {
-          "id": 2061,
-          "symbol": "000300",
-          "time": "2025-10-16T16:00:00.000Z",
-          "timestamp": 1760630400000,
-          "open": 4610.7,
-          "highest": 4618.56,
-          "lowest": 4509.33,
-          "close": 4514.23,
-          "amount": 55908596
-        },
-        {
-          "id": 2062,
-          "symbol": "000300",
-          "time": "2025-10-19T16:00:00.000Z",
-          "timestamp": 1760889600000,
-          "open": 4558.24,
-          "highest": 4570.44,
-          "lowest": 4520.5,
-          "close": 4538.22,
-          "amount": 50579880
-        }
-      ],
-      "independentCount": 3,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4645.10",
-        "lowest": 4509.33,
-        "leftIds": [
-          2058,
-          2059
-        ],
-        "middleIds": [
-          2060
-        ],
-        "middleIndex": 343,
-        "rightIds": [
-          2061,
-          2062
-        ],
-        "middleOriginId": 2060
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4645.1,
-        "lowest": 4509.33,
-        "leftIds": [
-          2060
-        ],
-        "middleIds": [
-          2061,
-          2062
-        ],
-        "middleIndex": 344,
-        "rightIds": [
-          2063,
-          2064
-        ],
-        "middleOriginId": 2061
-      }
-    },
-    {
-      "startTime": "2025-10-16T16:00:00.000Z",
-      "endTime": "2025-10-29T16:00:00.000Z",
-      "highest": 4761.83,
-      "lowest": 4509.33,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        2061,
-        2062,
-        2063,
-        2064,
-        2065,
-        2066,
-        2067,
-        2068,
-        2069,
-        2070
-      ],
-      "originData": [
         {
           "id": 2061,
           "symbol": "000300",
@@ -9119,24 +6839,25 @@
           "amount": 71995624
         }
       ],
-      "independentCount": 10,
+      "independentCount": 90,
       "startFenxing": {
         "type": "bottom",
-        "highest": 4645.1,
-        "lowest": 4509.33,
+        "highest": 3914.16,
+        "lowest": 3827.08,
         "leftIds": [
-          2060
+          1979,
+          1980
         ],
         "middleIds": [
-          2061,
-          2062
+          1981,
+          1982,
+          1983
         ],
-        "middleIndex": 344,
+        "middleIndex": 279,
         "rightIds": [
-          2063,
-          2064
+          1984
         ],
-        "middleOriginId": 2061
+        "middleOriginId": 1983
       },
       "endFenxing": {
         "type": "top",
@@ -9157,9 +6878,9 @@
     },
     {
       "startTime": "2025-10-29T16:00:00.000Z",
-      "endTime": "2025-11-04T16:00:00.000Z",
+      "endTime": "2025-11-23T16:00:00.000Z",
       "highest": 4761.83,
-      "lowest": 4558.76,
+      "lowest": 4421.81,
       "trend": "down",
       "type": "complete",
       "status": 1,
@@ -9168,7 +6889,20 @@
         2071,
         2072,
         2073,
-        2074
+        2074,
+        2075,
+        2076,
+        2077,
+        2078,
+        2079,
+        2080,
+        2081,
+        2082,
+        2083,
+        2084,
+        2085,
+        2086,
+        2087
       ],
       "originData": [
         {
@@ -9215,71 +6949,6 @@
           "close": 4618.7,
           "amount": 50517772
         },
-        {
-          "id": 2074,
-          "symbol": "000300",
-          "time": "2025-11-04T16:00:00.000Z",
-          "timestamp": 1762272000000,
-          "open": 4562.11,
-          "highest": 4642.61,
-          "lowest": 4558.76,
-          "close": 4627.26,
-          "amount": 46836116
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4761.83",
-        "lowest": 4640.67,
-        "leftIds": [
-          2069
-        ],
-        "middleIds": [
-          2070
-        ],
-        "middleIndex": 350,
-        "rightIds": [
-          2071
-        ],
-        "middleOriginId": 2070
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4698.09,
-        "lowest": "4558.76",
-        "leftIds": [
-          2072,
-          2073
-        ],
-        "middleIds": [
-          2074
-        ],
-        "middleIndex": 353,
-        "rightIds": [
-          2075
-        ],
-        "middleOriginId": 2074
-      }
-    },
-    {
-      "startTime": "2025-11-04T16:00:00.000Z",
-      "endTime": "2025-11-12T16:00:00.000Z",
-      "highest": 4703.49,
-      "lowest": 4558.76,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        2074,
-        2075,
-        2076,
-        2077,
-        2078,
-        2079,
-        2080
-      ],
-      "originData": [
         {
           "id": 2074,
           "symbol": "000300",
@@ -9346,72 +7015,6 @@
           "close": 4645.91,
           "amount": 49230884
         },
-        {
-          "id": 2080,
-          "symbol": "000300",
-          "time": "2025-11-12T16:00:00.000Z",
-          "timestamp": 1762963200000,
-          "open": 4643.79,
-          "highest": 4703.49,
-          "lowest": 4643.79,
-          "close": 4702.07,
-          "amount": 51006068
-        }
-      ],
-      "independentCount": 7,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4698.09,
-        "lowest": "4558.76",
-        "leftIds": [
-          2072,
-          2073
-        ],
-        "middleIds": [
-          2074
-        ],
-        "middleIndex": 353,
-        "rightIds": [
-          2075
-        ],
-        "middleOriginId": 2074
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4703.49",
-        "lowest": 4620.99,
-        "leftIds": [
-          2079
-        ],
-        "middleIds": [
-          2080
-        ],
-        "middleIndex": 358,
-        "rightIds": [
-          2081
-        ],
-        "middleOriginId": 2080
-      }
-    },
-    {
-      "startTime": "2025-11-12T16:00:00.000Z",
-      "endTime": "2025-11-23T16:00:00.000Z",
-      "highest": 4703.49,
-      "lowest": 4421.81,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        2080,
-        2081,
-        2082,
-        2083,
-        2084,
-        2085,
-        2086,
-        2087
-      ],
-      "originData": [
         {
           "id": 2080,
           "symbol": "000300",
@@ -9501,22 +7104,22 @@
           "amount": 42580748
         }
       ],
-      "independentCount": 8,
+      "independentCount": 18,
       "startFenxing": {
         "type": "top",
-        "highest": "4703.49",
-        "lowest": 4620.99,
+        "highest": "4761.83",
+        "lowest": 4640.67,
         "leftIds": [
-          2079
+          2069
         ],
         "middleIds": [
-          2080
+          2070
         ],
-        "middleIndex": 358,
+        "middleIndex": 350,
         "rightIds": [
-          2081
+          2071
         ],
-        "middleOriginId": 2080
+        "middleOriginId": 2070
       },
       "endFenxing": {
         "type": "bottom",
@@ -9715,9 +7318,9 @@
     },
     {
       "startTime": "2025-12-07T16:00:00.000Z",
-      "endTime": "2025-12-11T16:00:00.000Z",
+      "endTime": "2025-12-15T16:00:00.000Z",
       "highest": 4640.63,
-      "lowest": 4530.78,
+      "lowest": 4484.27,
       "trend": "down",
       "type": "complete",
       "status": 1,
@@ -9726,7 +7329,9 @@
         2098,
         2099,
         2100,
-        2101
+        2101,
+        2102,
+        2103
       ],
       "originData": [
         {
@@ -9783,127 +7388,7 @@
           "lowest": 4530.78,
           "close": 4580.95,
           "amount": 52386324
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4640.63",
-        "lowest": 4535.02,
-        "leftIds": [
-          2096
-        ],
-        "middleIds": [
-          2097
-        ],
-        "middleIndex": 373,
-        "rightIds": [
-          2098
-        ],
-        "middleOriginId": 2097
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4598.54,
-        "lowest": "4530.78",
-        "leftIds": [
-          2099,
-          2100
-        ],
-        "middleIds": [
-          2101
-        ],
-        "middleIndex": 376,
-        "rightIds": [
-          2102
-        ],
-        "middleOriginId": 2101
-      }
-    },
-    {
-      "startTime": "2025-12-11T16:00:00.000Z",
-      "endTime": "2025-12-14T16:00:00.000Z",
-      "highest": 4595.05,
-      "lowest": 4530.78,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2101,
-        2102
-      ],
-      "originData": [
-        {
-          "id": 2101,
-          "symbol": "000300",
-          "time": "2025-12-11T16:00:00.000Z",
-          "timestamp": 1765468800000,
-          "open": 4558.74,
-          "highest": 4583.68,
-          "lowest": 4530.78,
-          "close": 4580.95,
-          "amount": 52386324
         },
-        {
-          "id": 2102,
-          "symbol": "000300",
-          "time": "2025-12-14T16:00:00.000Z",
-          "timestamp": 1765728000000,
-          "open": 4550,
-          "highest": 4595.05,
-          "lowest": 4548.44,
-          "close": 4552.06,
-          "amount": 42438340
-        }
-      ],
-      "independentCount": 2,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4598.54,
-        "lowest": "4530.78",
-        "leftIds": [
-          2099,
-          2100
-        ],
-        "middleIds": [
-          2101
-        ],
-        "middleIndex": 376,
-        "rightIds": [
-          2102
-        ],
-        "middleOriginId": 2101
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4595.05",
-        "lowest": 4484.27,
-        "leftIds": [
-          2101
-        ],
-        "middleIds": [
-          2102
-        ],
-        "middleIndex": 377,
-        "rightIds": [
-          2103
-        ],
-        "middleOriginId": 2102
-      }
-    },
-    {
-      "startTime": "2025-12-14T16:00:00.000Z",
-      "endTime": "2025-12-15T16:00:00.000Z",
-      "highest": 4595.05,
-      "lowest": 4484.27,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2102,
-        2103
-      ],
-      "originData": [
         {
           "id": 2102,
           "symbol": "000300",
@@ -9927,22 +7412,22 @@
           "amount": 39050012
         }
       ],
-      "independentCount": 2,
+      "independentCount": 7,
       "startFenxing": {
         "type": "top",
-        "highest": "4595.05",
-        "lowest": 4484.27,
+        "highest": "4640.63",
+        "lowest": 4535.02,
         "leftIds": [
-          2101
+          2096
         ],
         "middleIds": [
-          2102
+          2097
         ],
-        "middleIndex": 377,
+        "middleIndex": 373,
         "rightIds": [
-          2103
+          2098
         ],
-        "middleOriginId": 2102
+        "middleOriginId": 2097
       },
       "endFenxing": {
         "type": "bottom",
@@ -9965,8 +7450,8 @@
     },
     {
       "startTime": "2025-12-15T16:00:00.000Z",
-      "endTime": "2025-12-22T16:00:00.000Z",
-      "highest": 4644.53,
+      "endTime": "2025-12-25T16:00:00.000Z",
+      "highest": 4676.13,
       "lowest": 4484.27,
       "trend": "up",
       "type": "complete",
@@ -9977,7 +7462,10 @@
         2105,
         2106,
         2107,
-        2108
+        2108,
+        2109,
+        2110,
+        2111
       ],
       "originData": [
         {
@@ -10045,128 +7533,7 @@
           "lowest": 4607.8,
           "close": 4620.73,
           "amount": 43314132
-        }
-      ],
-      "independentCount": 6,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4595.05,
-        "lowest": "4484.27",
-        "leftIds": [
-          2102
-        ],
-        "middleIds": [
-          2103
-        ],
-        "middleIndex": 378,
-        "rightIds": [
-          2104,
-          2105,
-          2106
-        ],
-        "middleOriginId": 2103
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4644.53",
-        "lowest": 4587.67,
-        "leftIds": [
-          2107
-        ],
-        "middleIds": [
-          2108
-        ],
-        "middleIndex": 381,
-        "rightIds": [
-          2109
-        ],
-        "middleOriginId": 2108
-      }
-    },
-    {
-      "startTime": "2025-12-22T16:00:00.000Z",
-      "endTime": "2025-12-23T16:00:00.000Z",
-      "highest": 4644.53,
-      "lowest": 4602.14,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2108,
-        2109
-      ],
-      "originData": [
-        {
-          "id": 2108,
-          "symbol": "000300",
-          "time": "2025-12-22T16:00:00.000Z",
-          "timestamp": 1766419200000,
-          "open": 4616.03,
-          "highest": 4644.53,
-          "lowest": 4607.8,
-          "close": 4620.73,
-          "amount": 43314132
         },
-        {
-          "id": 2109,
-          "symbol": "000300",
-          "time": "2025-12-23T16:00:00.000Z",
-          "timestamp": 1766505600000,
-          "open": 4623.68,
-          "highest": 4639.43,
-          "lowest": 4602.14,
-          "close": 4634.06,
-          "amount": 40637564
-        }
-      ],
-      "independentCount": 2,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4644.53",
-        "lowest": 4587.67,
-        "leftIds": [
-          2107
-        ],
-        "middleIds": [
-          2108
-        ],
-        "middleIndex": 381,
-        "rightIds": [
-          2109
-        ],
-        "middleOriginId": 2108
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4651.15,
-        "lowest": "4602.14",
-        "leftIds": [
-          2108
-        ],
-        "middleIds": [
-          2109
-        ],
-        "middleIndex": 382,
-        "rightIds": [
-          2110
-        ],
-        "middleOriginId": 2109
-      }
-    },
-    {
-      "startTime": "2025-12-23T16:00:00.000Z",
-      "endTime": "2025-12-25T16:00:00.000Z",
-      "highest": 4676.13,
-      "lowest": 4602.14,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        2109,
-        2110,
-        2111
-      ],
-      "originData": [
         {
           "id": 2109,
           "symbol": "000300",
@@ -10201,22 +7568,24 @@
           "amount": 46042692
         }
       ],
-      "independentCount": 3,
+      "independentCount": 9,
       "startFenxing": {
         "type": "bottom",
-        "highest": 4651.15,
-        "lowest": "4602.14",
+        "highest": 4595.05,
+        "lowest": "4484.27",
         "leftIds": [
-          2108
+          2102
         ],
         "middleIds": [
-          2109
+          2103
         ],
-        "middleIndex": 382,
+        "middleIndex": 378,
         "rightIds": [
-          2110
+          2104,
+          2105,
+          2106
         ],
-        "middleOriginId": 2109
+        "middleOriginId": 2103
       },
       "endFenxing": {
         "type": "top",
@@ -14452,9 +11821,9 @@
     },
     {
       "startTime": "2025-01-12T16:00:00.000Z",
-      "endTime": "2025-07-29T16:00:00.000Z",
-      "highest": 4185.21,
-      "lowest": 3514.12,
+      "endTime": "2025-02-23T16:00:00.000Z",
+      "highest": 3995.95,
+      "lowest": 3704.11,
       "trend": "up",
       "type": "complete",
       "status": 1,
@@ -14483,114 +11852,7 @@
         1900,
         1901,
         1902,
-        1903,
-        1904,
-        1905,
-        1906,
-        1907,
-        1908,
-        1909,
-        1910,
-        1911,
-        1912,
-        1913,
-        1914,
-        1915,
-        1916,
-        1917,
-        1918,
-        1919,
-        1920,
-        1921,
-        1922,
-        1923,
-        1924,
-        1925,
-        1926,
-        1927,
-        1928,
-        1929,
-        1930,
-        1931,
-        1932,
-        1933,
-        1934,
-        1935,
-        1936,
-        1937,
-        1938,
-        1939,
-        1940,
-        1941,
-        1942,
-        1943,
-        1944,
-        1945,
-        1946,
-        1947,
-        1948,
-        1949,
-        1950,
-        1951,
-        1952,
-        1953,
-        1954,
-        1955,
-        1956,
-        1957,
-        1958,
-        1959,
-        1960,
-        1961,
-        1962,
-        1963,
-        1964,
-        1965,
-        1966,
-        1967,
-        1968,
-        1969,
-        1970,
-        1971,
-        1972,
-        1973,
-        1974,
-        1975,
-        1976,
-        1977,
-        1978,
-        1979,
-        1980,
-        1981,
-        1982,
-        1983,
-        1984,
-        1985,
-        1986,
-        1987,
-        1988,
-        1989,
-        1990,
-        1991,
-        1992,
-        1993,
-        1994,
-        1995,
-        1996,
-        1997,
-        1998,
-        1999,
-        2000,
-        2001,
-        2002,
-        2003,
-        2004,
-        2005,
-        2006,
-        2007,
-        2008,
-        2009,
-        2010
+        1903
       ],
       "originData": [
         {
@@ -14867,1186 +12129,9 @@
           "lowest": 3949.23,
           "close": 3969.72,
           "amount": 45508872
-        },
-        {
-          "id": 1904,
-          "symbol": "000300",
-          "time": "2025-02-24T16:00:00.000Z",
-          "timestamp": 1740412800000,
-          "open": 3933.64,
-          "highest": 3955.43,
-          "lowest": 3915.65,
-          "close": 3925.65,
-          "amount": 37798144
-        },
-        {
-          "id": 1905,
-          "symbol": "000300",
-          "time": "2025-02-25T16:00:00.000Z",
-          "timestamp": 1740499200000,
-          "open": 3931.84,
-          "highest": 3960.33,
-          "lowest": 3925.37,
-          "close": 3959.94,
-          "amount": 38645820
-        },
-        {
-          "id": 1906,
-          "symbol": "000300",
-          "time": "2025-02-26T16:00:00.000Z",
-          "timestamp": 1740585600000,
-          "open": 3961.06,
-          "highest": 3973.93,
-          "lowest": 3933.46,
-          "close": 3968.12,
-          "amount": 42827276
-        },
-        {
-          "id": 1907,
-          "symbol": "000300",
-          "time": "2025-02-27T16:00:00.000Z",
-          "timestamp": 1740672000000,
-          "open": 3950.19,
-          "highest": 3972.48,
-          "lowest": 3886.4,
-          "close": 3890.05,
-          "amount": 42030804
-        },
-        {
-          "id": 1908,
-          "symbol": "000300",
-          "time": "2025-03-02T16:00:00.000Z",
-          "timestamp": 1740931200000,
-          "open": 3899.7,
-          "highest": 3930,
-          "lowest": 3872.59,
-          "close": 3888.47,
-          "amount": 35605776
-        },
-        {
-          "id": 1909,
-          "symbol": "000300",
-          "time": "2025-03-03T16:00:00.000Z",
-          "timestamp": 1741017600000,
-          "open": 3865.99,
-          "highest": 3890.42,
-          "lowest": 3855.73,
-          "close": 3885.22,
-          "amount": 29773926
-        },
-        {
-          "id": 1910,
-          "symbol": "000300",
-          "time": "2025-03-04T16:00:00.000Z",
-          "timestamp": 1741104000000,
-          "open": 3887.8,
-          "highest": 3906.42,
-          "lowest": 3877.02,
-          "close": 3902.57,
-          "amount": 29086050
-        },
-        {
-          "id": 1911,
-          "symbol": "000300",
-          "time": "2025-03-05T16:00:00.000Z",
-          "timestamp": 1741190400000,
-          "open": 3923.38,
-          "highest": 3964.49,
-          "lowest": 3917.08,
-          "close": 3956.24,
-          "amount": 39741940
-        },
-        {
-          "id": 1912,
-          "symbol": "000300",
-          "time": "2025-03-06T16:00:00.000Z",
-          "timestamp": 1741276800000,
-          "open": 3944.91,
-          "highest": 3967.07,
-          "lowest": 3935.05,
-          "close": 3944.01,
-          "amount": 34062672
-        },
-        {
-          "id": 1913,
-          "symbol": "000300",
-          "time": "2025-03-09T16:00:00.000Z",
-          "timestamp": 1741536000000,
-          "open": 3945.58,
-          "highest": 3949.14,
-          "lowest": 3905.13,
-          "close": 3928.8,
-          "amount": 29257498
-        },
-        {
-          "id": 1914,
-          "symbol": "000300",
-          "time": "2025-03-10T16:00:00.000Z",
-          "timestamp": 1741622400000,
-          "open": 3890.43,
-          "highest": 3941.42,
-          "lowest": 3889.43,
-          "close": 3941.42,
-          "amount": 28748044
-        },
-        {
-          "id": 1915,
-          "symbol": "000300",
-          "time": "2025-03-11T16:00:00.000Z",
-          "timestamp": 1741708800000,
-          "open": 3946.86,
-          "highest": 3953.61,
-          "lowest": 3921.47,
-          "close": 3927.23,
-          "amount": 30962726
-        },
-        {
-          "id": 1916,
-          "symbol": "000300",
-          "time": "2025-03-12T16:00:00.000Z",
-          "timestamp": 1741795200000,
-          "open": 3925.74,
-          "highest": 3939.29,
-          "lowest": 3897.38,
-          "close": 3911.58,
-          "amount": 29517312
-        },
-        {
-          "id": 1917,
-          "symbol": "000300",
-          "time": "2025-03-13T16:00:00.000Z",
-          "timestamp": 1741881600000,
-          "open": 3919.62,
-          "highest": 4014.16,
-          "lowest": 3919.62,
-          "close": 4006.56,
-          "amount": 45089528
-        },
-        {
-          "id": 1918,
-          "symbol": "000300",
-          "time": "2025-03-16T16:00:00.000Z",
-          "timestamp": 1742140800000,
-          "open": 4020.64,
-          "highest": 4021.73,
-          "lowest": 3992.26,
-          "close": 3996.79,
-          "amount": 31890440
-        },
-        {
-          "id": 1919,
-          "symbol": "000300",
-          "time": "2025-03-17T16:00:00.000Z",
-          "timestamp": 1742227200000,
-          "open": 4011.78,
-          "highest": 4016.87,
-          "lowest": 3995.96,
-          "close": 4007.72,
-          "amount": 29273932
-        },
-        {
-          "id": 1920,
-          "symbol": "000300",
-          "time": "2025-03-18T16:00:00.000Z",
-          "timestamp": 1742313600000,
-          "open": 4004.83,
-          "highest": 4025.3,
-          "lowest": 3989.51,
-          "close": 4010.17,
-          "amount": 28607528
-        },
-        {
-          "id": 1921,
-          "symbol": "000300",
-          "time": "2025-03-19T16:00:00.000Z",
-          "timestamp": 1742400000000,
-          "open": 4011.06,
-          "highest": 4012.04,
-          "lowest": 3969.93,
-          "close": 3974.99,
-          "amount": 26002068
-        },
-        {
-          "id": 1922,
-          "symbol": "000300",
-          "time": "2025-03-20T16:00:00.000Z",
-          "timestamp": 1742486400000,
-          "open": 3966.51,
-          "highest": 3983.15,
-          "lowest": 3904.77,
-          "close": 3914.7,
-          "amount": 30934860
-        },
-        {
-          "id": 1923,
-          "symbol": "000300",
-          "time": "2025-03-23T16:00:00.000Z",
-          "timestamp": 1742745600000,
-          "open": 3916.11,
-          "highest": 3938.18,
-          "lowest": 3907.2,
-          "close": 3934.85,
-          "amount": 26605144
-        },
-        {
-          "id": 1924,
-          "symbol": "000300",
-          "time": "2025-03-24T16:00:00.000Z",
-          "timestamp": 1742832000000,
-          "open": 3937.9,
-          "highest": 3946.36,
-          "lowest": 3921.53,
-          "close": 3932.3,
-          "amount": 23924632
-        },
-        {
-          "id": 1925,
-          "symbol": "000300",
-          "time": "2025-03-25T16:00:00.000Z",
-          "timestamp": 1742918400000,
-          "open": 3930.21,
-          "highest": 3942.03,
-          "lowest": 3916.86,
-          "close": 3919.36,
-          "amount": 22094318
-        },
-        {
-          "id": 1926,
-          "symbol": "000300",
-          "time": "2025-03-26T16:00:00.000Z",
-          "timestamp": 1743004800000,
-          "open": 3911.38,
-          "highest": 3952.99,
-          "lowest": 3903.65,
-          "close": 3932.41,
-          "amount": 23217362
-        },
-        {
-          "id": 1927,
-          "symbol": "000300",
-          "time": "2025-03-27T16:00:00.000Z",
-          "timestamp": 1743091200000,
-          "open": 3930.78,
-          "highest": 3934.23,
-          "lowest": 3907.38,
-          "close": 3915.17,
-          "amount": 21337918
-        },
-        {
-          "id": 1928,
-          "symbol": "000300",
-          "time": "2025-03-30T16:00:00.000Z",
-          "timestamp": 1743350400000,
-          "open": 3905.98,
-          "highest": 3928.45,
-          "lowest": 3872.4,
-          "close": 3887.31,
-          "amount": 26848032
-        },
-        {
-          "id": 1929,
-          "symbol": "000300",
-          "time": "2025-03-31T16:00:00.000Z",
-          "timestamp": 1743436800000,
-          "open": 3892.78,
-          "highest": 3905.26,
-          "lowest": 3882.4,
-          "close": 3887.68,
-          "amount": 24604168
-        },
-        {
-          "id": 1930,
-          "symbol": "000300",
-          "time": "2025-04-01T16:00:00.000Z",
-          "timestamp": 1743523200000,
-          "open": 3884.42,
-          "highest": 3900.49,
-          "lowest": 3877.16,
-          "close": 3884.39,
-          "amount": 19826752
-        },
-        {
-          "id": 1931,
-          "symbol": "000300",
-          "time": "2025-04-02T16:00:00.000Z",
-          "timestamp": 1743609600000,
-          "open": 3843.42,
-          "highest": 3883.7,
-          "lowest": 3843.42,
-          "close": 3861.5,
-          "amount": 26368468
-        },
-        {
-          "id": 1932,
-          "symbol": "000300",
-          "time": "2025-04-06T16:00:00.000Z",
-          "timestamp": 1743955200000,
-          "open": 3675.2,
-          "highest": 3707.78,
-          "lowest": 3514.12,
-          "close": 3589.44,
-          "amount": 51297180
-        },
-        {
-          "id": 1933,
-          "symbol": "000300",
-          "time": "2025-04-07T16:00:00.000Z",
-          "timestamp": 1744041600000,
-          "open": 3597.99,
-          "highest": 3650.76,
-          "lowest": 3583.87,
-          "close": 3650.76,
-          "amount": 46402108
-        },
-        {
-          "id": 1934,
-          "symbol": "000300",
-          "time": "2025-04-08T16:00:00.000Z",
-          "timestamp": 1744128000000,
-          "open": 3606.1,
-          "highest": 3686.79,
-          "lowest": 3587.34,
-          "close": 3686.79,
-          "amount": 45503108
-        },
-        {
-          "id": 1935,
-          "symbol": "000300",
-          "time": "2025-04-09T16:00:00.000Z",
-          "timestamp": 1744214400000,
-          "open": 3749.13,
-          "highest": 3756.14,
-          "lowest": 3708.82,
-          "close": 3735.12,
-          "amount": 40384256
-        },
-        {
-          "id": 1936,
-          "symbol": "000300",
-          "time": "2025-04-10T16:00:00.000Z",
-          "timestamp": 1744300800000,
-          "open": 3730.31,
-          "highest": 3762.37,
-          "lowest": 3708.46,
-          "close": 3750.52,
-          "amount": 31853514
-        },
-        {
-          "id": 1937,
-          "symbol": "000300",
-          "time": "2025-04-13T16:00:00.000Z",
-          "timestamp": 1744560000000,
-          "open": 3772.04,
-          "highest": 3776.63,
-          "lowest": 3754.03,
-          "close": 3759.14,
-          "amount": 29257128
-        },
-        {
-          "id": 1938,
-          "symbol": "000300",
-          "time": "2025-04-14T16:00:00.000Z",
-          "timestamp": 1744646400000,
-          "open": 3756.48,
-          "highest": 3764.49,
-          "lowest": 3737.85,
-          "close": 3761.23,
-          "amount": 22860462
-        },
-        {
-          "id": 1939,
-          "symbol": "000300",
-          "time": "2025-04-15T16:00:00.000Z",
-          "timestamp": 1744732800000,
-          "open": 3757.88,
-          "highest": 3775.17,
-          "lowest": 3721.6,
-          "close": 3772.82,
-          "amount": 26171110
-        },
-        {
-          "id": 1940,
-          "symbol": "000300",
-          "time": "2025-04-16T16:00:00.000Z",
-          "timestamp": 1744819200000,
-          "open": 3755.09,
-          "highest": 3779.13,
-          "lowest": 3749.5,
-          "close": 3772.22,
-          "amount": 20901232
-        },
-        {
-          "id": 1941,
-          "symbol": "000300",
-          "time": "2025-04-17T16:00:00.000Z",
-          "timestamp": 1744905600000,
-          "open": 3760.04,
-          "highest": 3782.04,
-          "lowest": 3754.41,
-          "close": 3772.52,
-          "amount": 17310938
-        },
-        {
-          "id": 1942,
-          "symbol": "000300",
-          "time": "2025-04-20T16:00:00.000Z",
-          "timestamp": 1745164800000,
-          "open": 3768.14,
-          "highest": 3790.18,
-          "lowest": 3763.14,
-          "close": 3784.88,
-          "amount": 20808568
-        },
-        {
-          "id": 1943,
-          "symbol": "000300",
-          "time": "2025-04-21T16:00:00.000Z",
-          "timestamp": 1745251200000,
-          "open": 3780.11,
-          "highest": 3799.23,
-          "lowest": 3778.08,
-          "close": 3783.95,
-          "amount": 21020070
-        },
-        {
-          "id": 1944,
-          "symbol": "000300",
-          "time": "2025-04-22T16:00:00.000Z",
-          "timestamp": 1745337600000,
-          "open": 3803.43,
-          "highest": 3807.95,
-          "lowest": 3780.52,
-          "close": 3786.88,
-          "amount": 24711738
-        },
-        {
-          "id": 1945,
-          "symbol": "000300",
-          "time": "2025-04-23T16:00:00.000Z",
-          "timestamp": 1745424000000,
-          "open": 3787.46,
-          "highest": 3807.26,
-          "lowest": 3775.21,
-          "close": 3784.36,
-          "amount": 20548304
-        },
-        {
-          "id": 1946,
-          "symbol": "000300",
-          "time": "2025-04-24T16:00:00.000Z",
-          "timestamp": 1745510400000,
-          "open": 3792.08,
-          "highest": 3801.58,
-          "lowest": 3780.78,
-          "close": 3786.99,
-          "amount": 22053504
-        },
-        {
-          "id": 1947,
-          "symbol": "000300",
-          "time": "2025-04-27T16:00:00.000Z",
-          "timestamp": 1745769600000,
-          "open": 3786.39,
-          "highest": 3792.01,
-          "lowest": 3772.8,
-          "close": 3781.62,
-          "amount": 21063532
-        },
-        {
-          "id": 1948,
-          "symbol": "000300",
-          "time": "2025-04-28T16:00:00.000Z",
-          "timestamp": 1745856000000,
-          "open": 3776,
-          "highest": 3785.32,
-          "lowest": 3768.03,
-          "close": 3775.08,
-          "amount": 19746274
-        },
-        {
-          "id": 1949,
-          "symbol": "000300",
-          "time": "2025-04-29T16:00:00.000Z",
-          "timestamp": 1745942400000,
-          "open": 3775.83,
-          "highest": 3787.56,
-          "lowest": 3768.76,
-          "close": 3770.57,
-          "amount": 24482046
-        },
-        {
-          "id": 1950,
-          "symbol": "000300",
-          "time": "2025-05-05T16:00:00.000Z",
-          "timestamp": 1746460800000,
-          "open": 3794.38,
-          "highest": 3809.09,
-          "lowest": 3782.78,
-          "close": 3808.54,
-          "amount": 26793708
-        },
-        {
-          "id": 1951,
-          "symbol": "000300",
-          "time": "2025-05-06T16:00:00.000Z",
-          "timestamp": 1746547200000,
-          "open": 3861.58,
-          "highest": 3863.68,
-          "lowest": 3814.99,
-          "close": 3831.63,
-          "amount": 28601074
-        },
-        {
-          "id": 1952,
-          "symbol": "000300",
-          "time": "2025-05-07T16:00:00.000Z",
-          "timestamp": 1746633600000,
-          "open": 3820.55,
-          "highest": 3867.33,
-          "lowest": 3816.26,
-          "close": 3852.9,
-          "amount": 24698728
-        },
-        {
-          "id": 1953,
-          "symbol": "000300",
-          "time": "2025-05-08T16:00:00.000Z",
-          "timestamp": 1746720000000,
-          "open": 3848.62,
-          "highest": 3853.66,
-          "lowest": 3836.53,
-          "close": 3846.16,
-          "amount": 21669794
-        },
-        {
-          "id": 1954,
-          "symbol": "000300",
-          "time": "2025-05-11T16:00:00.000Z",
-          "timestamp": 1746979200000,
-          "open": 3866.53,
-          "highest": 3890.73,
-          "lowest": 3859.03,
-          "close": 3890.61,
-          "amount": 29612294
-        },
-        {
-          "id": 1955,
-          "symbol": "000300",
-          "time": "2025-05-12T16:00:00.000Z",
-          "timestamp": 1747065600000,
-          "open": 3915.59,
-          "highest": 3915.59,
-          "lowest": 3890.69,
-          "close": 3896.26,
-          "amount": 26758640
-        },
-        {
-          "id": 1956,
-          "symbol": "000300",
-          "time": "2025-05-13T16:00:00.000Z",
-          "timestamp": 1747152000000,
-          "open": 3894.84,
-          "highest": 3960.52,
-          "lowest": 3890.65,
-          "close": 3943.21,
-          "amount": 31946522
-        },
-        {
-          "id": 1957,
-          "symbol": "000300",
-          "time": "2025-05-14T16:00:00.000Z",
-          "timestamp": 1747238400000,
-          "open": 3934.03,
-          "highest": 3936.47,
-          "lowest": 3904.91,
-          "close": 3907.2,
-          "amount": 24146496
-        },
-        {
-          "id": 1958,
-          "symbol": "000300",
-          "time": "2025-05-15T16:00:00.000Z",
-          "timestamp": 1747324800000,
-          "open": 3898.67,
-          "highest": 3903.85,
-          "lowest": 3874.86,
-          "close": 3889.09,
-          "amount": 20883566
-        },
-        {
-          "id": 1959,
-          "symbol": "000300",
-          "time": "2025-05-18T16:00:00.000Z",
-          "timestamp": 1747584000000,
-          "open": 3882.57,
-          "highest": 3885.59,
-          "lowest": 3866.57,
-          "close": 3877.15,
-          "amount": 18488816
-        },
-        {
-          "id": 1960,
-          "symbol": "000300",
-          "time": "2025-05-19T16:00:00.000Z",
-          "timestamp": 1747670400000,
-          "open": 3883.1,
-          "highest": 3911.47,
-          "lowest": 3881.74,
-          "close": 3898.17,
-          "amount": 20163670
-        },
-        {
-          "id": 1961,
-          "symbol": "000300",
-          "time": "2025-05-20T16:00:00.000Z",
-          "timestamp": 1747756800000,
-          "open": 3899.44,
-          "highest": 3928.63,
-          "lowest": 3899.44,
-          "close": 3916.38,
-          "amount": 21703774
-        },
-        {
-          "id": 1962,
-          "symbol": "000300",
-          "time": "2025-05-21T16:00:00.000Z",
-          "timestamp": 1747843200000,
-          "open": 3912.6,
-          "highest": 3923.02,
-          "lowest": 3903.09,
-          "close": 3913.87,
-          "amount": 19751142
-        },
-        {
-          "id": 1963,
-          "symbol": "000300",
-          "time": "2025-05-22T16:00:00.000Z",
-          "timestamp": 1747929600000,
-          "open": 3910.37,
-          "highest": 3931.55,
-          "lowest": 3882.27,
-          "close": 3882.27,
-          "amount": 23294538
-        },
-        {
-          "id": 1964,
-          "symbol": "000300",
-          "time": "2025-05-25T16:00:00.000Z",
-          "timestamp": 1748188800000,
-          "open": 3875.79,
-          "highest": 3884.54,
-          "lowest": 3849.04,
-          "close": 3860.11,
-          "amount": 20887680
-        },
-        {
-          "id": 1965,
-          "symbol": "000300",
-          "time": "2025-05-26T16:00:00.000Z",
-          "timestamp": 1748275200000,
-          "open": 3857.63,
-          "highest": 3865.43,
-          "lowest": 3834.85,
-          "close": 3839.4,
-          "amount": 17846676
-        },
-        {
-          "id": 1966,
-          "symbol": "000300",
-          "time": "2025-05-27T16:00:00.000Z",
-          "timestamp": 1748361600000,
-          "open": 3843.07,
-          "highest": 3849.74,
-          "lowest": 3833.96,
-          "close": 3836.24,
-          "amount": 16249636
-        },
-        {
-          "id": 1967,
-          "symbol": "000300",
-          "time": "2025-05-28T16:00:00.000Z",
-          "timestamp": 1748448000000,
-          "open": 3838.01,
-          "highest": 3869.79,
-          "lowest": 3831.46,
-          "close": 3858.7,
-          "amount": 20945960
-        },
-        {
-          "id": 1968,
-          "symbol": "000300",
-          "time": "2025-05-29T16:00:00.000Z",
-          "timestamp": 1748534400000,
-          "open": 3850.49,
-          "highest": 3858.61,
-          "lowest": 3829.25,
-          "close": 3840.23,
-          "amount": 19938976
-        },
-        {
-          "id": 1969,
-          "symbol": "000300",
-          "time": "2025-06-02T16:00:00.000Z",
-          "timestamp": 1748880000000,
-          "open": 3833.46,
-          "highest": 3863.3,
-          "lowest": 3832.72,
-          "close": 3852.01,
-          "amount": 22678278
-        },
-        {
-          "id": 1970,
-          "symbol": "000300",
-          "time": "2025-06-03T16:00:00.000Z",
-          "timestamp": 1748966400000,
-          "open": 3855.49,
-          "highest": 3875.86,
-          "lowest": 3855.49,
-          "close": 3868.74,
-          "amount": 21173618
-        },
-        {
-          "id": 1971,
-          "symbol": "000300",
-          "time": "2025-06-04T16:00:00.000Z",
-          "timestamp": 1749052800000,
-          "open": 3872.64,
-          "highest": 3883.13,
-          "lowest": 3861.27,
-          "close": 3877.56,
-          "amount": 23174928
-        },
-        {
-          "id": 1972,
-          "symbol": "000300",
-          "time": "2025-06-05T16:00:00.000Z",
-          "timestamp": 1749139200000,
-          "open": 3878.1,
-          "highest": 3889.46,
-          "lowest": 3869.39,
-          "close": 3873.98,
-          "amount": 20203474
-        },
-        {
-          "id": 1973,
-          "symbol": "000300",
-          "time": "2025-06-08T16:00:00.000Z",
-          "timestamp": 1749398400000,
-          "open": 3877.8,
-          "highest": 3894.65,
-          "lowest": 3871.99,
-          "close": 3885.25,
-          "amount": 26202368
-        },
-        {
-          "id": 1974,
-          "symbol": "000300",
-          "time": "2025-06-09T16:00:00.000Z",
-          "timestamp": 1749484800000,
-          "open": 3887.55,
-          "highest": 3897.46,
-          "lowest": 3850.47,
-          "close": 3865.47,
-          "amount": 26364756
-        },
-        {
-          "id": 1975,
-          "symbol": "000300",
-          "time": "2025-06-10T16:00:00.000Z",
-          "timestamp": 1749571200000,
-          "open": 3870.67,
-          "highest": 3911.61,
-          "lowest": 3870.67,
-          "close": 3894.63,
-          "amount": 25721770
-        },
-        {
-          "id": 1976,
-          "symbol": "000300",
-          "time": "2025-06-11T16:00:00.000Z",
-          "timestamp": 1749657600000,
-          "open": 3885.52,
-          "highest": 3900.04,
-          "lowest": 3870.38,
-          "close": 3892.2,
-          "amount": 26023958
-        },
-        {
-          "id": 1977,
-          "symbol": "000300",
-          "time": "2025-06-12T16:00:00.000Z",
-          "timestamp": 1749744000000,
-          "open": 3881.49,
-          "highest": 3889.16,
-          "lowest": 3853.82,
-          "close": 3864.18,
-          "amount": 30917234
-        },
-        {
-          "id": 1978,
-          "symbol": "000300",
-          "time": "2025-06-15T16:00:00.000Z",
-          "timestamp": 1750003200000,
-          "open": 3853.62,
-          "highest": 3876.17,
-          "lowest": 3853.62,
-          "close": 3873.8,
-          "amount": 24686098
-        },
-        {
-          "id": 1979,
-          "symbol": "000300",
-          "time": "2025-06-16T16:00:00.000Z",
-          "timestamp": 1750089600000,
-          "open": 3875.18,
-          "highest": 3880.42,
-          "lowest": 3860.41,
-          "close": 3870.38,
-          "amount": 22039982
-        },
-        {
-          "id": 1980,
-          "symbol": "000300",
-          "time": "2025-06-17T16:00:00.000Z",
-          "timestamp": 1750176000000,
-          "open": 3871.65,
-          "highest": 3881.35,
-          "lowest": 3854.66,
-          "close": 3874.97,
-          "amount": 23055386
-        },
-        {
-          "id": 1981,
-          "symbol": "000300",
-          "time": "2025-06-18T16:00:00.000Z",
-          "timestamp": 1750262400000,
-          "open": 3870.05,
-          "highest": 3872.94,
-          "lowest": 3834.95,
-          "close": 3843.09,
-          "amount": 23484018
-        },
-        {
-          "id": 1982,
-          "symbol": "000300",
-          "time": "2025-06-19T16:00:00.000Z",
-          "timestamp": 1750348800000,
-          "open": 3839.78,
-          "highest": 3856.48,
-          "lowest": 3839.78,
-          "close": 3846.64,
-          "amount": 21352282
-        },
-        {
-          "id": 1983,
-          "symbol": "000300",
-          "time": "2025-06-22T16:00:00.000Z",
-          "timestamp": 1750608000000,
-          "open": 3831.17,
-          "highest": 3867.59,
-          "lowest": 3827.08,
-          "close": 3857.9,
-          "amount": 23248220
-        },
-        {
-          "id": 1984,
-          "symbol": "000300",
-          "time": "2025-06-23T16:00:00.000Z",
-          "timestamp": 1750694400000,
-          "open": 3862.39,
-          "highest": 3914.16,
-          "lowest": 3862.39,
-          "close": 3904.03,
-          "amount": 29422872
-        },
-        {
-          "id": 1985,
-          "symbol": "000300",
-          "time": "2025-06-24T16:00:00.000Z",
-          "timestamp": 1750780800000,
-          "open": 3907.07,
-          "highest": 3963.04,
-          "lowest": 3902.18,
-          "close": 3960.07,
-          "amount": 36172728
-        },
-        {
-          "id": 1986,
-          "symbol": "000300",
-          "time": "2025-06-25T16:00:00.000Z",
-          "timestamp": 1750867200000,
-          "open": 3953.16,
-          "highest": 3964.48,
-          "lowest": 3945.26,
-          "close": 3946.02,
-          "amount": 32810284
-        },
-        {
-          "id": 1987,
-          "symbol": "000300",
-          "time": "2025-06-26T16:00:00.000Z",
-          "timestamp": 1750953600000,
-          "open": 3949.79,
-          "highest": 3969.26,
-          "lowest": 3918.2,
-          "close": 3921.76,
-          "amount": 34346824
-        },
-        {
-          "id": 1988,
-          "symbol": "000300",
-          "time": "2025-06-29T16:00:00.000Z",
-          "timestamp": 1751212800000,
-          "open": 3920.31,
-          "highest": 3940.36,
-          "lowest": 3911.6,
-          "close": 3936.08,
-          "amount": 28882144
-        },
-        {
-          "id": 1989,
-          "symbol": "000300",
-          "time": "2025-06-30T16:00:00.000Z",
-          "timestamp": 1751299200000,
-          "open": 3935.91,
-          "highest": 3946.25,
-          "lowest": 3924.72,
-          "close": 3942.76,
-          "amount": 23607034
-        },
-        {
-          "id": 1990,
-          "symbol": "000300",
-          "time": "2025-07-01T16:00:00.000Z",
-          "timestamp": 1751385600000,
-          "open": 3943.32,
-          "highest": 3952.14,
-          "lowest": 3929.7,
-          "close": 3943.68,
-          "amount": 24663786
-        },
-        {
-          "id": 1991,
-          "symbol": "000300",
-          "time": "2025-07-02T16:00:00.000Z",
-          "timestamp": 1751472000000,
-          "open": 3949.4,
-          "highest": 3971.62,
-          "lowest": 3945.14,
-          "close": 3968.07,
-          "amount": 26960956
-        },
-        {
-          "id": 1992,
-          "symbol": "000300",
-          "time": "2025-07-03T16:00:00.000Z",
-          "timestamp": 1751558400000,
-          "open": 3967.46,
-          "highest": 4013.85,
-          "lowest": 3958.38,
-          "close": 3982.2,
-          "amount": 29051300
-        },
-        {
-          "id": 1993,
-          "symbol": "000300",
-          "time": "2025-07-06T16:00:00.000Z",
-          "timestamp": 1751817600000,
-          "open": 3977.29,
-          "highest": 3979.75,
-          "lowest": 3956.57,
-          "close": 3965.17,
-          "amount": 22510698
-        },
-        {
-          "id": 1994,
-          "symbol": "000300",
-          "time": "2025-07-07T16:00:00.000Z",
-          "timestamp": 1751904000000,
-          "open": 3965.43,
-          "highest": 4002.27,
-          "lowest": 3965.43,
-          "close": 3998.45,
-          "amount": 29208982
-        },
-        {
-          "id": 1995,
-          "symbol": "000300",
-          "time": "2025-07-08T16:00:00.000Z",
-          "timestamp": 1751990400000,
-          "open": 3997.5,
-          "highest": 4016.74,
-          "lowest": 3987.43,
-          "close": 3991.4,
-          "amount": 30539880
-        },
-        {
-          "id": 1996,
-          "symbol": "000300",
-          "time": "2025-07-09T16:00:00.000Z",
-          "timestamp": 1752076800000,
-          "open": 3993.42,
-          "highest": 4032.98,
-          "lowest": 3992.52,
-          "close": 4010.02,
-          "amount": 34783672
-        },
-        {
-          "id": 1997,
-          "symbol": "000300",
-          "time": "2025-07-10T16:00:00.000Z",
-          "timestamp": 1752163200000,
-          "open": 4011.47,
-          "highest": 4065.94,
-          "lowest": 4010.11,
-          "close": 4014.81,
-          "amount": 44378080
-        },
-        {
-          "id": 1998,
-          "symbol": "000300",
-          "time": "2025-07-13T16:00:00.000Z",
-          "timestamp": 1752422400000,
-          "open": 4021.21,
-          "highest": 4034.92,
-          "lowest": 4017.67,
-          "close": 4017.67,
-          "amount": 32141594
-        },
-        {
-          "id": 1999,
-          "symbol": "000300",
-          "time": "2025-07-14T16:00:00.000Z",
-          "timestamp": 1752508800000,
-          "open": 4023.99,
-          "highest": 4042.66,
-          "lowest": 3994.26,
-          "close": 4019.06,
-          "amount": 35352460
-        },
-        {
-          "id": 2000,
-          "symbol": "000300",
-          "time": "2025-07-15T16:00:00.000Z",
-          "timestamp": 1752595200000,
-          "open": 4019.39,
-          "highest": 4027.86,
-          "lowest": 3993.92,
-          "close": 4007.2,
-          "amount": 30065678
-        },
-        {
-          "id": 2001,
-          "symbol": "000300",
-          "time": "2025-07-16T16:00:00.000Z",
-          "timestamp": 1752681600000,
-          "open": 4005.07,
-          "highest": 4034.59,
-          "lowest": 4005.07,
-          "close": 4034.49,
-          "amount": 32551686
-        },
-        {
-          "id": 2002,
-          "symbol": "000300",
-          "time": "2025-07-17T16:00:00.000Z",
-          "timestamp": 1752768000000,
-          "open": 4039.87,
-          "highest": 4064.64,
-          "lowest": 4039.32,
-          "close": 4058.55,
-          "amount": 35424448
-        },
-        {
-          "id": 2003,
-          "symbol": "000300",
-          "time": "2025-07-20T16:00:00.000Z",
-          "timestamp": 1753027200000,
-          "open": 4069.77,
-          "highest": 4086.12,
-          "lowest": 4063.44,
-          "close": 4085.61,
-          "amount": 37793856
-        },
-        {
-          "id": 2004,
-          "symbol": "000300",
-          "time": "2025-07-21T16:00:00.000Z",
-          "timestamp": 1753113600000,
-          "open": 4087.34,
-          "highest": 4119.2,
-          "lowest": 4068.34,
-          "close": 4118.96,
-          "amount": 45087400
-        },
-        {
-          "id": 2005,
-          "symbol": "000300",
-          "time": "2025-07-22T16:00:00.000Z",
-          "timestamp": 1753200000000,
-          "open": 4129.15,
-          "highest": 4155.68,
-          "lowest": 4113.91,
-          "close": 4119.77,
-          "amount": 47033092
-        },
-        {
-          "id": 2006,
-          "symbol": "000300",
-          "time": "2025-07-23T16:00:00.000Z",
-          "timestamp": 1753286400000,
-          "open": 4116.83,
-          "highest": 4152.43,
-          "lowest": 4111.88,
-          "close": 4149.04,
-          "amount": 48700004
-        },
-        {
-          "id": 2007,
-          "symbol": "000300",
-          "time": "2025-07-24T16:00:00.000Z",
-          "timestamp": 1753372800000,
-          "open": 4145.32,
-          "highest": 4150.5,
-          "lowest": 4117.8,
-          "close": 4127.16,
-          "amount": 43044552
-        },
-        {
-          "id": 2008,
-          "symbol": "000300",
-          "time": "2025-07-27T16:00:00.000Z",
-          "timestamp": 1753632000000,
-          "open": 4128.2,
-          "highest": 4146.12,
-          "lowest": 4112.97,
-          "close": 4135.82,
-          "amount": 40679288
-        },
-        {
-          "id": 2009,
-          "symbol": "000300",
-          "time": "2025-07-28T16:00:00.000Z",
-          "timestamp": 1753718400000,
-          "open": 4132.68,
-          "highest": 4153.33,
-          "lowest": 4117.58,
-          "close": 4152.02,
-          "amount": 42876428
-        },
-        {
-          "id": 2010,
-          "symbol": "000300",
-          "time": "2025-07-29T16:00:00.000Z",
-          "timestamp": 1753804800000,
-          "open": 4148.94,
-          "highest": 4185.21,
-          "lowest": 4127.43,
-          "close": 4151.24,
-          "amount": 44516844
         }
       ],
-      "independentCount": 132,
+      "independentCount": 25,
       "startFenxing": {
         "type": "bottom",
         "highest": 3842.95,
@@ -16067,19 +12152,19 @@
       },
       "endFenxing": {
         "type": "top",
-        "highest": "4185.21",
-        "lowest": 4063.67,
+        "highest": "3995.95",
+        "lowest": 3915.65,
         "leftIds": [
-          2009
+          1902
         ],
         "middleIds": [
-          2010
+          1903
         ],
-        "middleIndex": 302,
+        "middleIndex": 222,
         "rightIds": [
-          2011
+          1904
         ],
-        "middleOriginId": 2010
+        "middleOriginId": 1903
       }
     },
     {
@@ -18536,9 +14621,9 @@
     },
     {
       "startTime": "2025-10-29T16:00:00.000Z",
-      "endTime": "2025-11-04T16:00:00.000Z",
+      "endTime": "2025-11-23T16:00:00.000Z",
       "highest": 4761.83,
-      "lowest": 4558.76,
+      "lowest": 4421.81,
       "trend": "down",
       "type": "complete",
       "status": 1,
@@ -18547,7 +14632,20 @@
         2071,
         2072,
         2073,
-        2074
+        2074,
+        2075,
+        2076,
+        2077,
+        2078,
+        2079,
+        2080,
+        2081,
+        2082,
+        2083,
+        2084,
+        2085,
+        2086,
+        2087
       ],
       "originData": [
         {
@@ -18594,71 +14692,6 @@
           "close": 4618.7,
           "amount": 50517772
         },
-        {
-          "id": 2074,
-          "symbol": "000300",
-          "time": "2025-11-04T16:00:00.000Z",
-          "timestamp": 1762272000000,
-          "open": 4562.11,
-          "highest": 4642.61,
-          "lowest": 4558.76,
-          "close": 4627.26,
-          "amount": 46836116
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "top",
-        "highest": "4761.83",
-        "lowest": 4640.67,
-        "leftIds": [
-          2069
-        ],
-        "middleIds": [
-          2070
-        ],
-        "middleIndex": 350,
-        "rightIds": [
-          2071
-        ],
-        "middleOriginId": 2070
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 4698.09,
-        "lowest": "4558.76",
-        "leftIds": [
-          2072,
-          2073
-        ],
-        "middleIds": [
-          2074
-        ],
-        "middleIndex": 353,
-        "rightIds": [
-          2075
-        ],
-        "middleOriginId": 2074
-      }
-    },
-    {
-      "startTime": "2025-11-04T16:00:00.000Z",
-      "endTime": "2025-11-12T16:00:00.000Z",
-      "highest": 4703.49,
-      "lowest": 4558.76,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        2074,
-        2075,
-        2076,
-        2077,
-        2078,
-        2079,
-        2080
-      ],
-      "originData": [
         {
           "id": 2074,
           "symbol": "000300",
@@ -18725,72 +14758,6 @@
           "close": 4645.91,
           "amount": 49230884
         },
-        {
-          "id": 2080,
-          "symbol": "000300",
-          "time": "2025-11-12T16:00:00.000Z",
-          "timestamp": 1762963200000,
-          "open": 4643.79,
-          "highest": 4703.49,
-          "lowest": 4643.79,
-          "close": 4702.07,
-          "amount": 51006068
-        }
-      ],
-      "independentCount": 7,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 4698.09,
-        "lowest": "4558.76",
-        "leftIds": [
-          2072,
-          2073
-        ],
-        "middleIds": [
-          2074
-        ],
-        "middleIndex": 353,
-        "rightIds": [
-          2075
-        ],
-        "middleOriginId": 2074
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "4703.49",
-        "lowest": 4620.99,
-        "leftIds": [
-          2079
-        ],
-        "middleIds": [
-          2080
-        ],
-        "middleIndex": 358,
-        "rightIds": [
-          2081
-        ],
-        "middleOriginId": 2080
-      }
-    },
-    {
-      "startTime": "2025-11-12T16:00:00.000Z",
-      "endTime": "2025-11-23T16:00:00.000Z",
-      "highest": 4703.49,
-      "lowest": 4421.81,
-      "trend": "down",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        2080,
-        2081,
-        2082,
-        2083,
-        2084,
-        2085,
-        2086,
-        2087
-      ],
-      "originData": [
         {
           "id": 2080,
           "symbol": "000300",
@@ -18880,22 +14847,22 @@
           "amount": 42580748
         }
       ],
-      "independentCount": 8,
+      "independentCount": 18,
       "startFenxing": {
         "type": "top",
-        "highest": "4703.49",
-        "lowest": 4620.99,
+        "highest": "4761.83",
+        "lowest": 4640.67,
         "leftIds": [
-          2079
+          2069
         ],
         "middleIds": [
-          2080
+          2070
         ],
-        "middleIndex": 358,
+        "middleIndex": 350,
         "rightIds": [
-          2081
+          2071
         ],
-        "middleOriginId": 2080
+        "middleOriginId": 2070
       },
       "endFenxing": {
         "type": "bottom",
