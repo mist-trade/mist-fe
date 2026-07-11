@@ -485,6 +485,145 @@ button {
   padding: 4px 8px;
 }
 
+.backtest-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.backtest-history,
+.backtest-detail,
+.backtest-drawer {
+  min-width: 0;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.backtest-run-list {
+  display: grid;
+  gap: 8px;
+}
+
+.backtest-run-list button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid #d8dee8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #151a24;
+  padding: 9px;
+  text-align: left;
+}
+
+.backtest-run-list button.selected {
+  border-color: #1f7a8c;
+  background: #eef7f8;
+}
+
+.backtest-run-list span,
+.backtest-run-list small,
+.backtest-detail-header p {
+  color: #647083;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.backtest-detail {
+  display: grid;
+  gap: 12px;
+}
+
+.backtest-detail-header,
+.backtest-drawer-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.backtest-detail-header h2,
+.backtest-drawer-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.backtest-detail-header p {
+  margin: 4px 0 0;
+}
+
+.backtest-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.backtest-metric-grid > div {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #e4e9f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 9px;
+}
+
+.backtest-metric-grid span {
+  color: #647083;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.backtest-metric-grid strong {
+  font-size: 16px;
+}
+
+.backtest-chart {
+  min-height: 280px;
+  border: 1px solid #e4e9f0;
+  border-radius: 6px;
+}
+
+.backtest-snapshots {
+  display: grid;
+  gap: 8px;
+}
+
+.backtest-snapshots pre {
+  overflow: auto;
+  margin: 0;
+  border: 1px solid #e4e9f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.backtest-empty-state {
+  display: grid;
+  min-height: 280px;
+  place-content: center;
+  color: #647083;
+  text-align: center;
+}
+
+.backtest-empty-state h2 {
+  margin: 0;
+  color: #151a24;
+}
+
+.backtest-empty-state p {
+  margin: 6px 0 0;
+}
+
+.backtest-drawer {
+  display: grid;
+  gap: 12px;
+  border-color: #1f7a8c;
+}
+
 .kline-summary {
   display: flex;
   flex-wrap: wrap;
@@ -543,6 +682,14 @@ button {
   .strategy-detail-grid {
     grid-template-columns: 1fr;
   }
+
+  .backtest-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .backtest-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
@@ -569,7 +716,8 @@ button {
   }
 
   .strategy-editor-row,
-  .strategy-detail-grid dl {
+  .strategy-detail-grid dl,
+  .backtest-metric-grid {
     grid-template-columns: 1fr;
   }
 

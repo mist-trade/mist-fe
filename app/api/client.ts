@@ -14,11 +14,40 @@ const TIMEOUT = Number.parseInt(
   10
 );
 
-export type DataSourceValue = "ef" | "tdx" | "mqmt";
+export type DataSourceValue = "ef" | "tdx" | "qmt";
 export type StrategyStatus = "draft" | "enabled" | "disabled" | "archived";
 export type StrategyAlertStatus = "pending" | "delivered" | "acked" | "failed";
-export type BacktestRunStatus = "pending" | "running" | "completed" | "failed";
+export type BacktestRunStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "cancelled";
+export type BacktestRunStage =
+  | "queued"
+  | "loading_data"
+  | "simulating"
+  | "finalizing";
 export type StrategySignalSource = "live" | "backtest";
+export type StrategySignalKind = "entry" | "exit";
+export type BacktestOrderSide = "buy" | "sell";
+export type BacktestOrderStatus =
+  | "pending"
+  | "filled"
+  | "rejected"
+  | "expired"
+  | "cancelled";
+export type BacktestTradeStatus = "open" | "closed";
+
+export interface StrategyBacktestCursorPage<T> {
+  items: T[];
+  nextCursor: string | null;
+}
+
+export interface StrategyBacktestPageQuery {
+  cursor?: string;
+  limit?: number;
+}
 
 export interface KLineQuery {
   code: string;
@@ -48,7 +77,10 @@ export interface StrategyDefinitionPayload {
   targetUniverse: string[];
   periods: number[];
   sources: DataSourceValue[];
-  rule: Record<string, unknown>;
+  entryRule: Record<string, unknown>;
+  exitRule?: Record<string, unknown> | null;
+  lookbackBars: number;
+  backtestEnabled?: boolean;
 }
 
 export type StrategyDefinitionUpdate = Partial<StrategyDefinitionPayload>;
@@ -61,6 +93,7 @@ export interface StrategyDefinition {
   targetUniverse: string[];
   periods: number[];
   sources: DataSourceValue[];
+  backtestEnabled: boolean;
   currentVersionId?: number | null;
   createTime?: string;
   updateTime?: string;
@@ -71,7 +104,9 @@ export interface StrategyVersion {
   strategyDefinitionId: number;
   versionNumber: number;
   ruleSchemaVersion: string;
-  rule: Record<string, unknown>;
+  entryRule: Record<string, unknown>;
+  exitRule?: Record<string, unknown> | null;
+  lookbackBars: number;
   validationSummary?: Record<string, unknown>;
   createTime?: string;
 }
@@ -92,6 +127,7 @@ export interface StrategySignal {
   source: DataSourceValue;
   signalTime: string;
   signalSource: StrategySignalSource;
+  signalKind: StrategySignalKind;
   contextSnapshot?: Record<string, unknown> | null;
   ruleSnapshot?: Record<string, unknown> | null;
   createTime?: string;
@@ -128,12 +164,21 @@ export interface StrategyScanResult {
 }
 
 export interface StrategyBacktestRequest {
-  strategyVersionId: number;
+  strategyDefinitionId: number;
+  strategyVersionId?: number;
   targetUniverse: string[];
   period: number;
   source: DataSourceValue;
   startDate: string;
   endDate: string;
+  initialCash?: number;
+  maxPositions?: number;
+  slippageBps?: number;
+  commissionRate?: number;
+  minCommission?: number;
+  stampDutyRate?: number;
+  transferFeeRate?: number;
+  benchmarkCode?: string;
 }
 
 export interface StrategyBacktestRun {
@@ -146,8 +191,19 @@ export interface StrategyBacktestRun {
   startDate: string;
   endDate: string;
   status: BacktestRunStatus;
+  stage: BacktestRunStage;
   signalCount: number;
   matchedSecurityCount: number;
+  processedWork: number;
+  totalWork: number;
+  progressPercent: number;
+  attemptCount: number;
+  strategySnapshot?: Record<string, unknown>;
+  configSnapshot?: Record<string, unknown>;
+  metrics?: Record<string, number | null> | null;
+  errorCode?: string | null;
+  errorDetails?: Record<string, unknown> | null;
+  cancelRequestedAt?: string | null;
   startedAt?: string | null;
   completedAt?: string | null;
   errorMessage?: string | null;
@@ -155,7 +211,7 @@ export interface StrategyBacktestRun {
   updateTime?: string;
 }
 
-export interface StrategyBacktestSignalResult {
+export interface StrategyBacktestSignal {
   id: number;
   backtestRunId: number;
   strategyDefinitionId: number;
@@ -163,10 +219,61 @@ export interface StrategyBacktestSignalResult {
   securityCode: string;
   period: number;
   source: DataSourceValue;
+  signalKind: StrategySignalKind;
   signalTime: string;
   contextSnapshot?: Record<string, unknown> | null;
   ruleSnapshot?: Record<string, unknown> | null;
   createTime?: string;
+}
+
+export interface StrategyBacktestOrder {
+  id: number;
+  backtestRunId: number;
+  backtestSignalId?: number | null;
+  securityCode: string;
+  side: BacktestOrderSide;
+  status: BacktestOrderStatus;
+  reason?: string | null;
+  scheduledTime: string;
+  executionTime?: string | null;
+  expiredAt?: string | null;
+  quantity: number;
+  fillPrice?: number | null;
+  grossAmount?: number | null;
+  commission: number;
+  stampDuty: number;
+  transferFee: number;
+  totalFee: number;
+}
+
+export interface StrategyBacktestTrade {
+  id: number;
+  backtestRunId: number;
+  securityCode: string;
+  status: BacktestTradeStatus;
+  entryOrderId: number;
+  exitOrderId?: number | null;
+  entryTime: string;
+  exitTime?: string | null;
+  entryPrice: number;
+  exitPrice?: number | null;
+  quantity: number;
+  entryFee: number;
+  exitFee: number;
+  realizedPnl?: number | null;
+  holdingDays?: number | null;
+}
+
+export interface StrategyBacktestEquityPoint {
+  id: number;
+  backtestRunId: number;
+  pointTime: string;
+  cash: number;
+  marketValue: number;
+  equity: number;
+  benchmarkValue?: number | null;
+  drawdown: number;
+  exposure: number;
 }
 
 interface MistEnvelope<T> {
@@ -370,6 +477,18 @@ export const createStrategyBacktest = (payload: StrategyBacktestRequest) =>
     }
   );
 
+export const listStrategyBacktests = (
+  query?: StrategyBacktestPageQuery & {
+    strategyDefinitionId?: number;
+    status?: BacktestRunStatus;
+  }
+) =>
+  requestJson<StrategyBacktestCursorPage<StrategyBacktestRun>>(
+    getMistApiBase(),
+    buildQueryPath("/v1/strategy-backtests", query),
+    { method: "GET" }
+  );
+
 export const fetchStrategyBacktestRun = (runId: number) =>
   requestJson<StrategyBacktestRun>(
     getMistApiBase(),
@@ -377,10 +496,57 @@ export const fetchStrategyBacktestRun = (runId: number) =>
     { method: "GET" }
   );
 
-export const fetchStrategyBacktestSignals = (runId: number) =>
-  requestJson<StrategyBacktestSignalResult[]>(
+export const cancelStrategyBacktest = (runId: number) =>
+  requestJson<StrategyBacktestRun>(
     getMistApiBase(),
-    `/v1/strategy-backtests/${runId}/signals`,
+    `/v1/strategy-backtests/${runId}/cancel`,
+    { method: "POST" }
+  );
+
+export const fetchStrategyBacktestEquity = (runId: number) =>
+  requestJson<StrategyBacktestEquityPoint[]>(
+    getMistApiBase(),
+    `/v1/strategy-backtests/${runId}/equity`,
+    { method: "GET" }
+  );
+
+export const fetchStrategyBacktestSignals = (
+  runId: number,
+  query?: StrategyBacktestPageQuery
+) =>
+  requestJson<StrategyBacktestCursorPage<StrategyBacktestSignal>>(
+    getMistApiBase(),
+    buildQueryPath(`/v1/strategy-backtests/${runId}/signals`, query),
+    { method: "GET" }
+  );
+
+export const fetchStrategyBacktestOrders = (
+  runId: number,
+  query?: StrategyBacktestPageQuery
+) =>
+  requestJson<StrategyBacktestCursorPage<StrategyBacktestOrder>>(
+    getMistApiBase(),
+    buildQueryPath(`/v1/strategy-backtests/${runId}/orders`, query),
+    { method: "GET" }
+  );
+
+export const fetchStrategyBacktestTrades = (
+  runId: number,
+  query?: StrategyBacktestPageQuery
+) =>
+  requestJson<StrategyBacktestCursorPage<StrategyBacktestTrade>>(
+    getMistApiBase(),
+    buildQueryPath(`/v1/strategy-backtests/${runId}/trades`, query),
+    { method: "GET" }
+  );
+
+export const fetchStrategyBacktestPositions = (
+  runId: number,
+  query?: StrategyBacktestPageQuery & { asOf?: string }
+) =>
+  requestJson<StrategyBacktestCursorPage<StrategyBacktestTrade>>(
+    getMistApiBase(),
+    buildQueryPath(`/v1/strategy-backtests/${runId}/positions`, query),
     { method: "GET" }
   );
 

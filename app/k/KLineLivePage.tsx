@@ -35,7 +35,7 @@ interface ChartState {
 const DEFAULT_SOURCE: DataSourceValue = "tdx";
 const DEFAULT_PERIOD = 1440;
 const SECURITY_SEARCH_LIMIT = 20;
-const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "mqmt"]);
+const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "qmt"]);
 
 function isDataSourceValue(value: string | null): value is DataSourceValue {
   return value !== null && DATA_SOURCE_VALUES.has(value as DataSourceValue);
@@ -332,7 +332,7 @@ export default function KLineLivePage() {
           >
             <option value="tdx">TDX</option>
             <option value="ef">东方财富</option>
-            <option value="mqmt">miniQMT</option>
+            <option value="qmt">qmt</option>
           </select>
         </label>
 
