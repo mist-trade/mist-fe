@@ -5652,8 +5652,8 @@
     },
     {
       "startTime": "2025-05-26T16:00:00.000Z",
-      "endTime": "2025-07-22T16:00:00.000Z",
-      "highest": 3613.02,
+      "endTime": "2025-08-25T16:00:00.000Z",
+      "highest": 3888.6,
       "lowest": 3332.49,
       "trend": "up",
       "type": "complete",
@@ -5699,7 +5699,31 @@
         1032,
         1033,
         1034,
-        1035
+        1035,
+        1036,
+        1037,
+        1038,
+        1039,
+        1040,
+        1041,
+        1042,
+        1043,
+        1044,
+        1045,
+        1046,
+        1047,
+        1048,
+        1049,
+        1050,
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057,
+        1058,
+        1059
       ],
       "originData": [
         {
@@ -6152,130 +6176,7 @@
           "lowest": 3577.59,
           "close": 3582.3,
           "amount": 85704600
-        }
-      ],
-      "independentCount": 41,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3368.63,
-        "lowest": 3332.49,
-        "leftIds": [
-          994
-        ],
-        "middleIds": [
-          995,
-          996
-        ],
-        "middleIndex": 266,
-        "rightIds": [
-          997,
-          998
-        ],
-        "middleOriginId": 995
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3613.02",
-        "lowest": 3547.25,
-        "leftIds": [
-          1034
-        ],
-        "middleIds": [
-          1035
-        ],
-        "middleIndex": 296,
-        "rightIds": [
-          1036
-        ],
-        "middleOriginId": 1035
-      }
-    },
-    {
-      "startTime": "2025-07-22T16:00:00.000Z",
-      "endTime": "2025-07-23T16:00:00.000Z",
-      "highest": 3613.02,
-      "lowest": 3577.11,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1035,
-        1036
-      ],
-      "originData": [
-        {
-          "id": 1035,
-          "symbol": "000001",
-          "time": "2025-07-22T16:00:00.000Z",
-          "timestamp": 1753200000000,
-          "open": 3588.88,
-          "highest": 3613.02,
-          "lowest": 3577.59,
-          "close": 3582.3,
-          "amount": 85704600
         },
-        {
-          "id": 1036,
-          "symbol": "000001",
-          "time": "2025-07-23T16:00:00.000Z",
-          "timestamp": 1753286400000,
-          "open": 3578.91,
-          "highest": 3608.73,
-          "lowest": 3577.11,
-          "close": 3605.73,
-          "amount": 85223968
-        }
-      ],
-      "independentCount": 2,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3613.02",
-        "lowest": 3547.25,
-        "leftIds": [
-          1034
-        ],
-        "middleIds": [
-          1035
-        ],
-        "middleIndex": 296,
-        "rightIds": [
-          1036
-        ],
-        "middleOriginId": 1035
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3613.02,
-        "lowest": "3577.11",
-        "leftIds": [
-          1035
-        ],
-        "middleIds": [
-          1036
-        ],
-        "middleIndex": 297,
-        "rightIds": [
-          1037
-        ],
-        "middleOriginId": 1036
-      }
-    },
-    {
-      "startTime": "2025-07-23T16:00:00.000Z",
-      "endTime": "2025-07-29T16:00:00.000Z",
-      "highest": 3636.17,
-      "lowest": 3577.11,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1036,
-        1037,
-        1038,
-        1039,
-        1040
-      ],
-      "originData": [
         {
           "id": 1036,
           "symbol": "000001",
@@ -6330,67 +6231,6 @@
           "lowest": 3593.73,
           "close": 3615.72,
           "amount": 81962792
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3613.02,
-        "lowest": "3577.11",
-        "leftIds": [
-          1035
-        ],
-        "middleIds": [
-          1036
-        ],
-        "middleIndex": 297,
-        "rightIds": [
-          1037
-        ],
-        "middleOriginId": 1036
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3636.17",
-        "lowest": 3562.61,
-        "leftIds": [
-          1039
-        ],
-        "middleIds": [
-          1040
-        ],
-        "middleIndex": 301,
-        "rightIds": [
-          1041
-        ],
-        "middleOriginId": 1040
-      }
-    },
-    {
-      "startTime": "2025-07-29T16:00:00.000Z",
-      "endTime": "2025-08-03T16:00:00.000Z",
-      "highest": 3636.17,
-      "lowest": 3547.16,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1040,
-        1041,
-        1042,
-        1043
-      ],
-      "originData": [
-        {
-          "id": 1040,
-          "symbol": "000001",
-          "time": "2025-07-29T16:00:00.000Z",
-          "timestamp": 1753804800000,
-          "open": 3608.35,
-          "highest": 3636.17,
-          "lowest": 3593.73,
-          "close": 3615.72,
-          "amount": 81962792
         },
         {
           "id": 1041,
@@ -6403,85 +6243,6 @@
           "close": 3573.21,
           "amount": 84589304
         },
-        {
-          "id": 1042,
-          "symbol": "000001",
-          "time": "2025-07-31T16:00:00.000Z",
-          "timestamp": 1753977600000,
-          "open": 3568.26,
-          "highest": 3581.75,
-          "lowest": 3550.04,
-          "close": 3559.95,
-          "amount": 68464520
-        },
-        {
-          "id": 1043,
-          "symbol": "000001",
-          "time": "2025-08-03T16:00:00.000Z",
-          "timestamp": 1754236800000,
-          "open": 3547.16,
-          "highest": 3583.31,
-          "lowest": 3547.16,
-          "close": 3583.31,
-          "amount": 63977560
-        }
-      ],
-      "independentCount": 4,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3636.17",
-        "lowest": 3562.61,
-        "leftIds": [
-          1039
-        ],
-        "middleIds": [
-          1040
-        ],
-        "middleIndex": 301,
-        "rightIds": [
-          1041
-        ],
-        "middleOriginId": 1040
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3617.6,
-        "lowest": 3547.16,
-        "leftIds": [
-          1041
-        ],
-        "middleIds": [
-          1042,
-          1043
-        ],
-        "middleIndex": 303,
-        "rightIds": [
-          1044
-        ],
-        "middleOriginId": 1043
-      }
-    },
-    {
-      "startTime": "2025-08-03T16:00:00.000Z",
-      "endTime": "2025-08-13T16:00:00.000Z",
-      "highest": 3704.77,
-      "lowest": 3547.16,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1042,
-        1043,
-        1044,
-        1045,
-        1046,
-        1047,
-        1048,
-        1049,
-        1050,
-        1051
-      ],
-      "originData": [
         {
           "id": 1042,
           "symbol": "000001",
@@ -6591,147 +6352,7 @@
           "lowest": 3662.57,
           "close": 3666.44,
           "amount": 94946424
-        }
-      ],
-      "independentCount": 10,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3617.6,
-        "lowest": 3547.16,
-        "leftIds": [
-          1041
-        ],
-        "middleIds": [
-          1042,
-          1043
-        ],
-        "middleIndex": 303,
-        "rightIds": [
-          1044
-        ],
-        "middleOriginId": 1043
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 3704.77,
-        "lowest": 3647.96,
-        "leftIds": [
-          1049
-        ],
-        "middleIds": [
-          1050,
-          1051
-        ],
-        "middleIndex": 310,
-        "rightIds": [
-          1052
-        ],
-        "middleOriginId": 1051
-      }
-    },
-    {
-      "startTime": "2025-08-13T16:00:00.000Z",
-      "endTime": "2025-08-14T16:00:00.000Z",
-      "highest": 3704.77,
-      "lowest": 3658.38,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1050,
-        1051,
-        1052
-      ],
-      "originData": [
-        {
-          "id": 1050,
-          "symbol": "000001",
-          "time": "2025-08-12T16:00:00.000Z",
-          "timestamp": 1755014400000,
-          "open": 3668.66,
-          "highest": 3688.63,
-          "lowest": 3666.55,
-          "close": 3683.46,
-          "amount": 88702264
         },
-        {
-          "id": 1051,
-          "symbol": "000001",
-          "time": "2025-08-13T16:00:00.000Z",
-          "timestamp": 1755100800000,
-          "open": 3685.52,
-          "highest": 3704.77,
-          "lowest": 3662.57,
-          "close": 3666.44,
-          "amount": 94946424
-        },
-        {
-          "id": 1052,
-          "symbol": "000001",
-          "time": "2025-08-14T16:00:00.000Z",
-          "timestamp": 1755187200000,
-          "open": 3659.81,
-          "highest": 3702.26,
-          "lowest": 3658.38,
-          "close": 3696.77,
-          "amount": 96062496
-        }
-      ],
-      "independentCount": 3,
-      "startFenxing": {
-        "type": "top",
-        "highest": 3704.77,
-        "lowest": 3647.96,
-        "leftIds": [
-          1049
-        ],
-        "middleIds": [
-          1050,
-          1051
-        ],
-        "middleIndex": 310,
-        "rightIds": [
-          1052
-        ],
-        "middleOriginId": 1051
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3745.94,
-        "lowest": "3658.38",
-        "leftIds": [
-          1050,
-          1051
-        ],
-        "middleIds": [
-          1052
-        ],
-        "middleIndex": 311,
-        "rightIds": [
-          1053
-        ],
-        "middleOriginId": 1052
-      }
-    },
-    {
-      "startTime": "2025-08-14T16:00:00.000Z",
-      "endTime": "2025-08-25T16:00:00.000Z",
-      "highest": 3888.6,
-      "lowest": 3658.38,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1052,
-        1053,
-        1054,
-        1055,
-        1056,
-        1057,
-        1058,
-        1059
-      ],
-      "originData": [
         {
           "id": 1052,
           "symbol": "000001",
@@ -6821,23 +6442,24 @@
           "amount": 111418792
         }
       ],
-      "independentCount": 8,
+      "independentCount": 65,
       "startFenxing": {
         "type": "bottom",
-        "highest": 3745.94,
-        "lowest": "3658.38",
+        "highest": 3368.63,
+        "lowest": 3332.49,
         "leftIds": [
-          1050,
-          1051
+          994
         ],
         "middleIds": [
-          1052
+          995,
+          996
         ],
-        "middleIndex": 311,
+        "middleIndex": 266,
         "rightIds": [
-          1053
+          997,
+          998
         ],
-        "middleOriginId": 1052
+        "middleOriginId": 995
       },
       "endFenxing": {
         "type": "top",
@@ -7000,8 +6622,8 @@
     },
     {
       "startTime": "2025-09-03T16:00:00.000Z",
-      "endTime": "2025-09-17T16:00:00.000Z",
-      "highest": 3899.96,
+      "endTime": "2025-10-29T16:00:00.000Z",
+      "highest": 4025.7,
       "lowest": 3732.84,
       "trend": "up",
       "type": "complete",
@@ -7017,7 +6639,31 @@
         1073,
         1074,
         1075,
-        1076
+        1076,
+        1077,
+        1078,
+        1079,
+        1080,
+        1081,
+        1082,
+        1083,
+        1084,
+        1085,
+        1086,
+        1087,
+        1088,
+        1089,
+        1090,
+        1091,
+        1092,
+        1093,
+        1094,
+        1095,
+        1096,
+        1097,
+        1098,
+        1099,
+        1100
       ],
       "originData": [
         {
@@ -7140,80 +6786,6 @@
           "lowest": 3801,
           "close": 3831.66,
           "amount": 136596240
-        }
-      ],
-      "independentCount": 11,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3868.39,
-        "lowest": "3732.84",
-        "leftIds": [
-          1065
-        ],
-        "middleIds": [
-          1066
-        ],
-        "middleIndex": 323,
-        "rightIds": [
-          1067
-        ],
-        "middleOriginId": 1066
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 3899.96,
-        "lowest": 3811.9,
-        "leftIds": [
-          1074
-        ],
-        "middleIds": [
-          1075,
-          1076
-        ],
-        "middleIndex": 331,
-        "rightIds": [
-          1077
-        ],
-        "middleOriginId": 1076
-      }
-    },
-    {
-      "startTime": "2025-09-17T16:00:00.000Z",
-      "endTime": "2025-09-22T16:00:00.000Z",
-      "highest": 3899.96,
-      "lowest": 3774.53,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1075,
-        1076,
-        1077,
-        1078,
-        1079
-      ],
-      "originData": [
-        {
-          "id": 1075,
-          "symbol": "000001",
-          "time": "2025-09-16T16:00:00.000Z",
-          "timestamp": 1758038400000,
-          "open": 3854.07,
-          "highest": 3882.67,
-          "lowest": 3848.95,
-          "close": 3876.34,
-          "amount": 100667912
-        },
-        {
-          "id": 1076,
-          "symbol": "000001",
-          "time": "2025-09-17T16:00:00.000Z",
-          "timestamp": 1758124800000,
-          "open": 3876.06,
-          "highest": 3899.96,
-          "lowest": 3801,
-          "close": 3831.66,
-          "amount": 136596240
         },
         {
           "id": 1077,
@@ -7226,85 +6798,6 @@
           "close": 3820.09,
           "amount": 101634824
         },
-        {
-          "id": 1078,
-          "symbol": "000001",
-          "time": "2025-09-21T16:00:00.000Z",
-          "timestamp": 1758470400000,
-          "open": 3822.01,
-          "highest": 3831.74,
-          "lowest": 3806.2,
-          "close": 3828.58,
-          "amount": 94180000
-        },
-        {
-          "id": 1079,
-          "symbol": "000001",
-          "time": "2025-09-22T16:00:00.000Z",
-          "timestamp": 1758556800000,
-          "open": 3830.14,
-          "highest": 3838.61,
-          "lowest": 3774.53,
-          "close": 3821.83,
-          "amount": 107169784
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "top",
-        "highest": 3899.96,
-        "lowest": 3811.9,
-        "leftIds": [
-          1074
-        ],
-        "middleIds": [
-          1075,
-          1076
-        ],
-        "middleIndex": 331,
-        "rightIds": [
-          1077
-        ],
-        "middleOriginId": 1076
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3854.92,
-        "lowest": 3774.53,
-        "leftIds": [
-          1077
-        ],
-        "middleIds": [
-          1078,
-          1079
-        ],
-        "middleIndex": 333,
-        "rightIds": [
-          1080
-        ],
-        "middleOriginId": 1079
-      }
-    },
-    {
-      "startTime": "2025-09-22T16:00:00.000Z",
-      "endTime": "2025-10-08T16:00:00.000Z",
-      "highest": 3936.58,
-      "lowest": 3774.53,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1078,
-        1079,
-        1080,
-        1081,
-        1082,
-        1083,
-        1084,
-        1085,
-        1086
-      ],
-      "originData": [
         {
           "id": 1078,
           "symbol": "000001",
@@ -7403,154 +6896,7 @@
           "lowest": 3886.31,
           "close": 3897.03,
           "amount": 113212720
-        }
-      ],
-      "independentCount": 9,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3854.92,
-        "lowest": 3774.53,
-        "leftIds": [
-          1077
-        ],
-        "middleIds": [
-          1078,
-          1079
-        ],
-        "middleIndex": 333,
-        "rightIds": [
-          1080
-        ],
-        "middleOriginId": 1079
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": 3936.58,
-        "lowest": 3800.11,
-        "leftIds": [
-          1084
-        ],
-        "middleIds": [
-          1085,
-          1086
-        ],
-        "middleIndex": 338,
-        "rightIds": [
-          1087
-        ],
-        "middleOriginId": 1085
-      }
-    },
-    {
-      "startTime": "2025-10-08T16:00:00.000Z",
-      "endTime": "2025-10-12T16:00:00.000Z",
-      "highest": 3936.58,
-      "lowest": 3800.11,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1085,
-        1086,
-        1087
-      ],
-      "originData": [
-        {
-          "id": 1085,
-          "symbol": "000001",
-          "time": "2025-10-08T16:00:00.000Z",
-          "timestamp": 1759939200000,
-          "open": 3898.31,
-          "highest": 3936.58,
-          "lowest": 3885.74,
-          "close": 3933.97,
-          "amount": 121688872
         },
-        {
-          "id": 1086,
-          "symbol": "000001",
-          "time": "2025-10-09T16:00:00.000Z",
-          "timestamp": 1760025600000,
-          "open": 3915.48,
-          "highest": 3933.01,
-          "lowest": 3886.31,
-          "close": 3897.03,
-          "amount": 113212720
-        },
-        {
-          "id": 1087,
-          "symbol": "000001",
-          "time": "2025-10-12T16:00:00.000Z",
-          "timestamp": 1760284800000,
-          "open": 3800.11,
-          "highest": 3895.83,
-          "lowest": 3800.11,
-          "close": 3889.5,
-          "amount": 108541360
-        }
-      ],
-      "independentCount": 3,
-      "startFenxing": {
-        "type": "top",
-        "highest": 3936.58,
-        "lowest": 3800.11,
-        "leftIds": [
-          1084
-        ],
-        "middleIds": [
-          1085,
-          1086
-        ],
-        "middleIndex": 338,
-        "rightIds": [
-          1087
-        ],
-        "middleOriginId": 1085
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3936.58,
-        "lowest": "3800.11",
-        "leftIds": [
-          1085,
-          1086
-        ],
-        "middleIds": [
-          1087
-        ],
-        "middleIndex": 339,
-        "rightIds": [
-          1088,
-          1089
-        ],
-        "middleOriginId": 1087
-      }
-    },
-    {
-      "startTime": "2025-10-12T16:00:00.000Z",
-      "endTime": "2025-10-29T16:00:00.000Z",
-      "highest": 4025.7,
-      "lowest": 3800.11,
-      "trend": "up",
-      "type": "complete",
-      "status": 1,
-      "originIds": [
-        1087,
-        1088,
-        1089,
-        1090,
-        1091,
-        1092,
-        1093,
-        1094,
-        1095,
-        1096,
-        1097,
-        1098,
-        1099,
-        1100
-      ],
-      "originData": [
         {
           "id": 1087,
           "symbol": "000001",
@@ -7706,24 +7052,22 @@
           "amount": 107005856
         }
       ],
-      "independentCount": 14,
+      "independentCount": 35,
       "startFenxing": {
         "type": "bottom",
-        "highest": 3936.58,
-        "lowest": "3800.11",
+        "highest": 3868.39,
+        "lowest": "3732.84",
         "leftIds": [
-          1085,
-          1086
+          1065
         ],
         "middleIds": [
-          1087
+          1066
         ],
-        "middleIndex": 339,
+        "middleIndex": 323,
         "rightIds": [
-          1088,
-          1089
+          1067
         ],
-        "middleOriginId": 1087
+        "middleOriginId": 1066
       },
       "endFenxing": {
         "type": "top",
@@ -8330,9 +7674,9 @@
     },
     {
       "startTime": "2025-12-07T16:00:00.000Z",
-      "endTime": "2025-12-11T16:00:00.000Z",
+      "endTime": "2025-12-15T16:00:00.000Z",
       "highest": 3936.31,
-      "lowest": 3850.6,
+      "lowest": 3815.84,
       "trend": "down",
       "type": "complete",
       "status": 1,
@@ -8341,7 +7685,9 @@
         1128,
         1129,
         1130,
-        1131
+        1131,
+        1132,
+        1133
       ],
       "originData": [
         {
@@ -8398,125 +7744,7 @@
           "lowest": 3850.6,
           "close": 3889.35,
           "amount": 90995088
-        }
-      ],
-      "independentCount": 5,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3936.31",
-        "lowest": 3863.31,
-        "leftIds": [
-          1126
-        ],
-        "middleIds": [
-          1127
-        ],
-        "middleIndex": 369,
-        "rightIds": [
-          1128
-        ],
-        "middleOriginId": 1127
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3904.96,
-        "lowest": "3850.60",
-        "leftIds": [
-          1130
-        ],
-        "middleIds": [
-          1131
-        ],
-        "middleIndex": 373,
-        "rightIds": [
-          1132
-        ],
-        "middleOriginId": 1131
-      }
-    },
-    {
-      "startTime": "2025-12-11T16:00:00.000Z",
-      "endTime": "2025-12-14T16:00:00.000Z",
-      "highest": 3896.98,
-      "lowest": 3850.6,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1131,
-        1132
-      ],
-      "originData": [
-        {
-          "id": 1131,
-          "symbol": "000001",
-          "time": "2025-12-11T16:00:00.000Z",
-          "timestamp": 1765468800000,
-          "open": 3869.41,
-          "highest": 3891.81,
-          "lowest": 3850.6,
-          "close": 3889.35,
-          "amount": 90995088
         },
-        {
-          "id": 1132,
-          "symbol": "000001",
-          "time": "2025-12-14T16:00:00.000Z",
-          "timestamp": 1765728000000,
-          "open": 3865.4,
-          "highest": 3896.98,
-          "lowest": 3863.63,
-          "close": 3867.92,
-          "amount": 76460488
-        }
-      ],
-      "independentCount": 2,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 3904.96,
-        "lowest": "3850.60",
-        "leftIds": [
-          1130
-        ],
-        "middleIds": [
-          1131
-        ],
-        "middleIndex": 373,
-        "rightIds": [
-          1132
-        ],
-        "middleOriginId": 1131
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3896.98",
-        "lowest": 3815.84,
-        "leftIds": [
-          1131
-        ],
-        "middleIds": [
-          1132
-        ],
-        "middleIndex": 374,
-        "rightIds": [
-          1133
-        ],
-        "middleOriginId": 1132
-      }
-    },
-    {
-      "startTime": "2025-12-14T16:00:00.000Z",
-      "endTime": "2025-12-15T16:00:00.000Z",
-      "highest": 3896.98,
-      "lowest": 3815.84,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        1132,
-        1133
-      ],
-      "originData": [
         {
           "id": 1132,
           "symbol": "000001",
@@ -8540,22 +7768,22 @@
           "amount": 73329400
         }
       ],
-      "independentCount": 2,
+      "independentCount": 7,
       "startFenxing": {
         "type": "top",
-        "highest": "3896.98",
-        "lowest": 3815.84,
+        "highest": "3936.31",
+        "lowest": 3863.31,
         "leftIds": [
-          1131
+          1126
         ],
         "middleIds": [
-          1132
+          1127
         ],
-        "middleIndex": 374,
+        "middleIndex": 369,
         "rightIds": [
-          1133
+          1128
         ],
-        "middleOriginId": 1132
+        "middleOriginId": 1127
       },
       "endFenxing": {
         "type": "bottom",

@@ -1,7 +1,7 @@
 {
   "key": "chinext-2024-2025",
   "name": "创业板指 2024-2025",
-  "generatedAt": "2026-07-10T18:02:02.391Z",
+  "generatedAt": "2026-07-11T04:55:29.961Z",
   "backendUrl": "http://192.168.31.182:8008",
   "testCase": {
     "code": "399006",
@@ -13,9 +13,9 @@
   "stats": {
     "kCount": 485,
     "mergeKCount": 382,
-    "biCount": 25,
-    "phaseABiCount": 39,
-    "phaseBBiCount": 25,
+    "biCount": 21,
+    "phaseABiCount": 27,
+    "phaseBBiCount": 21,
     "channelCount": 0,
     "fenxingCount": 174
   }
