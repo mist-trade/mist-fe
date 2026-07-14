@@ -1,4 +1,4 @@
-import { BiStatus } from "@/app/api/types";
+import { BiStatus, ChannelStatus } from "@/app/api/types";
 import type { SnapshotData } from "../load-snapshot";
 import { snapshotToChart } from "../snapshot-to-chart";
 
@@ -44,7 +44,7 @@ const baseSnapshot: SnapshotData = {
     phaseB: [],
   },
   fenxing: [],
-  channel: [],
+  channel: { phaseA: [], phaseB: [] },
 };
 
 describe("snapshotToChart", () => {
@@ -68,5 +68,33 @@ describe("snapshotToChart", () => {
       status: BiStatus.Valid,
       endTime: "2025-01-12T16:00:00.000Z",
     });
+  });
+
+  it("normalizes each channel phase status independently", () => {
+    const baseChannel = {
+      bis: [],
+      zg: 10,
+      zd: 5,
+      gg: 12,
+      dd: 3,
+      level: "bi",
+      type: "complete",
+      startId: 1,
+      endId: 5,
+      trend: "up",
+      displayStartId: 1,
+      displayEndId: 5,
+    };
+
+    const chart = snapshotToChart({
+      ...baseSnapshot,
+      channel: {
+        phaseA: [{ ...baseChannel, status: "2" }],
+        phaseB: [{ ...baseChannel, status: "1" }],
+      },
+    });
+
+    expect(chart.channel.phaseA[0].status).toBe(ChannelStatus.Invalid);
+    expect(chart.channel.phaseB[0].status).toBe(ChannelStatus.Valid);
   });
 });

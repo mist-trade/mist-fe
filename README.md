@@ -267,10 +267,16 @@ interface IFetchChannel {
   dd: number;           // 中枢最低（所有笔的最低点）
   level: ChannelLevel;  // 'bi' | 'duan'
   type: ChannelType;    // 'complete' | 'uncomplete'
+  status: ChannelStatus; // 0 unknown | 1 valid | 2 invalid
   startId: number;
   endId: number;
   trend: TrendDirection;
   bis: IFetchBi[];
+}
+
+interface IFetchChannelPhases {
+  phaseA: IFetchChannel[]; // 全部基础候选，包含 Invalid
+  phaseB: IFetchChannel[]; // 固定点归约后的 Valid 中枢
 }
 ```
 
@@ -332,7 +338,11 @@ NEXT_PUBLIC_CHAN_API_BASE_URL=http://127.0.0.1:8008
 | `/api/chan/v1/chan/merge-k` | POST | 计算合并 K |
 | `/api/chan/v1/chan/bi` | POST | 计算笔 |
 | `/api/chan/v1/chan/fenxing` | POST | 计算分型 |
-| `/api/chan/v1/chan/channel` | POST | 计算中枢 |
+| `/api/chan/v1/chan/channel` | POST | 计算中枢，响应 `data` 为 `{ phaseA, phaseB }` |
+
+统一响应 envelope 解包后，中枢客户端兼容旧版数组 payload：旧数组会在 API
+边界归一为两个相同 phase；新版对象必须同时包含 `phaseA` 和 `phaseB`。生产 K
+线页默认渲染 Phase B。
 
 ### 配置
 

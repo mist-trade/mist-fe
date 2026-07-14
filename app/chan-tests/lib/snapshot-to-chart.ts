@@ -4,6 +4,7 @@ import {
   BiStatus,
   ChannelType,
   ChannelLevel,
+  ChannelStatus,
   type IFetchK,
   type IMergeK,
   type IFetchBi,
@@ -23,12 +24,17 @@ export interface ChartBiPhases {
   phaseB: IFetchBi[];
 }
 
+export interface ChartChannelPhases {
+  phaseA: IFetchChannel[];
+  phaseB: IFetchChannel[];
+}
+
 export interface ChartData {
   k: IFetchK[];
   mergeK: IMergeK[];
   bi: ChartBiPhases;
   fenxing: IFenxing[];
-  channel: IFetchChannel[];
+  channel: ChartChannelPhases;
 }
 
 function asTrend(v: unknown): TrendDirection {
@@ -60,6 +66,13 @@ function asChannelLevel(v: unknown): ChannelLevel {
   return v === "duan" || v === ChannelLevel.Duan
     ? ChannelLevel.Duan
     : ChannelLevel.Bi;
+}
+
+function asChannelStatus(v: unknown): ChannelStatus {
+  const n = typeof v === "number" ? v : Number(v);
+  if (n === 1) return ChannelStatus.Valid;
+  if (n === 2) return ChannelStatus.Invalid;
+  return ChannelStatus.Unknown;
 }
 
 function asFenxingType(v: unknown): FenxingType {
@@ -98,12 +111,25 @@ export function snapshotToChart(snap: SnapshotData): ChartData {
     ...x,
     type: asFenxingType(x.type),
   }));
-  const channel = (snap.channel as IFetchChannel[]).map((x) => ({
+  const channelRaw = snap.channel as
+    | IFetchChannel[]
+    | { phaseA: IFetchChannel[]; phaseB: IFetchChannel[] };
+  const normalizeChannel = (x: IFetchChannel) => ({
     ...x,
     trend: asTrend(x.trend),
     type: asChannelType(x.type),
     level: asChannelLevel(x.level),
+    status: asChannelStatus(x.status),
     bis: (x.bis ?? []).map(asBi),
-  }));
+  });
+  const channel = Array.isArray(channelRaw)
+    ? {
+        phaseA: channelRaw.map(normalizeChannel),
+        phaseB: channelRaw.map(normalizeChannel),
+      }
+    : {
+        phaseA: channelRaw.phaseA.map(normalizeChannel),
+        phaseB: channelRaw.phaseB.map(normalizeChannel),
+      };
   return { k, mergeK, bi, fenxing, channel };
 }

@@ -1,7 +1,7 @@
 import type {
   IFenxing,
-  IFetchBi,
-  IFetchChannel,
+  IFetchBiPhases,
+  IFetchChannelPhases,
   IFetchK,
   IMergeK,
 } from "./types";
@@ -396,11 +396,31 @@ export const fetchMergeK = (query: KLineQuery) =>
     body: JSON.stringify(query),
   });
 
-export const fetchBi = (query: KLineQuery) =>
-  requestJson<IFetchBi[]>(getAnalysisApiBase(), "/v1/chan/bi", {
-    method: "POST",
-    body: JSON.stringify(query),
-  });
+export function normalizeBiPhases(value: unknown): IFetchBiPhases {
+  if (Array.isArray(value)) {
+    return { phaseA: value, phaseB: value } as IFetchBiPhases;
+  }
+  if (
+    value &&
+    typeof value === "object" &&
+    Array.isArray((value as { phaseA?: unknown }).phaseA) &&
+    Array.isArray((value as { phaseB?: unknown }).phaseB)
+  ) {
+    const { phaseA, phaseB } = value as IFetchBiPhases;
+    return { phaseA, phaseB };
+  }
+  throw new Error(
+    "bi response must be an array or contain phaseA and phaseB arrays"
+  );
+}
+
+export const fetchBi = async (query: KLineQuery) =>
+  normalizeBiPhases(
+    await requestJson<unknown>(getAnalysisApiBase(), "/v1/chan/bi", {
+      method: "POST",
+      body: JSON.stringify(query),
+    })
+  );
 
 export const fetchFenxing = (query: KLineQuery) =>
   requestJson<IFenxing[]>(getAnalysisApiBase(), "/v1/chan/fenxing", {
@@ -408,12 +428,32 @@ export const fetchFenxing = (query: KLineQuery) =>
     body: JSON.stringify(query),
   });
 
-export const fetchChannel = (query: KLineQuery) =>
-  requestJson<IFetchChannel[]>(
-    getAnalysisApiBase(),
-    "/v1/chan/channel",
-    {
-      method: "POST",
-      body: JSON.stringify(query),
-    }
+export function normalizeChannelPhases(value: unknown): IFetchChannelPhases {
+  if (Array.isArray(value)) {
+    return { phaseA: value, phaseB: value } as IFetchChannelPhases;
+  }
+  if (
+    value &&
+    typeof value === "object" &&
+    Array.isArray((value as { phaseA?: unknown }).phaseA) &&
+    Array.isArray((value as { phaseB?: unknown }).phaseB)
+  ) {
+    const { phaseA, phaseB } = value as IFetchChannelPhases;
+    return { phaseA, phaseB };
+  }
+  throw new Error(
+    "channel response must be an array or contain phaseA and phaseB arrays"
+  );
+}
+
+export const fetchChannel = async (query: KLineQuery) =>
+  normalizeChannelPhases(
+    await requestJson<unknown>(
+      getAnalysisApiBase(),
+      "/v1/chan/channel",
+      {
+        method: "POST",
+        body: JSON.stringify(query),
+      }
+    )
   );

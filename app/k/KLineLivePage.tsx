@@ -158,12 +158,13 @@ export default function KLineLivePage() {
       const fenxingData = await fetchFenxing(nextQuery);
       const channelData = await fetchChannel(nextQuery);
 
+      // 后端返回两阶段结果 { phaseA, phaseB }，渲染统一用 phaseB（干净序列）
       return {
         k,
         mergeK: Promise.resolve(mergeKData),
-        bi: Promise.resolve(biData),
+        bi: Promise.resolve(biData.phaseB),
         fenxing: Promise.resolve(fenxingData),
-        channel: Promise.resolve(channelData),
+        channel: Promise.resolve(channelData.phaseB),
         isFallback: false,
       };
     },

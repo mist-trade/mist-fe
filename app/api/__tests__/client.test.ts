@@ -199,6 +199,92 @@ describe("Mist frontend API client", () => {
     );
   });
 
+  it("normalizes a legacy bi array into both phases", async () => {
+    const legacy = [{ startTime: "2026-01-01", endTime: "2026-01-02" }];
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => legacy,
+    });
+
+    await expect(
+      fetchBi({
+        code: "600519",
+        source: "tdx",
+        period: 1440,
+        startDate: "2026-01-01",
+        endDate: "2026-06-30",
+      })
+    ).resolves.toEqual({ phaseA: legacy, phaseB: legacy });
+  });
+
+  it("preserves canonical bi phases and rejects partial objects", async () => {
+    const query = {
+      code: "600519",
+      source: "tdx" as const,
+      period: 1440,
+      startDate: "2026-01-01",
+      endDate: "2026-06-30",
+    };
+    const canonical = {
+      phaseA: [{ startTime: "2026-01-01" }],
+      phaseB: [{ startTime: "2026-01-02" }],
+    };
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true, json: async () => canonical })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ phaseA: [] }),
+      });
+
+    await expect(fetchBi(query)).resolves.toEqual(canonical);
+    await expect(fetchBi(query)).rejects.toThrow(
+      "bi response must be an array or contain phaseA and phaseB arrays"
+    );
+  });
+
+  it("normalizes a legacy channel array into both phases", async () => {
+    const legacy = [{ startId: 1, endId: 5 }];
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => legacy,
+    });
+
+    await expect(
+      fetchChannel({
+        code: "600519",
+        source: "tdx",
+        period: 1440,
+        startDate: "2026-01-01",
+        endDate: "2026-06-30",
+      })
+    ).resolves.toEqual({ phaseA: legacy, phaseB: legacy });
+  });
+
+  it("preserves canonical channel phases and rejects partial objects", async () => {
+    const query = {
+      code: "600519",
+      source: "tdx" as const,
+      period: 1440,
+      startDate: "2026-01-01",
+      endDate: "2026-06-30",
+    };
+    const canonical = {
+      phaseA: [{ startId: 1 }],
+      phaseB: [{ startId: 2 }],
+    };
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({ ok: true, json: async () => canonical })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ phaseA: [] }),
+      });
+
+    await expect(fetchChannel(query)).resolves.toEqual(canonical);
+    await expect(fetchChannel(query)).rejects.toThrow(
+      "channel response must be an array or contain phaseA and phaseB arrays"
+    );
+  });
+
   it("calls strategy registry endpoints through the Mist v1 gateway path", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
