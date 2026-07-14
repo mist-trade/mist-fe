@@ -16,6 +16,8 @@ export interface SnapshotStats {
   phaseABiCount?: number;
   phaseBBiCount?: number;
   channelCount: number;
+  phaseAChannelCount?: number;
+  phaseBChannelCount?: number;
   fenxingCount: number;
 }
 
@@ -62,10 +64,15 @@ export interface SnapshotData {
   mergeK: unknown[];
   bi: SnapshotBiData;
   fenxing: unknown[];
-  channel: unknown[];
+  channel: SnapshotChannelData;
 }
 
 export interface SnapshotBiData {
+  phaseA: unknown[];
+  phaseB: unknown[];
+}
+
+export interface SnapshotChannelData {
   phaseA: unknown[];
   phaseB: unknown[];
 }
@@ -87,6 +94,27 @@ export function normalizeSnapshotBiData(value: unknown): SnapshotBiData {
   throw new Error("bi.json 必须是数组，或包含 phaseA 和 phaseB 数组的对象");
 }
 
+export function normalizeSnapshotChannelData(
+  value: unknown,
+): SnapshotChannelData {
+  if (Array.isArray(value)) return { phaseA: value, phaseB: value };
+  if (
+    value &&
+    typeof value === "object" &&
+    Array.isArray((value as { phaseA?: unknown }).phaseA) &&
+    Array.isArray((value as { phaseB?: unknown }).phaseB)
+  ) {
+    const { phaseA, phaseB } = value as {
+      phaseA: unknown[];
+      phaseB: unknown[];
+    };
+    return { phaseA, phaseB };
+  }
+  throw new Error(
+    "channel.json 必须是数组，或包含 phaseA 和 phaseB 数组的对象",
+  );
+}
+
 /** 读取某用例的完整快照数据 */
 export function readSnapshot(key: string): SnapshotData | null {
   const dir = path.join(SNAPSHOTS_ROOT, key);
@@ -99,7 +127,7 @@ export function readSnapshot(key: string): SnapshotData | null {
       mergeK: readJson(dir, "merge-k.json"),
       bi: normalizeSnapshotBiData(readJson(dir, "bi.json")),
       fenxing: readJson(dir, "fenxing.json"),
-      channel: readJson(dir, "channel.json"),
+      channel: normalizeSnapshotChannelData(readJson(dir, "channel.json")),
     };
   } catch {
     return null;

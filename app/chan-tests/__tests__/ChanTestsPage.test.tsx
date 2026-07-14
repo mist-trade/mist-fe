@@ -1,5 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { BiStatus, type IFetchBi } from "@/app/api/types";
+import {
+  BiStatus,
+  ChannelStatus,
+  type IFetchBi,
+  type IFetchChannel,
+} from "@/app/api/types";
 import { ChanTestsPage } from "../ChanTestsPage";
 import type {
   CaseWithMeta,
@@ -8,11 +13,19 @@ import type {
 } from "../lib/load-snapshot";
 
 let mockLatestBi: Promise<IFetchBi[]> | undefined;
+let mockLatestChannel: Promise<IFetchChannel[]> | undefined;
 
 jest.mock("@/app/components/k-panel", () => ({
   __esModule: true,
-  default: ({ bi }: { bi: Promise<IFetchBi[]> }) => {
+  default: ({
+    bi,
+    channel,
+  }: {
+    bi: Promise<IFetchBi[]>;
+    channel: Promise<IFetchChannel[]>;
+  }) => {
     mockLatestBi = bi;
+    mockLatestChannel = channel;
     return <div data-testid="k-panel" />;
   },
 }));
@@ -82,7 +95,42 @@ function createSnapshot(testCase: CaseWithMeta): SnapshotData {
       phaseB: [createBi(BiStatus.Valid, phaseBEnd)],
     },
     fenxing: [],
-    channel: [],
+    channel: {
+      phaseA: [
+        {
+          startId: 1,
+          endId: 5,
+          displayStartId: 1,
+          displayEndId: 5,
+          bis: [],
+          zg: 10,
+          zd: 8,
+          gg: 12,
+          dd: 6,
+          level: "bi",
+          type: "complete",
+          trend: "up",
+          status: ChannelStatus.Invalid,
+        },
+      ],
+      phaseB: [
+        {
+          startId: 2,
+          endId: 6,
+          displayStartId: 2,
+          displayEndId: 6,
+          bis: [],
+          zg: 11,
+          zd: 9,
+          gg: 13,
+          dd: 7,
+          level: "bi",
+          type: "complete",
+          trend: "up",
+          status: ChannelStatus.Valid,
+        },
+      ],
+    },
   };
 }
 
@@ -107,6 +155,7 @@ function expectStat(label: string, value: number) {
 describe("ChanTestsPage", () => {
   beforeEach(() => {
     mockLatestBi = undefined;
+    mockLatestChannel = undefined;
   });
 
   it("defaults to Phase B and switches KPanel to Phase A", async () => {
@@ -129,6 +178,9 @@ describe("ChanTestsPage", () => {
     await expect(initialBi!).resolves.toEqual([
       expect.objectContaining({ status: BiStatus.Valid, endTime: phaseBEnd }),
     ]);
+    await expect(mockLatestChannel!).resolves.toEqual([
+      expect.objectContaining({ status: ChannelStatus.Valid, startId: 2 }),
+    ]);
 
     fireEvent.click(screen.getByRole("button", { name: "Phase A 原始" }));
 
@@ -140,6 +192,9 @@ describe("ChanTestsPage", () => {
     expect(selectedBi).toBeDefined();
     await expect(selectedBi!).resolves.toEqual([
       expect.objectContaining({ status: BiStatus.Invalid, endTime: phaseAEnd }),
+    ]);
+    await expect(mockLatestChannel!).resolves.toEqual([
+      expect.objectContaining({ status: ChannelStatus.Invalid, startId: 1 }),
     ]);
   });
 

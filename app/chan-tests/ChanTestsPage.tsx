@@ -104,7 +104,7 @@ function KPanelChartFromSnapshot({
       mergeK={Promise.resolve(chart.mergeK)}
       bi={Promise.resolve(chart.bi[selectedPhase])}
       fenxing={Promise.resolve(chart.fenxing)}
-      channel={Promise.resolve(chart.channel)}
+      channel={Promise.resolve(chart.channel[selectedPhase])}
     />
   );
 }

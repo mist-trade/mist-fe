@@ -31,6 +31,9 @@ const REPO_ROOT = path.resolve(__dirname, "..");
 const BACKEND_ROOT = path.resolve(REPO_ROOT, "..", "mist");
 const CASES_ENTRY = path.join(REPO_ROOT, "__fixtures__", "cases", "index.ts");
 const SNAPSHOTS_DIR = path.join(REPO_ROOT, "__fixtures__", "snapshots", "chan");
+// 后端导出工具（bi/channel phases）的 stdout 可能很大（中枢 JSON >1MB），
+// execFileSync 默认 maxBuffer 1MB 不够，统一放大到 16MB
+const EXPORT_MAX_BUFFER = 16 * 1024 * 1024;
 
 // 默认指向部署环境的 chan app（HTTP，非 HTTPS）
 const BACKEND_URL = (
@@ -117,6 +120,21 @@ function normalizeBiPayload(value) {
   throw new Error("/v1/chan/bi 必须返回数组，或包含 phaseA 和 phaseB 数组的对象");
 }
 
+function normalizeChannelPayload(value) {
+  if (Array.isArray(value)) return { phaseA: value, phaseB: value };
+  if (
+    value &&
+    typeof value === "object" &&
+    Array.isArray(value.phaseA) &&
+    Array.isArray(value.phaseB)
+  ) {
+    return { phaseA: value.phaseA, phaseB: value.phaseB };
+  }
+  throw new Error(
+    "/v1/chan/channel 必须返回数组，或包含 phaseA 和 phaseB 数组的对象",
+  );
+}
+
 function readSnapshotFile(outDir, file) {
   return JSON.parse(fs.readFileSync(path.join(outDir, file), "utf8"));
 }
@@ -128,9 +146,22 @@ function exportBiFromMergeK(outDir) {
       path.join(BACKEND_ROOT, "tools", "export-chan-bi-phases.cjs"),
       path.join(outDir, "merge-k.json"),
     ],
-    { cwd: BACKEND_ROOT, encoding: "utf8" },
+    { cwd: BACKEND_ROOT, encoding: "utf8", maxBuffer: EXPORT_MAX_BUFFER },
   );
   return normalizeBiPayload(JSON.parse(output));
+}
+
+// 与 exportBiFromMergeK 对齐：从已提交的 merge-k.json 离线算中枢两阶段
+function exportChannelFromMergeK(outDir) {
+  const output = execFileSync(
+    process.execPath,
+    [
+      path.join(BACKEND_ROOT, "tools", "export-chan-channel-phases.cjs"),
+      path.join(outDir, "merge-k.json"),
+    ],
+    { cwd: BACKEND_ROOT, encoding: "utf8", maxBuffer: EXPORT_MAX_BUFFER },
+  );
+  return normalizeChannelPayload(JSON.parse(output));
 }
 
 // ---- 生成单个用例快照 ----
@@ -150,21 +181,24 @@ async function generateSnapshot(testCase) {
         mergeK: readSnapshotFile(outDir, "merge-k.json"),
         bi: exportBiFromMergeK(outDir),
         fenxing: readSnapshotFile(outDir, "fenxing.json"),
-        channel: readSnapshotFile(outDir, "channel.json"),
+        // 与 bi 对齐：离线模式也从 merge-k 现算 channel（而非复用旧文件）
+        channel: exportChannelFromMergeK(outDir),
       }
     : {
         k: await callBackend("/v1/indicators/k", query),
         mergeK: await callBackend("/v1/chan/merge-k", query),
         bi: normalizeBiPayload(await callBackend("/v1/chan/bi", query)),
         fenxing: await callBackend("/v1/chan/fenxing", query),
-        channel: await callBackend("/v1/chan/channel", query),
+        channel: normalizeChannelPayload(
+          await callBackend("/v1/chan/channel", query),
+        ),
       };
 
   const meta = {
     key: testCase.key,
     name: testCase.name,
     generatedAt: new Date().toISOString(),
-    backendUrl: BACKEND_URL,
+    backendUrl: biFromMergeK ? "offline:committed-merge-k" : BACKEND_URL,
     testCase: {
       code: testCase.code,
       source: testCase.source,
@@ -178,7 +212,9 @@ async function generateSnapshot(testCase) {
       biCount: snapshot.bi.phaseB.length,
       phaseABiCount: snapshot.bi.phaseA.length,
       phaseBBiCount: snapshot.bi.phaseB.length,
-      channelCount: Array.isArray(snapshot.channel) ? snapshot.channel.length : 0,
+      channelCount: snapshot.channel.phaseB.length,
+      phaseAChannelCount: snapshot.channel.phaseA.length,
+      phaseBChannelCount: snapshot.channel.phaseB.length,
       fenxingCount: Array.isArray(snapshot.fenxing) ? snapshot.fenxing.length : 0,
     },
   };
@@ -187,6 +223,11 @@ async function generateSnapshot(testCase) {
   fs.writeFileSync(
     path.join(outDir, "bi.json"),
     JSON.stringify(snapshot.bi, null, 2) + "\n",
+  );
+  // bi 和 channel 都从 merge-k 现算（两阶段），与 k/merge-k/fenxing 一样无条件落盘
+  fs.writeFileSync(
+    path.join(outDir, "channel.json"),
+    JSON.stringify(snapshot.channel, null, 2) + "\n",
   );
   if (!biFromMergeK) {
     fs.writeFileSync(
@@ -200,10 +241,6 @@ async function generateSnapshot(testCase) {
     fs.writeFileSync(
       path.join(outDir, "fenxing.json"),
       JSON.stringify(snapshot.fenxing, null, 2) + "\n",
-    );
-    fs.writeFileSync(
-      path.join(outDir, "channel.json"),
-      JSON.stringify(snapshot.channel, null, 2) + "\n",
     );
   }
 
