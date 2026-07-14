@@ -1,8 +1,8 @@
 {
   "key": "csi300-2024-2025",
   "name": "沪深300 2024-2025",
-  "generatedAt": "2026-07-11T04:55:29.928Z",
-  "backendUrl": "http://192.168.31.182:8008",
+  "generatedAt": "2026-07-14T18:19:08.220Z",
+  "backendUrl": "offline:committed-merge-k",
   "testCase": {
     "code": "000300",
     "source": "tdx",
@@ -16,7 +16,9 @@
     "biCount": 31,
     "phaseABiCount": 31,
     "phaseBBiCount": 31,
-    "channelCount": 0,
+    "channelCount": 2,
+    "phaseAChannelCount": 18,
+    "phaseBChannelCount": 2,
     "fenxingCount": 179
   }
 }
