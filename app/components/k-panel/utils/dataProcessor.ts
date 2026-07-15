@@ -200,8 +200,6 @@ export const calculateChannelData = (
       endIndex,
       zg: channel.zg,
       zd: channel.zd,
-      gg: channel.gg,
-      dd: channel.dd,
       trend: channel.trend,
       type: channel.type,
       level: channel.level,

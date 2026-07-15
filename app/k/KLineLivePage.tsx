@@ -29,7 +29,6 @@ interface ChartState {
   bi: Promise<IFetchBi[]>;
   fenxing: Promise<IFenxing[]>;
   channel: Promise<IFetchChannel[]>;
-  isFallback: boolean;
 }
 
 const DEFAULT_SOURCE: DataSourceValue = "tdx";
@@ -89,16 +88,6 @@ function updateUrl(query: KLineQuery) {
   window.history.pushState(null, "", `/k?${params.toString()}`);
 }
 
-function isDevelopmentFallbackEnabled() {
-  // 临时禁用：旧 test-data 已删除，快照机制尚未接入
-  // Phase 5 后可改为读取 __fixtures__/snapshots/
-  return false;
-}
-
-async function loadDevelopmentFallbackData() {
-  return [];
-}
-
 export default function KLineLivePage() {
   const [query, setQuery] = useState<KLineQuery>(getDefaultQuery);
   const [securities, setSecurities] = useState<SecurityOption[]>([]);
@@ -137,22 +126,7 @@ export default function KLineLivePage() {
   }, []);
 
   const createChartState = useCallback(
-    async (
-      k: IFetchK[],
-      fallback: boolean,
-      nextQuery: KLineQuery
-    ): Promise<ChartState> => {
-      if (fallback) {
-        return {
-          k,
-          mergeK: Promise.resolve([]),
-          bi: Promise.resolve([]),
-          fenxing: Promise.resolve([]),
-          channel: Promise.resolve([]),
-          isFallback: true,
-        };
-      }
-
+    async (k: IFetchK[], nextQuery: KLineQuery): Promise<ChartState> => {
       const mergeKData = await fetchMergeK(nextQuery);
       const biData = await fetchBi(nextQuery);
       const fenxingData = await fetchFenxing(nextQuery);
@@ -165,7 +139,6 @@ export default function KLineLivePage() {
         bi: Promise.resolve(biData.phaseB),
         fenxing: Promise.resolve(fenxingData),
         channel: Promise.resolve(channelData.phaseB),
-        isFallback: false,
       };
     },
     []
@@ -197,18 +170,11 @@ export default function KLineLivePage() {
           return;
         }
 
-        const nextChart = await createChartState(k, false, nextQuery);
+        const nextChart = await createChartState(k, nextQuery);
         if (!isCurrentRequest()) return;
         setChart(nextChart);
       } catch (error) {
         if (!isCurrentRequest()) return;
-        if (isDevelopmentFallbackEnabled()) {
-          const fallbackData = await loadDevelopmentFallbackData();
-          if (!isCurrentRequest()) return;
-          setChart(await createChartState(fallbackData, true, nextQuery));
-          setStatusMessage("正在显示开发 fallback 数据");
-          return;
-        }
         setChartError(error instanceof Error ? error.message : String(error));
       } finally {
         if (isCurrentRequest()) {
@@ -384,7 +350,6 @@ export default function KLineLivePage() {
         <strong>{query.code || "未选择股票"}</strong>
         {selectedSecurity && <span>{selectedSecurity.name}</span>}
         {statusMessage && <span>{statusMessage}</span>}
-        {chart?.isFallback && <span>开发 fallback</span>}
         {chartError && <span className="field-error">{chartError}</span>}
       </section>
 
