@@ -94,8 +94,6 @@ export interface ChannelMappedData {
   endIndex: number;
   zg: number; // 中枢上沿
   zd: number; // 中枢下沿
-  gg: number; // 中枢最高
-  dd: number; // 中枢最低
   trend: TrendDirection;
   type: ChannelType;
   level: ChannelLevel;

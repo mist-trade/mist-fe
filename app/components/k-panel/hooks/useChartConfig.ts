@@ -113,7 +113,7 @@ export function useChartConfig({
   // 创建合并k线的数据
   const createMergeKSeries = useCallback((): CustomSeriesOption => {
     return {
-      name: "mergeK",
+      name: "合并K",
       type: "custom",
       renderItem: (params, api) => {
         const dataIndex = params.dataIndex;
@@ -178,7 +178,7 @@ export function useChartConfig({
   // 创建笔的数据
   const createBiSeries = useCallback((): CustomSeriesOption => {
     return {
-      name: "bi",
+      name: "笔",
       type: "custom",
       renderItem: (params, api) => {
         const dataIndex = params.dataIndex;
@@ -235,7 +235,7 @@ export function useChartConfig({
   // 创建中枢的数据
   const createChannelSeries = useCallback((): CustomSeriesOption => {
     return {
-      name: "channel",
+      name: "中枢",
       type: "custom",
       renderItem: (params, api) => {
         const dataIndex = params.dataIndex;
@@ -375,7 +375,7 @@ export function useChartConfig({
   // 创建分型的数据
   const createFenxingSeries = useCallback((): CustomSeriesOption => {
     return {
-      name: "fenxing",
+      name: "分型",
       type: "custom",
       renderItem: (params, api) => {
         const dataIndex = params.dataIndex;

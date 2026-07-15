@@ -16,7 +16,7 @@ export const TITLE_CONFIG: TitleComponentOption = {
 
 // Chart legend configuration
 export const LEGEND_CONFIG: LegendComponentOption = {
-  data: ["K线", "成交量", "笔"],
+  data: ["K线", "成交量", "笔", "中枢", "合并K", "分型"],
   top: 30,
 };
 
