@@ -221,8 +221,7 @@ button {
   color: #ffffff;
 }
 
-.strategy-header-actions span,
-.strategy-success {
+.strategy-header-actions span {
   color: #166534;
   font-size: 13px;
   font-weight: 700;
@@ -534,6 +533,21 @@ button {
 .backtest-detail {
   display: grid;
   gap: 12px;
+}
+
+.backtest-table-scroll {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.backtest-table-scroll table {
+  min-width: 620px;
+}
+
+.backtest-table-scroll th,
+.backtest-table-scroll td {
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .backtest-detail-header,

@@ -15,6 +15,7 @@ const TIMEOUT = Number.parseInt(
 );
 
 export type DataSourceValue = "ef" | "tdx" | "qmt";
+export type StrategyBacktestSourceValue = Exclude<DataSourceValue, "ef">;
 export type StrategyStatus = "draft" | "enabled" | "disabled" | "archived";
 export type StrategyAlertStatus = "pending" | "delivered" | "acked" | "failed";
 export type BacktestRunStatus =
@@ -167,8 +168,9 @@ export interface StrategyBacktestRequest {
   strategyDefinitionId: number;
   strategyVersionId?: number;
   targetUniverse: string[];
-  period: number;
-  source: DataSourceValue;
+  /** Daily (1440) is the only period supported by portfolio backtesting. */
+  period: 1440;
+  source: StrategyBacktestSourceValue;
   startDate: string;
   endDate: string;
   initialCash?: number;
@@ -187,7 +189,7 @@ export interface StrategyBacktestRun {
   strategyVersionId: number;
   targetUniverse: string[];
   period: number;
-  source: DataSourceValue;
+  source: StrategyBacktestSourceValue;
   startDate: string;
   endDate: string;
   status: BacktestRunStatus;
@@ -200,6 +202,7 @@ export interface StrategyBacktestRun {
   attemptCount: number;
   strategySnapshot?: Record<string, unknown>;
   configSnapshot?: Record<string, unknown>;
+  marketDataFingerprint?: string | null;
   metrics?: Record<string, number | null> | null;
   errorCode?: string | null;
   errorDetails?: Record<string, unknown> | null;

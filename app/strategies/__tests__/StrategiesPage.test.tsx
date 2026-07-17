@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import StrategiesPage from "../page";
 import {
   acknowledgeStrategyAlertEvent,
+  cancelStrategyBacktest,
   createStrategyBacktest,
   createStrategyDefinition,
   disableStrategyDefinition,
@@ -52,6 +53,7 @@ const mockedListStrategyVersions = listStrategyVersions as jest.Mock;
 const mockedFetchStrategySignals = fetchStrategySignals as jest.Mock;
 const mockedFetchStrategyAlertEvents = fetchStrategyAlertEvents as jest.Mock;
 const mockedAcknowledgeStrategyAlertEvent = acknowledgeStrategyAlertEvent as jest.Mock;
+const mockedCancelStrategyBacktest = cancelStrategyBacktest as jest.Mock;
 const mockedRunStrategyScan = runStrategyScan as jest.Mock;
 const mockedCreateStrategyBacktest = createStrategyBacktest as jest.Mock;
 const mockedListStrategyBacktests = listStrategyBacktests as jest.Mock;
@@ -69,7 +71,7 @@ const strategy = {
   status: "enabled",
   targetUniverse: ["600519", "000001"],
   periods: [1440],
-  sources: ["tdx"],
+  sources: ["tdx", "qmt"],
   currentVersionId: 5,
   backtestEnabled: true,
   updateTime: "2026-07-07T10:00:00.000Z",
@@ -126,6 +128,22 @@ const backtestRun = {
   totalWork: 4,
   progressPercent: 100,
   attemptCount: 1,
+  marketDataFingerprint: "a".repeat(64),
+  configSnapshot: {
+    priceModel: "tdx_front",
+    priceModelProvenance: "tdx_forward_factor_request_contract",
+    executionAssumption: "full_fill_at_adjusted_next_open",
+    limitations: [
+      "dividends_not_modeled",
+      "splits_not_modeled",
+      "rights_issues_not_modeled",
+      "full_price_limit_rules_not_modeled",
+      "st_rules_not_modeled",
+      "liquidity_not_modeled",
+      "partial_fills_not_modeled",
+    ],
+    marketDataFingerprintAlgorithm: "sha256-v1",
+  },
   metrics: { totalReturn: 0.1 },
   startedAt: "2026-07-07T10:10:00.000Z",
   completedAt: "2026-07-07T10:10:01.000Z",
@@ -179,6 +197,10 @@ function setupMocks() {
   mockedEnableStrategyDefinition.mockResolvedValue({ ...strategy, status: "enabled" });
   mockedDisableStrategyDefinition.mockResolvedValue({ ...strategy, status: "disabled" });
   mockedCreateStrategyBacktest.mockResolvedValue(backtestRun);
+  mockedCancelStrategyBacktest.mockResolvedValue({
+    ...backtestRun,
+    status: "cancelled",
+  });
   mockedListStrategyBacktests.mockResolvedValue({
     items: [backtestRun],
     nextCursor: null,
@@ -337,6 +359,10 @@ describe("StrategiesPage", () => {
     expect(screen.getByRole("tab", { name: "持仓" })).toBeInTheDocument();
     expect(screen.getByText("年化波动")).toBeInTheDocument();
     expect(screen.getByText("平均仓位")).toBeInTheDocument();
+    expect(screen.getByText("价格模型：tdx_front")).toBeInTheDocument();
+    expect(
+      screen.getByText(/使用下一可得开盘价和全额成交假设；不建模分红/),
+    ).toBeInTheDocument();
     for (const label of [
       "总收益",
       "年化收益",
@@ -389,6 +415,46 @@ describe("StrategiesPage", () => {
     expect(screen.getByRole("heading", { name: "运行 #11" })).toBeInTheDocument();
   });
 
+  it("drops a stale run-page response after the status filter changes", async () => {
+    let resolveStalePage!: (value: {
+      items: typeof backtestRun[];
+      nextCursor: null;
+    }) => void;
+    const stalePage = new Promise<{
+      items: typeof backtestRun[];
+      nextCursor: null;
+    }>((resolve) => {
+      resolveStalePage = resolve;
+    });
+    mockedListStrategyBacktests
+      .mockResolvedValueOnce({ items: [backtestRun], nextCursor: "run-cursor" })
+      .mockReturnValueOnce(stalePage)
+      .mockResolvedValueOnce({ items: [backtestRun], nextCursor: null });
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+    await screen.findByText("阶段 finalizing");
+    fireEvent.click(await screen.findByRole("button", { name: "加载更多运行" }));
+    fireEvent.change(screen.getByLabelText("回测状态筛选"), {
+      target: { value: "completed" },
+    });
+    await waitFor(() =>
+      expect(mockedListStrategyBacktests).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: "completed" })
+      )
+    );
+
+    await act(async () => {
+      resolveStalePage({
+        items: [{ ...backtestRun, id: 12, status: "failed" }],
+        nextCursor: null,
+      });
+      await stalePage;
+    });
+    expect(screen.queryByText("运行 #12")).not.toBeInTheDocument();
+  });
+
   it("loads only the active result tab", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
@@ -402,6 +468,41 @@ describe("StrategiesPage", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: "订单" }));
     await waitFor(() => expect(mockedFetchStrategyBacktestOrders).toHaveBeenCalled());
+  });
+
+  it("drops a stale fact response after switching detail tabs", async () => {
+    let resolveTrades!: (value: {
+      items: typeof backtestTrade[];
+      nextCursor: null;
+    }) => void;
+    const tradesPage = new Promise<{
+      items: typeof backtestTrade[];
+      nextCursor: null;
+    }>((resolve) => {
+      resolveTrades = resolve;
+    });
+    mockedFetchStrategyBacktestTrades
+      .mockReturnValueOnce(tradesPage)
+      .mockResolvedValue({ items: [], nextCursor: null });
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+    await screen.findByText("阶段 finalizing");
+    fireEvent.click(screen.getByRole("tab", { name: "订单" }));
+    await waitFor(() => expect(mockedFetchStrategyBacktestOrders).toHaveBeenCalled());
+
+    await act(async () => {
+      resolveTrades({ items: [backtestTrade], nextCursor: null });
+      await tradesPage;
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("tab", { name: "交易" }));
+    });
+    await waitFor(() =>
+      expect(mockedFetchStrategyBacktestTrades).toHaveBeenCalledTimes(2)
+    );
+    expect(screen.queryByText("490")).not.toBeInTheDocument();
   });
 
   it("disables a new portfolio run with a concrete eligibility reason", async () => {
@@ -456,6 +557,71 @@ describe("StrategiesPage", () => {
     }
   });
 
+  it("refreshes terminal facts immediately and retries terminal equity independently", async () => {
+    jest.useFakeTimers();
+    try {
+      mockedFetchStrategyBacktestRun
+        .mockResolvedValueOnce({
+          ...backtestRun,
+          status: "running",
+          stage: "simulating",
+          completedAt: null,
+        })
+        .mockResolvedValue(backtestRun);
+      render(<StrategiesPage />);
+      await screen.findByRole("heading", { name: "突破策略" });
+
+      fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+      await waitFor(() => expect(mockedFetchStrategyBacktestEquity).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockedFetchStrategyBacktestTrades).toHaveBeenCalledTimes(1));
+      mockedFetchStrategyBacktestEquity.mockClear();
+      mockedFetchStrategyBacktestEquity
+        .mockRejectedValueOnce(new Error("equity transient"))
+        .mockRejectedValueOnce(new Error("equity transient"))
+        .mockResolvedValueOnce([]);
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(3_000);
+      });
+      expect(mockedFetchStrategyBacktestRun).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(mockedFetchStrategyBacktestTrades).toHaveBeenCalledTimes(2));
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(6_000);
+      });
+      expect(mockedFetchStrategyBacktestEquity).toHaveBeenCalledTimes(3);
+      expect(screen.queryByText("equity transient")).not.toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("stops terminal equity retries after three attempts and surfaces the error", async () => {
+    jest.useFakeTimers();
+    try {
+      mockedFetchStrategyBacktestEquity.mockRejectedValue(
+        new Error("equity unavailable")
+      );
+      render(<StrategiesPage />);
+      await screen.findByRole("heading", { name: "突破策略" });
+
+      fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+      await screen.findByText("阶段 finalizing");
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(6_000);
+      });
+
+      expect(mockedFetchStrategyBacktestEquity).toHaveBeenCalledTimes(3);
+      expect(screen.getByText("equity unavailable")).toBeInTheDocument();
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(6_000);
+      });
+      expect(mockedFetchStrategyBacktestEquity).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("follows fact cursors and supports as-of position reconstruction", async () => {
     mockedFetchStrategyBacktestTrades
       .mockResolvedValueOnce({ items: [backtestTrade], nextCursor: "trade-cursor" })
@@ -475,9 +641,15 @@ describe("StrategiesPage", () => {
     );
 
     fireEvent.click(screen.getByRole("tab", { name: "持仓" }));
+    await waitFor(() => expect(mockedFetchStrategyBacktestPositions).toHaveBeenCalled());
+    const callsBeforeDraftChange = mockedFetchStrategyBacktestPositions.mock.calls.length;
     fireEvent.change(await screen.findByLabelText("持仓截止日期"), {
       target: { value: "2026-03-05" },
     });
+    await act(async () => Promise.resolve());
+    expect(mockedFetchStrategyBacktestPositions).toHaveBeenCalledTimes(
+      callsBeforeDraftChange
+    );
     fireEvent.click(screen.getByRole("button", { name: "查询持仓" }));
     await waitFor(() =>
       expect(mockedFetchStrategyBacktestPositions).toHaveBeenLastCalledWith(
@@ -485,6 +657,94 @@ describe("StrategiesPage", () => {
         expect.objectContaining({ asOf: "2026-03-05", limit: 100 })
       )
     );
+  });
+
+  it("rejects invalid numeric backtest inputs instead of silently omitting them", async () => {
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+    fireEvent.click(await screen.findByRole("button", { name: "新建组合回测" }));
+    fireEvent.change(screen.getByLabelText("最大持仓"), {
+      target: { value: "1.5" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "提交组合回测" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "最大持仓数格式或范围无效"
+    );
+    expect(mockedCreateStrategyBacktest).not.toHaveBeenCalled();
+  });
+
+  it("enforces the shared CNY ceiling in inputs and submitted payloads", async () => {
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+    fireEvent.click(await screen.findByRole("button", { name: "新建组合回测" }));
+    const initialCash = screen.getByLabelText("初始资金");
+    const minCommission = screen.getByLabelText("最低佣金");
+    expect(initialCash).toHaveAttribute("max", "1000000000000");
+    expect(minCommission).toHaveAttribute("max", "1000000000000");
+    fireEvent.change(initialCash, { target: { value: "1000000000000" } });
+    fireEvent.change(minCommission, { target: { value: "1000000000000" } });
+    fireEvent.click(screen.getByRole("button", { name: "提交组合回测" }));
+
+    await waitFor(() =>
+      expect(mockedCreateStrategyBacktest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          initialCash: 1e12,
+          minCommission: 1e12,
+        })
+      )
+    );
+  });
+
+  it("shows scoped cancellation failures, restores the button, and clears the error after success", async () => {
+    const running = { ...backtestRun, status: "running", progressPercent: 50 };
+    mockedListStrategyBacktests.mockResolvedValue({
+      items: [running],
+      nextCursor: null,
+    });
+    mockedFetchStrategyBacktestRun.mockResolvedValue(running);
+    mockedCancelStrategyBacktest
+      .mockRejectedValueOnce(new Error("取消请求失败"))
+      .mockResolvedValueOnce({ ...running, status: "cancelled" });
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+    const cancelButton = await screen.findByRole("button", { name: "取消回测" });
+    fireEvent.click(cancelButton);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("取消请求失败");
+    expect(cancelButton).toBeEnabled();
+    expect(screen.getAllByText("running").length).toBeGreaterThan(0);
+
+    fireEvent.click(cancelButton);
+    await waitFor(() =>
+      expect(screen.queryByText("取消请求失败")).not.toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(screen.getAllByText("cancelled").length).toBeGreaterThan(1)
+    );
+  });
+
+  it("rejects CNY values above the shared frontend ceiling", async () => {
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("tab", { name: "组合回测" }));
+    fireEvent.click(await screen.findByRole("button", { name: "新建组合回测" }));
+    fireEvent.change(screen.getByLabelText("初始资金"), {
+      target: { value: "1000000000001" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "提交组合回测" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "初始资金格式或范围无效"
+    );
+    expect(mockedCreateStrategyBacktest).not.toHaveBeenCalled();
   });
 
   it("surfaces structured run errors in the dedicated result tab", async () => {

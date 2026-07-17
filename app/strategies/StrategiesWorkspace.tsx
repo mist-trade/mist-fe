@@ -23,6 +23,7 @@ import {
   updateStrategyDefinition,
   type BacktestRunStatus,
   type DataSourceValue,
+  type StrategyBacktestSourceValue,
   type StrategyAlertEvent,
   type StrategyBacktestRun,
   type StrategyBacktestSignal,
@@ -49,6 +50,17 @@ const DEFAULT_RULE = {
   value: 100,
 };
 
+const STRATEGY_BACKTEST_SOURCES = new Set<StrategyBacktestSourceValue>([
+  "tdx",
+  "qmt",
+]);
+const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "qmt"]);
+
+const isStrategyBacktestSource = (
+  source: DataSourceValue
+): source is StrategyBacktestSourceValue =>
+  STRATEGY_BACKTEST_SOURCES.has(source as StrategyBacktestSourceValue);
+
 const formatJson = (value: unknown) => JSON.stringify(value ?? {}, null, 2);
 
 const parseCsv = (value: string) =>
@@ -57,14 +69,81 @@ const parseCsv = (value: string) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-const parseNumberCsv = (value: string) =>
-  parseCsv(value)
-    .map((item) => Number(item))
-    .filter((item) => Number.isFinite(item));
+const parseNumberCsv = (value: string, label: string) => {
+  const tokens = parseCsv(value);
+  const numbers = tokens.map((item) => Number(item));
+  if (numbers.some((item) => !Number.isFinite(item))) {
+    throw new Error(`${label}必须是逗号分隔的有效数字`);
+  }
+  return numbers;
+};
+
+const parseDataSourceCsv = (value: string) => {
+  const sources = parseCsv(value);
+  const invalid = sources.filter(
+    (source) => !DATA_SOURCE_VALUES.has(source as DataSourceValue)
+  );
+  if (invalid.length > 0) {
+    throw new Error(`数据来源无效：${invalid.join("、")}`);
+  }
+  return sources as DataSourceValue[];
+};
+
+const parseOptionalNumber = (
+  value: string,
+  label: string,
+  options: { integer?: boolean; min?: number; max?: number } = {}
+) => {
+  const trimmed = value.trim();
+  if (trimmed === "") return undefined;
+  const numeric = Number(trimmed);
+  if (
+    !Number.isFinite(numeric) ||
+    (options.integer && !Number.isInteger(numeric)) ||
+    (options.min !== undefined && numeric < options.min) ||
+    (options.max !== undefined && numeric > options.max)
+  ) {
+    throw new Error(`${label}格式或范围无效`);
+  }
+  return numeric;
+};
+
+const MAX_BACKTEST_CNY = 1e12;
+
+const beijingDateTimeFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Shanghai",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+const beijingDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Shanghai",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "-";
-  return value.replace("T", " ").replace(".000Z", "");
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "-";
+  // Intl formats as "YYYY-MM-DD, HH:MM:SS"; drop the comma for compactness.
+  return beijingDateTimeFormatter.format(parsed).replace(", ", " ");
+};
+
+// Date-only Beijing formatter: a persisted Beijing-midnight instant
+// (e.g. 2025-12-31T16:00:00Z) must render as its Beijing calendar date
+// (2026-01-01), not the raw ISO string.
+const formatBeijingDate = (value?: string | null) => {
+  if (!value) return "-";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "-";
+  return beijingDateFormatter.format(parsed);
 };
 
 const statusLabel = (status?: string) => status || "-";
@@ -74,6 +153,42 @@ const formatMetric = (value: number | null | undefined, suffix = "") =>
 
 const formatPercentMetric = (value: number | null | undefined) =>
   value === null || value === undefined ? "-" : formatMetric(value * 100, "%");
+
+const formatSnapshotString = (
+  snapshot: Record<string, unknown> | undefined,
+  key: string
+) => (typeof snapshot?.[key] === "string" ? snapshot[key] : "未记录");
+
+const BACKTEST_LIMITATION_LABELS: Record<string, string> = {
+  dividends_not_modeled: "分红",
+  splits_not_modeled: "拆并股",
+  rights_issues_not_modeled: "配股",
+  full_price_limit_rules_not_modeled: "涨跌停",
+  st_rules_not_modeled: "ST",
+  liquidity_not_modeled: "流动性",
+  partial_fills_not_modeled: "部分成交",
+};
+
+const formatBacktestAssumptions = (
+  snapshot: Record<string, unknown> | undefined
+) => {
+  const assumption =
+    typeof snapshot?.executionAssumption === "string"
+      ? snapshot.executionAssumption
+      : "";
+  const limitationText =
+    assumption === "full_fill_at_adjusted_next_open"
+      ? "使用下一可得开盘价和全额成交假设"
+      : assumption || "执行假设未记录";
+  const limitations = Array.isArray(snapshot?.limitations)
+    ? (snapshot!.limitations as unknown[])
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => BACKTEST_LIMITATION_LABELS[item] ?? item)
+        .join("、")
+    : "";
+  const notModeled = limitations ? `；不建模${limitations}` : "";
+  return `${limitationText}${notModeled}。`;
+};
 
 const mergeById = <T extends { id: number }>(items: T[], nextItems: T[]) => [
   ...items,
@@ -142,6 +257,9 @@ function BacktestEquityChart({ points }: { points: StrategyBacktestEquityPoint[]
         ],
       });
       window.addEventListener("resize", resize);
+    }).catch(() => {
+      // Dynamic echarts load failure: leave chart null; cleanup runs safely.
+      // A visible error state for chart-load failure is a future enhancement.
     });
 
     return () => {
@@ -168,6 +286,10 @@ export default function StrategiesWorkspace() {
   const [backtestRuns, setBacktestRuns] = useState<StrategyBacktestRun[]>([]);
   const [backtestRunsNextCursor, setBacktestRunsNextCursor] = useState<string | null>(null);
   const [backtestStatusFilter, setBacktestStatusFilter] = useState<BacktestRunStatus | "">("");
+  const backtestStatusFilterRef = useRef(backtestStatusFilter || undefined);
+  useEffect(() => {
+    backtestStatusFilterRef.current = backtestStatusFilter || undefined;
+  }, [backtestStatusFilter]);
   const [selectedBacktestId, setSelectedBacktestId] = useState<number | null>(null);
   const [backtestRun, setBacktestRun] = useState<StrategyBacktestRun | null>(null);
   const [backtestSignals, setBacktestSignals] = useState<StrategyBacktestSignal[]>([]);
@@ -179,15 +301,22 @@ export default function StrategiesWorkspace() {
   const [backtestEquity, setBacktestEquity] = useState<StrategyBacktestEquityPoint[]>([]);
   const [backtestPositions, setBacktestPositions] = useState<StrategyBacktestTrade[]>([]);
   const [backtestPositionsNextCursor, setBacktestPositionsNextCursor] = useState<string | null>(null);
-  const [positionAsOf, setPositionAsOf] = useState("");
+  const [positionAsOfDraft, setPositionAsOfDraft] = useState("");
+  const [positionAsOfApplied, setPositionAsOfApplied] = useState("");
+  const [factRefreshGeneration, setFactRefreshGeneration] = useState(0);
   const [backtestDetailTab, setBacktestDetailTab] = useState<BacktestDetailTab>("trades");
   const [isBacktestDrawerOpen, setIsBacktestDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isActionRunning, setIsActionRunning] = useState(false);
+  const [isLoadingMoreBacktests, setIsLoadingMoreBacktests] = useState(false);
+  const [isLoadingMoreFacts, setIsLoadingMoreFacts] = useState(false);
+  const [isCancellingBacktest, setIsCancellingBacktest] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [backtestCreateError, setBacktestCreateError] = useState("");
   const [backtestResultError, setBacktestResultError] = useState("");
+  const [backtestEquityError, setBacktestEquityError] = useState("");
+  const [backtestCancelError, setBacktestCancelError] = useState("");
   const [editorError, setEditorError] = useState("");
   const [scanResult, setScanResult] = useState("");
 
@@ -205,8 +334,9 @@ export default function StrategiesWorkspace() {
 
   const [backtestVersionId, setBacktestVersionId] = useState("");
   const [backtestUniverse, setBacktestUniverse] = useState("");
-  const [backtestPeriod, setBacktestPeriod] = useState("1440");
-  const [backtestSource, setBacktestSource] = useState<DataSourceValue>("tdx");
+  const [backtestSource, setBacktestSource] = useState<
+    StrategyBacktestSourceValue | ""
+  >("tdx");
   const [backtestStartDate, setBacktestStartDate] = useState("");
   const [backtestEndDate, setBacktestEndDate] = useState("");
   const [backtestInitialCash, setBacktestInitialCash] = useState("1000000");
@@ -223,12 +353,44 @@ export default function StrategiesWorkspace() {
     [selectedId, strategies]
   );
 
+  // Mirror the current selected strategy id into a ref so async handlers can
+  // detect whether the selection changed while their request was in flight.
+  const selectedStrategyIdRef = useRef<number | null>(selectedId);
+  const runListRequestGenerationRef = useRef(0);
+  const factRequestGenerationRef = useRef(0);
+  useEffect(() => {
+    selectedStrategyIdRef.current = selectedId;
+  }, [selectedId]);
+
+  // Mirror the current backtest run id and detail tab into refs so paged fact
+  // fetches can detect whether the run/tab changed while the request was in
+  // flight, and drop stale append results.
+  const backtestRunIdRef = useRef<number | null>(null);
+  const backtestDetailTabRef = useRef<BacktestDetailTab>(backtestDetailTab);
+  const positionAsOfAppliedRef = useRef(positionAsOfApplied);
+  useEffect(() => {
+    backtestRunIdRef.current = backtestRun?.id ?? null;
+  }, [backtestRun?.id]);
+  useEffect(() => {
+    backtestDetailTabRef.current = backtestDetailTab;
+  }, [backtestDetailTab]);
+  useEffect(() => {
+    positionAsOfAppliedRef.current = positionAsOfApplied;
+  }, [positionAsOfApplied]);
+
+  // currentVersion must only resolve from versions that belong to the CURRENTLY
+  // selected strategy. A cross-strategy versions[0] fallback would let a stale
+  // previous strategy's rule bleed into the editor during/after a switch.
   const currentVersion = useMemo(
     () =>
       versions.find((item) => item.id === selectedStrategy?.currentVersionId) ||
-      versions[0] ||
       null,
     [selectedStrategy?.currentVersionId, versions]
+  );
+
+  const backtestSourceOptions = useMemo(
+    () => selectedStrategy?.sources.filter(isStrategyBacktestSource) ?? [],
+    [selectedStrategy]
   );
 
   const backtestEligibilityReason = useMemo(() => {
@@ -242,17 +404,21 @@ export default function StrategiesWorkspace() {
     if (!selectedStrategy.periods.includes(1440)) {
       return "组合回测仅支持日线周期。";
     }
-    if (selectedStrategy.sources.length === 0) {
-      return "策略至少需要配置一个数据来源。";
+    if (backtestSourceOptions.length === 0) {
+      return "组合回测需要策略配置 tdx 或 qmt 数据来源。";
     }
     return "";
-  }, [currentVersion?.exitRule, selectedStrategy]);
+  }, [backtestSourceOptions.length, currentVersion?.exitRule, selectedStrategy]);
 
   const editorBacktestGuidance = useMemo(() => {
     if (!backtestEnabled) return "关闭时可保留空的出场规则，仅用于实时入场信号。";
     if (exitRuleText.trim() === "") return "开启回测前必须填写出场规则 JSON。";
-    if (!parseNumberCsv(periods).includes(1440)) return "开启回测时必须包含日线周期 1440。";
-    if (parseCsv(sources).length === 0) return "开启回测时至少需要一个数据来源。";
+    if (!parseCsv(periods).some((period) => Number(period) === 1440)) {
+      return "开启回测时必须包含日线周期 1440。";
+    }
+    if (!(parseCsv(sources) as DataSourceValue[]).some(isStrategyBacktestSource)) {
+      return "开启回测时必须至少包含 tdx 或 qmt 数据来源。";
+    }
     return "回测资格会由后端再次校验规则字段和历史数据。";
   }, [backtestEnabled, exitRuleText, periods, sources]);
 
@@ -295,6 +461,10 @@ export default function StrategiesWorkspace() {
       return;
     }
 
+    // Clear stale versions immediately on strategy switch so currentVersion
+    // cannot briefly resolve to the previous strategy's versions[0] while the
+    // new fetch is in flight.
+    setVersions([]);
     let active = true;
     listStrategyVersions(selectedId)
       .then((items) => {
@@ -320,10 +490,26 @@ export default function StrategiesWorkspace() {
     setBacktestVersionId(String(selectedStrategy.currentVersionId || ""));
     setBacktestUniverse(selectedStrategy.targetUniverse.join(", "));
     setBacktestEnabled(Boolean(selectedStrategy.backtestEnabled));
+    const configuredBacktestSources = selectedStrategy.sources.filter(
+      isStrategyBacktestSource
+    );
+    setBacktestSource((current) =>
+      current && configuredBacktestSources.includes(current)
+        ? current
+        : configuredBacktestSources[0] ?? ""
+    );
   }, [selectedStrategy]);
 
   useEffect(() => {
-    if (!currentVersion) return;
+    // While versions for the selected strategy are still loading (or failed),
+    // currentVersion is null — clear the rule fields so the editor cannot
+    // submit the previous strategy's rules as a new version of the current one.
+    if (!currentVersion) {
+      setEntryRuleText("");
+      setExitRuleText("");
+      setLookbackBars("");
+      return;
+    }
     setEntryRuleText(formatJson(currentVersion.entryRule));
     setExitRuleText(currentVersion.exitRule ? formatJson(currentVersion.exitRule) : "");
     setLookbackBars(String(currentVersion.lookbackBars));
@@ -361,32 +547,28 @@ export default function StrategiesWorkspace() {
     return value;
   };
 
+  const buildStrategyPayload = (): Parameters<
+    typeof createStrategyDefinition
+  >[0] => {
+    const { entryRule, exitRule } = parseEditorRules();
+    return {
+      name,
+      description,
+      targetUniverse: parseCsv(targetUniverse),
+      periods: parseNumberCsv(periods, "周期"),
+      sources: parseDataSourceCsv(sources),
+      entryRule,
+      exitRule,
+      lookbackBars: parseLookbackBars(),
+      backtestEnabled,
+    };
+  };
+
   const saveStrategy = async () => {
     setEditorError("");
-    let entryRule: Record<string, unknown>;
-    let exitRule: Record<string, unknown> | null;
-    let editorLookbackBars: number;
-    try {
-      ({ entryRule, exitRule } = parseEditorRules());
-      editorLookbackBars = parseLookbackBars();
-    } catch (error) {
-      setEditorError(error instanceof Error ? error.message : String(error));
-      return;
-    }
-
     setIsSaving(true);
     try {
-      await createStrategyDefinition({
-        name,
-        description,
-        targetUniverse: parseCsv(targetUniverse),
-        periods: parseNumberCsv(periods),
-        sources: parseCsv(sources) as DataSourceValue[],
-        entryRule,
-        exitRule,
-        lookbackBars: editorLookbackBars,
-        backtestEnabled,
-      });
+      await createStrategyDefinition(buildStrategyPayload());
       await refreshStrategies();
     } catch (error) {
       setEditorError(error instanceof Error ? error.message : String(error));
@@ -398,30 +580,9 @@ export default function StrategiesWorkspace() {
   const updateCurrentStrategy = async () => {
     if (!selectedStrategy) return;
     setEditorError("");
-    let entryRule: Record<string, unknown>;
-    let exitRule: Record<string, unknown> | null;
-    let editorLookbackBars: number;
-    try {
-      ({ entryRule, exitRule } = parseEditorRules());
-      editorLookbackBars = parseLookbackBars();
-    } catch (error) {
-      setEditorError(error instanceof Error ? error.message : String(error));
-      return;
-    }
-
     setIsSaving(true);
     try {
-      await updateStrategyDefinition(selectedStrategy.id, {
-        name,
-        description,
-        targetUniverse: parseCsv(targetUniverse),
-        periods: parseNumberCsv(periods),
-        sources: parseCsv(sources) as DataSourceValue[],
-        entryRule,
-        exitRule,
-        lookbackBars: editorLookbackBars,
-        backtestEnabled,
-      });
+      await updateStrategyDefinition(selectedStrategy.id, buildStrategyPayload());
       await refreshStrategies();
       setVersions(await listStrategyVersions(selectedStrategy.id));
     } catch (error) {
@@ -477,17 +638,42 @@ export default function StrategiesWorkspace() {
   };
 
   const refreshBacktests = useCallback(async () => {
-    const page = await listStrategyBacktests({
-      strategyDefinitionId: selectedStrategy?.id,
-      status: backtestStatusFilter || undefined,
-      limit: 50,
-    });
-    setBacktestRuns(page.items);
-    setBacktestRunsNextCursor(page.nextCursor);
-    setSelectedBacktestId((current) =>
-      page.items.some((item) => item.id === current) ? current : page.items[0]?.id ?? null
-    );
-    return page.items;
+    const requestedStrategyId = selectedStrategy?.id;
+    const requestedFilter = backtestStatusFilter || undefined;
+    const requestGeneration = ++runListRequestGenerationRef.current;
+    setIsLoadingMoreBacktests(false);
+    try {
+      const page = await listStrategyBacktests({
+        strategyDefinitionId: requestedStrategyId,
+        status: requestedFilter,
+        limit: 50,
+      });
+      if (
+        requestGeneration !== runListRequestGenerationRef.current ||
+        requestedStrategyId !== selectedStrategyIdRef.current ||
+        requestedFilter !== backtestStatusFilterRef.current
+      ) {
+        return page.items;
+      }
+      setBacktestRuns(page.items);
+      setBacktestRunsNextCursor(page.nextCursor);
+      setSelectedBacktestId((current) =>
+        page.items.some((item) => item.id === current)
+          ? current
+          : page.items[0]?.id ?? null
+      );
+      setLoadError("");
+      return page.items;
+    } catch (error) {
+      if (
+        requestGeneration === runListRequestGenerationRef.current &&
+        requestedStrategyId === selectedStrategyIdRef.current &&
+        requestedFilter === backtestStatusFilterRef.current
+      ) {
+        setLoadError(error instanceof Error ? error.message : String(error));
+      }
+      return [];
+    }
   }, [backtestStatusFilter, selectedStrategy?.id]);
 
   const loadBacktestFactPage = async (
@@ -557,32 +743,34 @@ export default function StrategiesWorkspace() {
     setBacktestPositionsNextCursor(page.nextCursor);
   };
 
-  const loadBacktestDetail = async (
+  const loadBacktestRun = async (
     runId: number,
     canUpdate: () => boolean = () => true
   ) => {
-    const [run, equity] = await Promise.all([
-      fetchStrategyBacktestRun(runId),
-      fetchStrategyBacktestEquity(runId),
-    ]);
+    const run = await fetchStrategyBacktestRun(runId);
     if (!canUpdate()) return run;
     setBacktestRun(run);
-    setBacktestEquity(equity);
     setBacktestRuns((items) =>
       items.map((item) => (item.id === run.id ? run : item))
     );
     return run;
   };
 
+  const loadBacktestEquity = async (
+    runId: number,
+    canUpdate: () => boolean = () => true
+  ) => {
+    const equity = await fetchStrategyBacktestEquity(runId);
+    if (!canUpdate()) return;
+    setBacktestEquity(equity);
+  };
+
   useEffect(() => {
     if (activeTab !== "backtests") return;
-    refreshBacktests().catch((error) => {
-      setLoadError(error instanceof Error ? error.message : String(error));
-    });
+    void refreshBacktests();
   }, [activeTab, refreshBacktests]);
 
   const selectedBacktestRunId = backtestRun?.id;
-  const selectedBacktestRunStatus = backtestRun?.status;
 
   useEffect(() => {
     if (activeTab !== "backtests" || selectedBacktestId === null) {
@@ -596,6 +784,11 @@ export default function StrategiesWorkspace() {
       setBacktestTradesNextCursor(null);
       setBacktestPositions([]);
       setBacktestPositionsNextCursor(null);
+      setPositionAsOfDraft("");
+      setPositionAsOfApplied("");
+      setBacktestResultError("");
+      setBacktestEquityError("");
+      setBacktestCancelError("");
       return;
     }
 
@@ -610,28 +803,90 @@ export default function StrategiesWorkspace() {
     setBacktestTradesNextCursor(null);
     setBacktestPositions([]);
     setBacktestPositionsNextCursor(null);
+    setPositionAsOfDraft("");
+    setPositionAsOfApplied("");
     setBacktestResultError("");
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    const refresh = async () => {
+    setBacktestEquityError("");
+    setBacktestCancelError("");
+    let previousStatus: string | undefined;
+    let runTimeout: ReturnType<typeof setTimeout> | undefined;
+    let equityTimeout: ReturnType<typeof setTimeout> | undefined;
+    let runFailures = 0;
+    let equityRequestGeneration = 0;
+    const MAX_ATTEMPTS = 3;
+
+    const refreshEquity = (requestGeneration: number, attempt = 1) => {
+      void loadBacktestEquity(selectedBacktestId, () =>
+        active && requestGeneration === equityRequestGeneration
+      )
+        .then(() => {
+          if (active && requestGeneration === equityRequestGeneration) {
+            setBacktestEquityError("");
+          }
+        })
+        .catch((error) => {
+          if (!active || requestGeneration !== equityRequestGeneration) return;
+          if (attempt < MAX_ATTEMPTS) {
+            equityTimeout = setTimeout(
+              () => refreshEquity(requestGeneration, attempt + 1),
+              3_000
+            );
+            return;
+          }
+          setBacktestEquityError(
+            error instanceof Error ? error.message : String(error)
+          );
+        });
+    };
+
+    const startEquityRefresh = () => {
+      equityRequestGeneration += 1;
+      if (equityTimeout) clearTimeout(equityTimeout);
+      refreshEquity(equityRequestGeneration);
+    };
+
+    const scheduleRunRefresh = () => {
+      runTimeout = setTimeout(() => void refreshRun(), 3_000);
+    };
+
+    const refreshRun = async () => {
       try {
-        const run = await loadBacktestDetail(selectedBacktestId, () => active);
+        const run = await loadBacktestRun(selectedBacktestId, () => active);
         if (!active) return;
-        if (run.status === "pending" || run.status === "running") {
-          timeout = setTimeout(() => {
-            void refresh();
-          }, 3_000);
+        const isTerminal =
+          run.status !== "pending" && run.status !== "running";
+        const justBecameTerminal =
+          isTerminal &&
+          previousStatus !== undefined &&
+          previousStatus !== run.status;
+
+        previousStatus = run.status;
+        if (justBecameTerminal) {
+          setFactRefreshGeneration((generation) => generation + 1);
+          startEquityRefresh();
         }
+        runFailures = 0;
+        if (!isTerminal) scheduleRunRefresh();
       } catch (error) {
-        if (active) {
-          setLoadError(error instanceof Error ? error.message : String(error));
+        if (!active) return;
+        runFailures += 1;
+        if (runFailures < MAX_ATTEMPTS) {
+          scheduleRunRefresh();
+        } else {
+          setLoadError(
+            error instanceof Error ? error.message : String(error)
+          );
         }
       }
     };
-    void refresh();
+    startEquityRefresh();
+    void refreshRun();
 
     return () => {
       active = false;
-      if (timeout) clearTimeout(timeout);
+      equityRequestGeneration += 1;
+      if (runTimeout) clearTimeout(runTimeout);
+      if (equityTimeout) clearTimeout(equityTimeout);
     };
   }, [activeTab, selectedBacktestId]);
 
@@ -647,13 +902,21 @@ export default function StrategiesWorkspace() {
     }
 
     let active = true;
+    const requestGeneration = ++factRequestGenerationRef.current;
+    setIsLoadingMoreFacts(false);
+    const canUpdate = () =>
+      active &&
+      requestGeneration === factRequestGenerationRef.current &&
+      backtestRunIdRef.current === selectedBacktestId &&
+      backtestDetailTabRef.current === backtestDetailTab &&
+      positionAsOfAppliedRef.current === positionAsOfApplied;
     void loadBacktestFactPage(
       selectedBacktestId,
       backtestDetailTab,
-      { asOf: positionAsOf || undefined },
-      () => active
+      { asOf: positionAsOfApplied || undefined },
+      canUpdate
     ).catch((error) => {
-      if (active) {
+      if (canUpdate()) {
         setBacktestResultError(error instanceof Error ? error.message : String(error));
       }
     });
@@ -665,37 +928,68 @@ export default function StrategiesWorkspace() {
     activeTab,
     backtestDetailTab,
     selectedBacktestRunId,
-    selectedBacktestRunStatus,
-    positionAsOf,
+    positionAsOfApplied,
+    factRefreshGeneration,
     selectedBacktestId,
   ]);
 
   const runBacktest = async () => {
     if (!selectedStrategy) return;
     setBacktestCreateError("");
+    if (!backtestSource) {
+      setBacktestCreateError("组合回测需要策略配置 tdx 或 qmt 数据来源。");
+      return;
+    }
     setIsActionRunning(true);
     try {
       const run = await createStrategyBacktest({
         strategyDefinitionId: selectedStrategy.id,
-        strategyVersionId:
-          backtestVersionId.trim() === "" ? undefined : Number(backtestVersionId),
+        strategyVersionId: parseOptionalNumber(backtestVersionId, "策略版本", {
+          integer: true,
+          min: 1,
+        }),
         targetUniverse: parseCsv(backtestUniverse),
-        period: Number(backtestPeriod),
+        // Daily is the only supported period; send the literal rather than
+        // echoing a free-text input.
+        period: 1440,
         source: backtestSource,
         startDate: backtestStartDate,
         endDate: backtestEndDate,
-        initialCash: Number(backtestInitialCash),
-        maxPositions: Number(backtestMaxPositions),
-        slippageBps: Number(backtestSlippageBps),
-        commissionRate: Number(backtestCommissionRate),
-        minCommission: Number(backtestMinCommission),
-        stampDutyRate: Number(backtestStampDutyRate),
-        transferFeeRate: Number(backtestTransferFeeRate),
+        initialCash: parseOptionalNumber(backtestInitialCash, "初始资金", {
+          min: 0.01,
+          max: MAX_BACKTEST_CNY,
+        }),
+        maxPositions: parseOptionalNumber(backtestMaxPositions, "最大持仓数", {
+          integer: true,
+          min: 1,
+          max: 50,
+        }),
+        slippageBps: parseOptionalNumber(backtestSlippageBps, "滑点", {
+          min: 0,
+          max: 10_000,
+        }),
+        commissionRate: parseOptionalNumber(backtestCommissionRate, "佣金率", {
+          min: 0,
+          max: 1,
+        }),
+        minCommission: parseOptionalNumber(backtestMinCommission, "最低佣金", {
+          min: 0,
+          max: MAX_BACKTEST_CNY,
+        }),
+        stampDutyRate: parseOptionalNumber(backtestStampDutyRate, "印花税率", {
+          min: 0,
+          max: 1,
+        }),
+        transferFeeRate: parseOptionalNumber(backtestTransferFeeRate, "过户费率", {
+          min: 0,
+          max: 1,
+        }),
         benchmarkCode: backtestBenchmarkCode,
       });
       setBacktestRuns((items) => [run, ...items.filter((item) => item.id !== run.id)]);
       setSelectedBacktestId(run.id);
       setBacktestRun(run);
+      setBacktestCancelError("");
       setIsBacktestDrawerOpen(false);
     } catch (error) {
       setBacktestCreateError(error instanceof Error ? error.message : String(error));
@@ -716,86 +1010,126 @@ export default function StrategiesWorkspace() {
 
   const cancelBacktest = async () => {
     if (!backtestRun) return;
-    setIsActionRunning(true);
+    setBacktestCancelError("");
+    setIsCancellingBacktest(true);
     try {
       const run = await cancelStrategyBacktest(backtestRun.id);
       setBacktestRun(run);
       setBacktestRuns((items) =>
         items.map((item) => (item.id === run.id ? run : item))
       );
+      setBacktestCancelError("");
+    } catch (error) {
+      setBacktestCancelError(error instanceof Error ? error.message : String(error));
     } finally {
-      setIsActionRunning(false);
+      setIsCancellingBacktest(false);
     }
   };
 
   const loadMoreBacktests = async () => {
     if (!selectedStrategy || !backtestRunsNextCursor) return;
-    setIsActionRunning(true);
+    const requestedStrategyId = selectedStrategy.id;
+    const requestedFilter = backtestStatusFilter || undefined;
+    const requestedCursor = backtestRunsNextCursor;
+    const requestGeneration = ++runListRequestGenerationRef.current;
+    setIsLoadingMoreBacktests(true);
     try {
       const page = await listStrategyBacktests({
-        strategyDefinitionId: selectedStrategy.id,
-        status: backtestStatusFilter || undefined,
-        cursor: backtestRunsNextCursor,
+        strategyDefinitionId: requestedStrategyId,
+        status: requestedFilter,
+        cursor: requestedCursor,
         limit: 50,
       });
+      if (
+        requestGeneration !== runListRequestGenerationRef.current ||
+        requestedStrategyId !== selectedStrategyIdRef.current ||
+        requestedFilter !== backtestStatusFilterRef.current
+      ) {
+        return;
+      }
       setBacktestRuns((items) => mergeById(items, page.items));
       setBacktestRunsNextCursor(page.nextCursor);
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : String(error));
+      if (
+        requestGeneration === runListRequestGenerationRef.current &&
+        requestedStrategyId === selectedStrategyIdRef.current &&
+        requestedFilter === backtestStatusFilterRef.current
+      ) {
+        setLoadError(error instanceof Error ? error.message : String(error));
+      }
     } finally {
-      setIsActionRunning(false);
+      if (requestGeneration === runListRequestGenerationRef.current) {
+        setIsLoadingMoreBacktests(false);
+      }
     }
   };
 
-  const refreshBacktestPositions = async () => {
+  const refreshBacktestPositions = () => {
     if (!backtestRun) return;
-    setIsActionRunning(true);
-    try {
-      await loadBacktestFactPage(backtestRun.id, "positions", {
-        asOf: positionAsOf || undefined,
-      });
-      setBacktestResultError("");
-    } catch (error) {
-      setBacktestResultError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setIsActionRunning(false);
+    if (positionAsOfDraft !== positionAsOfApplied) {
+      setPositionAsOfApplied(positionAsOfDraft);
+      return;
     }
+    setFactRefreshGeneration((generation) => generation + 1);
   };
 
   const loadMoreBacktestFacts = async () => {
     if (!backtestRun) return;
-    setIsActionRunning(true);
+    const requestedRunId = backtestRun.id;
+    const requestedTab = backtestDetailTab;
+    const requestedAsOf = positionAsOfApplied;
+    const requestGeneration = ++factRequestGenerationRef.current;
+    const stillCurrent = () =>
+      requestGeneration === factRequestGenerationRef.current &&
+      backtestRunIdRef.current === requestedRunId &&
+      backtestDetailTabRef.current === requestedTab &&
+      positionAsOfAppliedRef.current === requestedAsOf;
+    setIsLoadingMoreFacts(true);
     try {
       if (backtestDetailTab === "signals" && backtestSignalsNextCursor) {
-        await loadBacktestFactPage(backtestRun.id, "signals", {
-          cursor: backtestSignalsNextCursor,
-          append: true,
-        });
+        await loadBacktestFactPage(
+          backtestRun.id,
+          "signals",
+          { cursor: backtestSignalsNextCursor, append: true },
+          stillCurrent,
+        );
       }
       if (backtestDetailTab === "orders" && backtestOrdersNextCursor) {
-        await loadBacktestFactPage(backtestRun.id, "orders", {
-          cursor: backtestOrdersNextCursor,
-          append: true,
-        });
+        await loadBacktestFactPage(
+          backtestRun.id,
+          "orders",
+          { cursor: backtestOrdersNextCursor, append: true },
+          stillCurrent,
+        );
       }
       if (backtestDetailTab === "trades" && backtestTradesNextCursor) {
-        await loadBacktestFactPage(backtestRun.id, "trades", {
-          cursor: backtestTradesNextCursor,
-          append: true,
-        });
+        await loadBacktestFactPage(
+          backtestRun.id,
+          "trades",
+          { cursor: backtestTradesNextCursor, append: true },
+          stillCurrent,
+        );
       }
       if (backtestDetailTab === "positions" && backtestPositionsNextCursor) {
-        await loadBacktestFactPage(backtestRun.id, "positions", {
-          asOf: positionAsOf || undefined,
-          cursor: backtestPositionsNextCursor,
-          append: true,
-        });
+        await loadBacktestFactPage(
+          backtestRun.id,
+          "positions",
+          {
+            asOf: requestedAsOf || undefined,
+            cursor: backtestPositionsNextCursor,
+            append: true,
+          },
+          stillCurrent,
+        );
       }
-      setBacktestResultError("");
     } catch (error) {
-      setBacktestResultError(error instanceof Error ? error.message : String(error));
+      if (stillCurrent()) {
+        setBacktestResultError(error instanceof Error ? error.message : String(error));
+      }
     } finally {
-      setIsActionRunning(false);
+      if (requestGeneration === factRequestGenerationRef.current) {
+        setIsLoadingMoreFacts(false);
+      }
     }
   };
 
@@ -1004,7 +1338,7 @@ export default function StrategiesWorkspace() {
                     保存策略
                   </button>
                   <button
-                    disabled={isSaving || !selectedStrategy}
+                    disabled={isSaving || !selectedStrategy || !currentVersion}
                     onClick={updateCurrentStrategy}
                     type="button"
                   >
@@ -1040,66 +1374,70 @@ export default function StrategiesWorkspace() {
           {activeTab === "signals" ? (
             <section className="strategy-panel" aria-label="信号历史">
               <h2>信号历史</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>策略</th>
-                    <th>版本</th>
-                    <th>证券</th>
-                    <th>周期</th>
-                    <th>来源</th>
-                    <th>时间</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {signals.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.strategyDefinitionId}</td>
-                      <td>{item.strategyVersionId}</td>
-                      <td>{item.securityCode}</td>
-                      <td>{item.period}</td>
-                      <td>{item.source}</td>
-                      <td>{formatDateTime(item.signalTime)}</td>
+              <div className="backtest-table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>策略</th>
+                      <th>版本</th>
+                      <th>证券</th>
+                      <th>周期</th>
+                      <th>来源</th>
+                      <th>时间</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {signals.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.strategyDefinitionId}</td>
+                        <td>{item.strategyVersionId}</td>
+                        <td>{item.securityCode}</td>
+                        <td>{item.period}</td>
+                        <td>{item.source}</td>
+                        <td>{formatDateTime(item.signalTime)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           ) : null}
 
           {activeTab === "alerts" ? (
             <section className="strategy-panel" aria-label="告警事件">
               <h2>告警事件</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>事件</th>
-                    <th>信号</th>
-                    <th>状态</th>
-                    <th>去重键</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {alerts.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.id}</td>
-                      <td>{item.strategySignalId}</td>
-                      <td>{item.status}</td>
-                      <td>{item.dedupeKey}</td>
-                      <td>
-                        <button
-                          disabled={isActionRunning || item.status === "acked"}
-                          onClick={() => acknowledgeAlert(item.id)}
-                          type="button"
-                        >
-                          确认告警
-                        </button>
-                      </td>
+              <div className="backtest-table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>事件</th>
+                      <th>信号</th>
+                      <th>状态</th>
+                      <th>去重键</th>
+                      <th>操作</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {alerts.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.id}</td>
+                        <td>{item.strategySignalId}</td>
+                        <td>{item.status}</td>
+                        <td>{item.dedupeKey}</td>
+                        <td>
+                          <button
+                            disabled={isActionRunning || item.status === "acked"}
+                            onClick={() => acknowledgeAlert(item.id)}
+                            type="button"
+                          >
+                            确认告警
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           ) : null}
 
@@ -1148,11 +1486,12 @@ export default function StrategiesWorkspace() {
                         <strong>运行 #{item.id}</strong>
                         <span>{statusLabel(item.status)}</span>
                         <small>
-                          {item.startDate} 至 {item.endDate}
+                          {formatBeijingDate(item.startDate)} 至{" "}
+                          {formatBeijingDate(item.endDate)}
                         </small>
                         <small>
                           {item.status === "completed"
-                            ? `收益 ${((item.metrics?.totalReturn ?? 0) * 100).toFixed(2)}%`
+                            ? `收益 ${formatPercentMetric(item.metrics?.totalReturn)}`
                             : `进度 ${item.progressPercent.toFixed(0)}%`}
                         </small>
                       </button>
@@ -1162,7 +1501,7 @@ export default function StrategiesWorkspace() {
                     ) : null}
                     {backtestRunsNextCursor ? (
                       <button
-                        disabled={isActionRunning}
+                        disabled={isLoadingMoreBacktests}
                         onClick={loadMoreBacktests}
                         type="button"
                       >
@@ -1186,7 +1525,7 @@ export default function StrategiesWorkspace() {
                           <strong>{statusLabel(backtestRun.status as BacktestRunStatus)}</strong>
                           {backtestRun.status === "pending" || backtestRun.status === "running" ? (
                             <button
-                              disabled={isActionRunning}
+                              disabled={isCancellingBacktest}
                               onClick={cancelBacktest}
                               type="button"
                             >
@@ -1195,6 +1534,11 @@ export default function StrategiesWorkspace() {
                           ) : null}
                         </div>
                       </div>
+                      {backtestCancelError ? (
+                        <p className="strategy-error" role="alert">
+                          {backtestCancelError}
+                        </p>
+                      ) : null}
 
                       <div className="strategy-metrics">
                         <span>阶段 {backtestRun.stage}</span>
@@ -1239,7 +1583,11 @@ export default function StrategiesWorkspace() {
 
                       <BacktestEquityChart points={backtestEquity} />
                       <p className="strategy-muted">
-                        使用存储的前复权日线、下一可得开盘价和全额成交假设；不建模分红、拆并股、涨跌停、ST、流动性和部分成交。
+                        <span>
+                          价格模型：
+                          {formatSnapshotString(backtestRun.configSnapshot, "priceModel")}
+                        </span>
+                        ；{formatBacktestAssumptions(backtestRun.configSnapshot)}
                       </p>
 
                       <div className="strategy-tabs" role="tablist" aria-label="回测详情">
@@ -1267,98 +1615,111 @@ export default function StrategiesWorkspace() {
                       {backtestResultError ? (
                         <p className="strategy-error">{backtestResultError}</p>
                       ) : null}
+                      {backtestEquityError ? (
+                        <p className="strategy-error">{backtestEquityError}</p>
+                      ) : null}
 
                       {backtestDetailTab === "trades" ? (
                         <>
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>证券</th>
-                              <th>状态</th>
-                              <th>入场</th>
-                              <th>出场</th>
-                              <th>数量</th>
-                              <th>盈亏</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {backtestTrades.map((item) => (
-                              <tr key={item.id}>
-                                <td>{item.securityCode}</td>
-                                <td>{item.status}</td>
-                                <td>{formatDateTime(item.entryTime)}</td>
-                                <td>{formatDateTime(item.exitTime)}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.realizedPnl ?? "-"}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        {backtestTrades.length === 0 ? (
-                          <p className="strategy-muted">暂无交易结果。</p>
-                        ) : null}
+                          <div className="backtest-table-scroll">
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>证券</th>
+                                  <th>状态</th>
+                                  <th>入场</th>
+                                  <th>出场</th>
+                                  <th>数量</th>
+                                  <th>盈亏</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {backtestTrades.map((item) => (
+                                  <tr key={item.id}>
+                                    <td>{item.securityCode}</td>
+                                    <td>{item.status}</td>
+                                    <td>{formatDateTime(item.entryTime)}</td>
+                                    <td>{formatDateTime(item.exitTime)}</td>
+                                    <td>{item.quantity}</td>
+                                    <td>{item.realizedPnl ?? "-"}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          {backtestTrades.length === 0 ? (
+                            <p className="strategy-muted">暂无交易结果。</p>
+                          ) : null}
                         </>
                       ) : null}
 
                       {backtestDetailTab === "orders" ? (
                         <>
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>证券</th>
-                              <th>方向</th>
-                              <th>状态</th>
-                              <th>计划时间</th>
-                              <th>成交/过期时间</th>
-                              <th>数量</th>
-                              <th>原因</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {backtestOrders.map((item) => (
-                              <tr key={item.id}>
-                                <td>{item.securityCode}</td>
-                                <td>{item.side}</td>
-                                <td>{item.status}</td>
-                                <td>{formatDateTime(item.scheduledTime)}</td>
-                                <td>{formatDateTime(item.executionTime ?? item.expiredAt)}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.reason ?? "-"}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        {backtestOrders.length === 0 ? (
-                          <p className="strategy-muted">暂无订单结果。</p>
-                        ) : null}
+                          <div className="backtest-table-scroll">
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>证券</th>
+                                  <th>方向</th>
+                                  <th>状态</th>
+                                  <th>计划时间</th>
+                                  <th>成交/过期时间</th>
+                                  <th>数量</th>
+                                  <th>原因</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {backtestOrders.map((item) => (
+                                  <tr key={item.id}>
+                                    <td>{item.securityCode}</td>
+                                    <td>{item.side}</td>
+                                    <td>{item.status}</td>
+                                    <td>{formatDateTime(item.scheduledTime)}</td>
+                                    <td>
+                                      {formatDateTime(
+                                        item.executionTime ?? item.expiredAt
+                                      )}
+                                    </td>
+                                    <td>{item.quantity}</td>
+                                    <td>{item.reason ?? "-"}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          {backtestOrders.length === 0 ? (
+                            <p className="strategy-muted">暂无订单结果。</p>
+                          ) : null}
                         </>
                       ) : null}
 
                       {backtestDetailTab === "signals" ? (
                         <>
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>证券</th>
-                              <th>种类</th>
-                              <th>时间</th>
-                              <th>规则</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {backtestSignals.map((item) => (
-                              <tr key={item.id}>
-                                <td>{item.securityCode}</td>
-                                <td>{item.signalKind}</td>
-                                <td>{formatDateTime(item.signalTime)}</td>
-                                <td>{formatJson(item.ruleSnapshot)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        {backtestSignals.length === 0 ? (
-                          <p className="strategy-muted">暂无信号结果。</p>
-                        ) : null}
+                          <div className="backtest-table-scroll">
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>证券</th>
+                                  <th>种类</th>
+                                  <th>时间</th>
+                                  <th>规则</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {backtestSignals.map((item) => (
+                                  <tr key={item.id}>
+                                    <td>{item.securityCode}</td>
+                                    <td>{item.signalKind}</td>
+                                    <td>{formatDateTime(item.signalTime)}</td>
+                                    <td>{formatJson(item.ruleSnapshot)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          {backtestSignals.length === 0 ? (
+                            <p className="strategy-muted">暂无信号结果。</p>
+                          ) : null}
                         </>
                       ) : null}
 
@@ -1370,38 +1731,42 @@ export default function StrategiesWorkspace() {
                               <input
                                 aria-label="持仓截止日期"
                                 type="date"
-                                value={positionAsOf}
-                                onChange={(event) => setPositionAsOf(event.target.value)}
+                                value={positionAsOfDraft}
+                                onChange={(event) =>
+                                  setPositionAsOfDraft(event.target.value)
+                                }
                               />
                             </label>
                             <button
-                              disabled={isActionRunning}
+                              disabled={isLoadingMoreFacts}
                               onClick={refreshBacktestPositions}
                               type="button"
                             >
                               查询持仓
                             </button>
                           </div>
-                          <table>
-                            <thead>
-                              <tr>
-                                <th>证券</th>
-                                <th>入场时间</th>
-                                <th>数量</th>
-                                <th>入场价</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {backtestPositions.map((item) => (
-                                <tr key={item.id}>
-                                  <td>{item.securityCode}</td>
-                                  <td>{formatDateTime(item.entryTime)}</td>
-                                  <td>{item.quantity}</td>
-                                  <td>{item.entryPrice}</td>
+                          <div className="backtest-table-scroll">
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>证券</th>
+                                  <th>入场时间</th>
+                                  <th>数量</th>
+                                  <th>入场价</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                {backtestPositions.map((item) => (
+                                  <tr key={item.id}>
+                                    <td>{item.securityCode}</td>
+                                    <td>{formatDateTime(item.entryTime)}</td>
+                                    <td>{item.quantity}</td>
+                                    <td>{item.entryPrice}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                           {backtestPositions.length === 0 ? (
                             <p className="strategy-muted">该时点暂无持仓。</p>
                           ) : null}
@@ -1410,6 +1775,19 @@ export default function StrategiesWorkspace() {
 
                       {backtestDetailTab === "snapshot" ? (
                         <div className="backtest-snapshots">
+                          <p className="strategy-muted">
+                            行情指纹：
+                            {backtestRun.marketDataFingerprint
+                              ? backtestRun.marketDataFingerprint.slice(0, 16) +
+                                "…"
+                              : "未记录"}
+                            （算法：
+                            {formatSnapshotString(
+                              backtestRun.configSnapshot,
+                              "marketDataFingerprintAlgorithm",
+                            )}
+                            ）。用于检测重跑时持久化 K 数据是否漂移，非可重放的数据快照。
+                          </p>
                           <pre>{formatJson(backtestRun.strategySnapshot)}</pre>
                           <pre>{formatJson(backtestRun.configSnapshot)}</pre>
                           {backtestRun.errorDetails ? (
@@ -1429,15 +1807,12 @@ export default function StrategiesWorkspace() {
                           ) : (
                             <p className="strategy-muted">该运行没有结构化错误。</p>
                           )}
-                          {backtestResultError ? (
-                            <p className="strategy-error">{backtestResultError}</p>
-                          ) : null}
                         </div>
                       ) : null}
 
                       {activeFactNextCursor ? (
                         <button
-                          disabled={isActionRunning}
+                          disabled={isLoadingMoreFacts}
                           onClick={loadMoreBacktestFacts}
                           type="button"
                         >
@@ -1474,6 +1849,9 @@ export default function StrategiesWorkspace() {
                     <label>
                       回测版本 ID
                       <input
+                        type="number"
+                        min="1"
+                        step="1"
                         value={backtestVersionId}
                         onChange={(event) => setBacktestVersionId(event.target.value)}
                       />
@@ -1490,19 +1868,27 @@ export default function StrategiesWorkspace() {
                     <label>
                       周期
                       <input
-                        value={backtestPeriod}
-                        onChange={(event) => setBacktestPeriod(event.target.value)}
+                        readOnly
+                        aria-readonly="true"
+                        value="日线 1440"
                       />
                     </label>
                     <label>
                       来源
                       <select
+                        disabled={backtestSourceOptions.length === 0}
                         value={backtestSource}
-                        onChange={(event) => setBacktestSource(event.target.value as DataSourceValue)}
+                        onChange={(event) =>
+                          setBacktestSource(
+                            event.target.value as StrategyBacktestSourceValue
+                          )
+                        }
                       >
-                        <option value="tdx">tdx</option>
-                        <option value="ef">ef</option>
-                        <option value="qmt">qmt</option>
+                        {backtestSourceOptions.map((source) => (
+                          <option key={source} value={source}>
+                            {source}
+                          </option>
+                        ))}
                       </select>
                     </label>
                     <label>
@@ -1525,15 +1911,15 @@ export default function StrategiesWorkspace() {
                   <div className="strategy-editor-row">
                     <label>
                       初始资金
-                      <input value={backtestInitialCash} onChange={(event) => setBacktestInitialCash(event.target.value)} />
+                      <input type="number" min="0" max={MAX_BACKTEST_CNY} step="0.01" value={backtestInitialCash} onChange={(event) => setBacktestInitialCash(event.target.value)} />
                     </label>
                     <label>
                       最大持仓
-                      <input value={backtestMaxPositions} onChange={(event) => setBacktestMaxPositions(event.target.value)} />
+                      <input type="number" min="1" max="50" step="1" value={backtestMaxPositions} onChange={(event) => setBacktestMaxPositions(event.target.value)} />
                     </label>
                     <label>
                       滑点 bps
-                      <input value={backtestSlippageBps} onChange={(event) => setBacktestSlippageBps(event.target.value)} />
+                      <input type="number" min="0" max="10000" step="0.01" value={backtestSlippageBps} onChange={(event) => setBacktestSlippageBps(event.target.value)} />
                     </label>
                     <label>
                       基准代码
@@ -1543,19 +1929,19 @@ export default function StrategiesWorkspace() {
                   <div className="strategy-editor-row">
                     <label>
                       佣金率
-                      <input value={backtestCommissionRate} onChange={(event) => setBacktestCommissionRate(event.target.value)} />
+                      <input type="number" min="0" max="1" step="0.0001" value={backtestCommissionRate} onChange={(event) => setBacktestCommissionRate(event.target.value)} />
                     </label>
                     <label>
                       最低佣金
-                      <input value={backtestMinCommission} onChange={(event) => setBacktestMinCommission(event.target.value)} />
+                      <input type="number" min="0" max={MAX_BACKTEST_CNY} step="0.01" value={backtestMinCommission} onChange={(event) => setBacktestMinCommission(event.target.value)} />
                     </label>
                     <label>
                       印花税率
-                      <input value={backtestStampDutyRate} onChange={(event) => setBacktestStampDutyRate(event.target.value)} />
+                      <input type="number" min="0" max="1" step="0.0001" value={backtestStampDutyRate} onChange={(event) => setBacktestStampDutyRate(event.target.value)} />
                     </label>
                     <label>
                       过户费率
-                      <input value={backtestTransferFeeRate} onChange={(event) => setBacktestTransferFeeRate(event.target.value)} />
+                      <input type="number" min="0" max="1" step="0.00001" value={backtestTransferFeeRate} onChange={(event) => setBacktestTransferFeeRate(event.target.value)} />
                     </label>
                   </div>
                   <div className="strategy-actions">
