@@ -120,6 +120,17 @@ export const DARK_TOKENS = {
 /** 主题名，与 ECharts registerTheme、next-themes data-theme 一致。 */
 export type ThemeName = "light" | "dark";
 
+/**
+ * 系统字体栈（无网络依赖，build 时不再拉取远程字体）。
+ *  - sans：系统无衬线，中文优先 PingFang/微软雅黑，数字靠 tabular-nums 对齐
+ *  - mono：等宽，用于数字列/KPI
+ * 所有消费方（globals.css、antd theme、echarts theme）引用这两常量。
+ */
+export const FONT_SANS =
+  "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif";
+export const FONT_MONO =
+  "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace";
+
 /** 间距阶（4px 基准）。与 antd margin token 对齐。 */
 export const SPACING = {
   xxs: 4,

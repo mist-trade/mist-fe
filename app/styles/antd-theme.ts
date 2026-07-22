@@ -13,7 +13,7 @@
 import type { ThemeConfig } from "antd";
 import { theme as antdTheme } from "antd";
 import type { ThemeName } from "./tokens";
-import { LIGHT_TOKENS, DARK_TOKENS, RADIUS } from "./tokens";
+import { LIGHT_TOKENS, DARK_TOKENS, RADIUS, FONT_SANS, FONT_MONO } from "./tokens";
 
 const TOKEN_BY_THEME = {
   light: LIGHT_TOKENS,
@@ -44,11 +44,9 @@ export function buildAntdTheme(themeName: ThemeName): ThemeConfig {
       fontSize: 14,
       controlHeight: 32,
       controlHeightSM: 24,
-      // 字体沿用 Geist（layout 已设 --font-geist-sans）
-      fontFamily:
-        "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      fontFamilyCode:
-        "var(--font-geist-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace",
+      // 系统字体栈（无网络依赖，见 tokens.ts FONT_SANS/FONT_MONO）
+      fontFamily: FONT_SANS,
+      fontFamilyCode: FONT_MONO,
       // 线条/边框由 algorithm 推导，但锚定 subtle 分隔线
       colorBorder: t.borderSubtle,
       colorBorderSecondary: t.borderSubtle,
