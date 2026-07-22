@@ -1,5 +1,49 @@
 import { BiType, BiStatus, ChannelType, TrendDirection } from "@/app/api/types";
 import type { BiStyle } from "../types";
+import {
+  LIGHT_TOKENS,
+  DARK_TOKENS,
+  type ThemeName,
+} from "@/app/styles/tokens";
+
+/**
+ * 当前主题的颜色集合。供渲染层（useChartConfig / useChartRender）使用，
+ * 取代原先散落的裸 hex 常量。
+ */
+export interface ThemeChartColors {
+  up: string;
+  down: string;
+  upFill: string;
+  downFill: string;
+  biValid: string;
+  biInvalid: string;
+  biUnknown: string;
+  fenxingTop: string;
+  fenxingBottom: string;
+  zhongshuComplete: string;
+  zhongshuUncomplete: string;
+  /** 分型标记描边色（顶/底分型 path/circle 的 stroke）。随主题用 surface 色保证对比。 */
+  fenxingStroke: string;
+}
+
+/** 按主题返回图表色集合，取自设计 Token（与 themes.css / antd 同源）。 */
+export function getThemeColors(themeName: ThemeName): ThemeChartColors {
+  const t = themeName === "dark" ? DARK_TOKENS : LIGHT_TOKENS;
+  return {
+    up: t.semUp,
+    down: t.semDown,
+    upFill: hexToRgba(t.semUp, 0.1),
+    downFill: hexToRgba(t.semDown, 0.1),
+    biValid: t.chanBiValid,
+    biInvalid: t.chanBiInvalid,
+    biUnknown: t.chanBiUnknown,
+    fenxingTop: t.chanFenxingTop,
+    fenxingBottom: t.chanFenxingBottom,
+    zhongshuComplete: t.chanZhongshuComplete,
+    zhongshuUncomplete: t.chanZhongshuUncomplete,
+    fenxingStroke: t.surfaceRaised,
+  };
+}
 
 // 根据 BiStatus 获取颜色（优先级更高）
 const getBiColorByStatus = (status: BiStatus): string => {
@@ -14,7 +58,38 @@ const getBiColorByStatus = (status: BiStatus): string => {
   }
 };
 
+/**
+ * 按主题返回笔（bi）颜色。
+ * 推荐：渲染层用此版本，传入 getThemeColors(themeName)。
+ */
+export function getBiColorForTheme(
+  type: BiType,
+  status: BiStatus | undefined,
+  c: ThemeChartColors
+): string {
+  if (status !== undefined) {
+    switch (status) {
+      case BiStatus.Valid:
+        return c.biValid;
+      case BiStatus.Invalid:
+        return c.biInvalid;
+      case BiStatus.Unknown:
+      default:
+        return c.biUnknown;
+    }
+  }
+  switch (type) {
+    case BiType.UnComplete:
+      return c.biUnknown;
+    case BiType.Complete:
+      return c.biValid;
+    default:
+      return "#666";
+  }
+}
+
 // 根据 BiType 获取颜色（作为后备）
+// @deprecated 使用 getBiColorForTheme 以支持深色模式；此版本恒为浅色。
 export const getBiColor = (type: BiType, status?: BiStatus): string => {
   // 如果提供了 status，优先使用状态颜色
   if (status !== undefined) {
@@ -63,6 +138,7 @@ export const getBiStyle = (trend: TrendDirection): BiStyle => {
 };
 
 // Color scheme constants
+// @deprecated 渲染层改用 getThemeColors(themeName) 以支持深色模式。此对象恒为浅色。
 export const COLORS = {
   up: "#ef5350",
   down: "#26a69a",
@@ -70,12 +146,31 @@ export const COLORS = {
   downFill: "rgba(38, 166, 154, 0.1)",
 } as const;
 
+// @deprecated 使用 getThemeColors(themeName).fenxingTop/Bottom。
 export const FENXING_COLORS = {
   top: "#2196f3",
   bottom: "#ff9800",
 } as const;
 
+/**
+ * 按主题返回中枢（channel）颜色。
+ */
+export function getChannelColorForTheme(
+  type: ChannelType,
+  c: ThemeChartColors
+): string {
+  switch (type) {
+    case ChannelType.Complete:
+      return c.zhongshuComplete;
+    case ChannelType.UnComplete:
+      return c.zhongshuUncomplete;
+    default:
+      return "#666";
+  }
+}
+
 // 根据 ChannelType 获取颜色
+// @deprecated 使用 getChannelColorForTheme。此版本恒为浅色。
 export const getChannelColor = (type: ChannelType): string => {
   switch (type) {
     case ChannelType.Complete:
