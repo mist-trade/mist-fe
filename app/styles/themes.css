@@ -10,6 +10,14 @@
  *  - ECharts 主题（运行期由 JS 读取 getComputedStyle）
  */
 
+/* 字体栈（与主题无关，全局统一）。值与 tokens.ts FONT_SANS/FONT_MONO 保持同步。 */
+:root {
+  --font-sans-stack: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono-stack: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    monospace;
+}
+
 :root,
 :root[data-theme="light"] {
   /* 表面 / 中性 */

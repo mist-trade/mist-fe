@@ -1,5 +1,5 @@
 import * as echarts from "echarts/core";
-import { LIGHT_TOKENS, DARK_TOKENS, type ThemeName } from "@/app/styles/tokens";
+import { LIGHT_TOKENS, DARK_TOKENS, FONT_SANS, type ThemeName } from "@/app/styles/tokens";
 
 /**
  * 主题对象的结构：ECharts 的 registerTheme 接受一个宽松对象，
@@ -62,8 +62,7 @@ function buildThemeOption(
     backgroundColor: "transparent",
     textStyle: {
       color: t.textSecondary,
-      fontFamily:
-        "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      fontFamily: FONT_SANS,
     },
     title: {
       textStyle: { color: t.textPrimary },
