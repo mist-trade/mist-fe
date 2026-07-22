@@ -173,6 +173,9 @@ describe("ChanTestsPage", () => {
     expectStat("笔（Phase A）", 47);
     expectStat("笔（Phase B）", 25);
 
+    // KPanel 经 next/dynamic 懒加载，需等待其解析后再读取捕获的 props。
+    await screen.findByTestId("k-panel");
+
     const initialBi = mockLatestBi;
     expect(initialBi).toBeDefined();
     await expect(initialBi!).resolves.toEqual([
@@ -188,6 +191,8 @@ describe("ChanTestsPage", () => {
       "aria-pressed",
       "true"
     );
+    // Phase 切换后等待懒加载 KPanel 重渲染完成。
+    await screen.findByTestId("k-panel");
     const selectedBi = mockLatestBi;
     expect(selectedBi).toBeDefined();
     await expect(selectedBi!).resolves.toEqual([
