@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { ThemeProvider } from "@/app/styles/ThemeProvider";
+import { TimeBasedThemeScript } from "@/app/styles/TimeBasedThemeScript";
 import "./globals.css";
+import "@/app/styles/themes.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Mist",
-  description: "Mist K-line and Chan analysis dashboard",
+  description: "Mist institutional quant workbench",
 };
 
 export default function RootLayout({
@@ -23,11 +27,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" data-theme="light" style={{ colorScheme: "light" }} suppressHydrationWarning>
+      <head>
+        {/* 防闪烁：hydration 前按时间规则/手动覆盖同步设置 data-theme */}
+        <TimeBasedThemeScript />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AntdRegistry>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AntdRegistry>
       </body>
     </html>
   );

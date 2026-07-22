@@ -1,8 +1,10 @@
 @import "tailwindcss";
+/* 设计 Token 的深浅 CSS 变量由 app/styles/themes.css 提供
+   （经 layout.tsx 的 import "@/app/styles/themes.css" 注入） */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--surface-base);
+  --foreground: var(--text-primary);
 }
 
 @theme inline {
@@ -10,19 +12,47 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* 业务语义色映射为 Tailwind 颜色工具类（如 text-sem-up / bg-sem-loss） */
+  --color-surface-base: var(--surface-base);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-sem-up: var(--sem-up);
+  --color-sem-down: var(--sem-down);
+  --color-sem-profit: var(--sem-profit);
+  --color-sem-loss: var(--sem-loss);
+  --color-sem-benchmark: var(--sem-benchmark);
+  --color-sem-excess: var(--sem-excess);
+  --color-sem-risk: var(--sem-risk);
+  --color-sem-warn: var(--sem-warn);
+  --color-sem-danger: var(--sem-danger);
+  --color-sem-success: var(--sem-success);
+
+  --color-brand: var(--brand);
+  --color-brand-fg: var(--brand-fg);
+
+  --color-chan-bi-valid: var(--chan-bi-valid);
+  --color-chan-bi-invalid: var(--chan-bi-invalid);
+  --color-chan-bi-unknown: var(--chan-bi-unknown);
+  --color-chan-fenxing-top: var(--chan-fenxing-top);
+  --color-chan-fenxing-bottom: var(--chan-fenxing-bottom);
+  --color-chan-zhongshu-complete: var(--chan-zhongshu-complete);
+  --color-chan-zhongshu-uncomplete: var(--chan-zhongshu-uncomplete);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-overlay: var(--shadow-overlay);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   margin: 0;
 }
 
@@ -34,6 +64,15 @@ select {
 
 button {
   cursor: pointer;
+}
+
+/* 数字：全局启用 tabular numerals，保证小数点/正负号/千分位对齐 */
+.tnum,
+table,
+.kpi-value,
+.numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .kline-page {
