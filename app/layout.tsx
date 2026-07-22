@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ThemeProvider } from "@/app/styles/ThemeProvider";
 import { TimeBasedThemeScript } from "@/app/styles/TimeBasedThemeScript";
+import { SWRProvider } from "@/app/lib/swr/SWRProvider";
 import "./globals.css";
 import "@/app/styles/themes.css";
 
@@ -36,7 +37,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AntdRegistry>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <SWRProvider>{children}</SWRProvider>
+          </ThemeProvider>
         </AntdRegistry>
       </body>
     </html>

@@ -8,8 +8,8 @@ import {
   getEquitySeries,
   getDrawdownSeries,
   getPositions,
-  getConnectionStatus,
 } from "../data/mock";
+import { useConnectionStatus } from "@/app/lib/swr/useConnectionStatus";
 import { KpiCard } from "./KpiCard";
 import { PositionsTable } from "./PositionsTable";
 import { ConnectionBadge } from "./ConnectionBadge";
@@ -38,7 +38,9 @@ const DrawdownChart = dynamic(
  */
 export function DashboardView() {
   const [range, setRange] = useState<RangeKey>("3M");
-  const connection = useMemo(() => getConnectionStatus(), []);
+  // 实时连接状态（延迟探测 + SWR 错误事件驱动），后端就绪前探测端点可能 404，
+  // useConnectionStatus 内部回退为 online，不阻断 UI。
+  const connection = useConnectionStatus();
   const positions = useMemo(() => getPositions(), []);
 
   const kpis = useMemo(() => getKpiMetrics(range), [range]);
