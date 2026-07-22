@@ -44,8 +44,7 @@ export const ChartContainer = forwardRef<HTMLDivElement, ChartContainerProps>(
       containerRef,
       ariaLabel,
       children,
-    },
-    _ref
+    }
   ) {
     const showLoading = loading && !error;
     const showEmpty = !loading && !error && isEmpty;
