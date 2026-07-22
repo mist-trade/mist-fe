@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ConnectionStatus } from "@/app/dashboard/lib/types";
 
 /**
@@ -31,7 +31,8 @@ export function useConnectionStatus(
         ? Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai"
         : "Asia/Shanghai",
   });
-  const [failCount, setFailCount] = useState(0);
+  // 失败计数用 ref（不驱动渲染，状态机由 setStatus 推进）
+  const failCountRef = useRef(0);
 
   // 延迟探测
   useEffect(() => {
@@ -50,7 +51,7 @@ export function useConnectionStatus(
         clearTimeout(timer);
         const latency = Date.now() - t0;
         if (cancelled) return;
-        setFailCount(0);
+        failCountRef.current = 0;
         setStatus((s) => ({
           ...s,
           state: "online",
@@ -59,16 +60,14 @@ export function useConnectionStatus(
         }));
       } catch {
         if (cancelled) return;
-        setFailCount((c) => {
-          const next = c + 1;
-          setStatus((s) => ({
-            ...s,
-            state:
-              next >= RECONNECT_FAIL_THRESHOLD ? "disconnected" : "reconnecting",
-            lastUpdated: s.lastUpdated,
-          }));
-          return next;
-        });
+        failCountRef.current += 1;
+        const next = failCountRef.current;
+        setStatus((s) => ({
+          ...s,
+          state:
+            next >= RECONNECT_FAIL_THRESHOLD ? "disconnected" : "reconnecting",
+          lastUpdated: s.lastUpdated,
+        }));
       }
     };
     probe();
