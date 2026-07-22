@@ -80,8 +80,8 @@ app/
 
 ### 前置要求
 
-- Node.js 18+
-- pnpm 8+
+- Node.js 24+
+- pnpm 11.7+
 
 ### 安装依赖
 
@@ -136,6 +136,9 @@ pnpm start
 `Build Frontend Docker Image` 会发布当前提交 SHA tag，`master` 分支额外发布
 `latest`。
 
+生产部署只使用 commit SHA tag，不使用 `latest`。部署与回滚由 `mist-deploy` 的
+`Deploy Windows Mist Stack` workflow 负责；frontend 不直连 TDX/QMT datasource。
+
 本地构建与 smoke：
 
 ```bash
@@ -144,13 +147,13 @@ docker run --rm -p 3000:3000 ghcr.io/mist-trade/mist-fe:local
 curl http://127.0.0.1:3000/
 ```
 
-默认基础镜像固定为 `node:22.13-alpine`，匹配 `pnpm@11.7.0` 的 Node
-版本要求。如果本机访问 Docker Hub 慢，可以临时换源，但仍要使用 Node
-`22.13` 或更高版本：
+默认基础镜像固定为 `node:24-alpine`，匹配项目 `engines.node >=24` 与
+`pnpm@11.7.0`。如果本机访问 Docker Hub 慢，可以临时换源，但仍要使用 Node
+24 或更高版本：
 
 ```bash
 docker build \
-  --build-arg NODE_IMAGE=docker.m.daocloud.io/library/node:22.13-alpine \
+  --build-arg NODE_IMAGE=docker.m.daocloud.io/library/node:24-alpine \
   --build-arg NPM_REGISTRY=https://registry.npmmirror.com \
   -t ghcr.io/mist-trade/mist-fe:local .
 ```
