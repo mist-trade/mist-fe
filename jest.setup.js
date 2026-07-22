@@ -18,6 +18,22 @@ global.IntersectionObserver = class IntersectionObserver {
   unobserve() {}
 };
 
+// Mock matchMedia：jsdom 不实现，antd v6 依赖它做响应式判断。
+// 不补这个会导致任何 antd 组件的测试抛 TypeError: window.matchMedia is not a function。
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},   // 兼容旧 API
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }),
+});
+
 // Mock AbortSignal.timeout for older Node versions
 if (!AbortSignal.timeout) {
   AbortSignal.timeout = (ms) => {
