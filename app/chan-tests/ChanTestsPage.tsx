@@ -1,8 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import KPanel from "@/app/components/k-panel";
+import dynamic from "next/dynamic";
 import type { CaseWithMeta, SnapshotData } from "./lib/load-snapshot";
+
+// 懒加载 KPanel（含 echarts/core），不进 /chan-tests 首屏 bundle。
+const KPanel = dynamic(() => import("@/app/components/k-panel"), {
+  ssr: false,
+});
 import { CaseList } from "./components/CaseList";
 import { StatsPanel } from "./components/StatsPanel";
 import { snapshotToChart } from "./lib/snapshot-to-chart";

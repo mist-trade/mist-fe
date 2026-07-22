@@ -13,8 +13,15 @@ import {
   type KLineQuery,
   type SecurityOption,
 } from "@/app/api/client";
-import KPanel from "@/app/components/k-panel";
+import dynamic from "next/dynamic";
 import KPanelSkeleton from "@/app/components/k-panel/skeleton";
+
+// 懒加载 KPanel（含 echarts/core），不进 /k 首屏 bundle。
+// ssr:false 避免 ECharts 在服务端访问 DOM。
+const KPanel = dynamic(() => import("@/app/components/k-panel"), {
+  ssr: false,
+  loading: () => <KPanelSkeleton />,
+});
 import type {
   IFenxing,
   IFetchBi,
