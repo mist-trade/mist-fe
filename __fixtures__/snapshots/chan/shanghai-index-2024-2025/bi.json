@@ -454,7 +454,7 @@
     },
     {
       "startTime": "2024-02-04T16:00:00.000Z",
-      "endTime": "2024-03-18T16:00:00.000Z",
+      "endTime": "2024-03-20T16:00:00.000Z",
       "highest": 3090.05,
       "lowest": 2635.09,
       "trend": "up",
@@ -486,7 +486,9 @@
         706,
         707,
         708,
-        709
+        709,
+        710,
+        711
       ],
       "originData": [
         {
@@ -774,125 +776,7 @@
           "lowest": 3062.63,
           "close": 3062.76,
           "amount": 44693064
-        }
-      ],
-      "independentCount": 26,
-      "startFenxing": {
-        "type": "bottom",
-        "highest": 2802.93,
-        "lowest": "2635.09",
-        "leftIds": [
-          683
-        ],
-        "middleIds": [
-          684
-        ],
-        "middleIndex": 21,
-        "rightIds": [
-          685
-        ],
-        "middleOriginId": 684
-      },
-      "endFenxing": {
-        "type": "top",
-        "highest": "3090.05",
-        "lowest": 3055.92,
-        "leftIds": [
-          708
-        ],
-        "middleIds": [
-          709
-        ],
-        "middleIndex": 40,
-        "rightIds": [
-          710
-        ],
-        "middleOriginId": 709
-      }
-    },
-    {
-      "startTime": "2024-03-18T16:00:00.000Z",
-      "endTime": "2024-03-19T16:00:00.000Z",
-      "highest": 3090.05,
-      "lowest": 3056.65,
-      "trend": "down",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        709,
-        710
-      ],
-      "originData": [
-        {
-          "id": 709,
-          "symbol": "000001",
-          "time": "2024-03-18T16:00:00.000Z",
-          "timestamp": 1710777600000,
-          "open": 3077.98,
-          "highest": 3090.05,
-          "lowest": 3062.63,
-          "close": 3062.76,
-          "amount": 44693064
         },
-        {
-          "id": 710,
-          "symbol": "000001",
-          "time": "2024-03-19T16:00:00.000Z",
-          "timestamp": 1710864000000,
-          "open": 3058.65,
-          "highest": 3081.75,
-          "lowest": 3056.65,
-          "close": 3079.69,
-          "amount": 40743256
-        }
-      ],
-      "independentCount": 2,
-      "startFenxing": {
-        "type": "top",
-        "highest": "3090.05",
-        "lowest": 3055.92,
-        "leftIds": [
-          708
-        ],
-        "middleIds": [
-          709
-        ],
-        "middleIndex": 40,
-        "rightIds": [
-          710
-        ],
-        "middleOriginId": 709
-      },
-      "endFenxing": {
-        "type": "bottom",
-        "highest": 3090.05,
-        "lowest": "3056.65",
-        "leftIds": [
-          709
-        ],
-        "middleIds": [
-          710
-        ],
-        "middleIndex": 41,
-        "rightIds": [
-          711
-        ],
-        "middleOriginId": 710
-      }
-    },
-    {
-      "startTime": "2024-03-19T16:00:00.000Z",
-      "endTime": "2024-03-20T16:00:00.000Z",
-      "highest": 3090.05,
-      "lowest": 3056.65,
-      "trend": "up",
-      "type": "complete",
-      "status": 2,
-      "originIds": [
-        710,
-        711
-      ],
-      "originData": [
         {
           "id": 710,
           "symbol": "000001",
@@ -916,22 +800,22 @@
           "amount": 43763464
         }
       ],
-      "independentCount": 2,
+      "independentCount": 28,
       "startFenxing": {
         "type": "bottom",
-        "highest": 3090.05,
-        "lowest": "3056.65",
+        "highest": 2802.93,
+        "lowest": "2635.09",
         "leftIds": [
-          709
+          683
         ],
         "middleIds": [
-          710
+          684
         ],
-        "middleIndex": 41,
+        "middleIndex": 21,
         "rightIds": [
-          711
+          685
         ],
-        "middleOriginId": 710
+        "middleOriginId": 684
       },
       "endFenxing": {
         "type": "top",
@@ -8433,8 +8317,8 @@
     },
     {
       "startTime": "2024-02-04T16:00:00.000Z",
-      "endTime": "2024-05-19T16:00:00.000Z",
-      "highest": 3174.27,
+      "endTime": "2024-03-20T16:00:00.000Z",
+      "highest": 3090.05,
       "lowest": 2635.09,
       "trend": "up",
       "type": "complete",
@@ -8467,44 +8351,7 @@
         708,
         709,
         710,
-        711,
-        712,
-        713,
-        714,
-        715,
-        716,
-        717,
-        718,
-        719,
-        720,
-        721,
-        722,
-        723,
-        724,
-        725,
-        726,
-        727,
-        728,
-        729,
-        730,
-        731,
-        732,
-        733,
-        734,
-        735,
-        736,
-        737,
-        738,
-        739,
-        740,
-        741,
-        742,
-        743,
-        744,
-        745,
-        746,
-        747,
-        748
+        711
       ],
       "originData": [
         {
@@ -8814,6 +8661,69 @@
           "lowest": 3069.27,
           "close": 3077.11,
           "amount": 43763464
+        }
+      ],
+      "independentCount": 28,
+      "startFenxing": {
+        "type": "bottom",
+        "highest": 2802.93,
+        "lowest": "2635.09",
+        "leftIds": [
+          683
+        ],
+        "middleIds": [
+          684
+        ],
+        "middleIndex": 21,
+        "rightIds": [
+          685
+        ],
+        "middleOriginId": 684
+      },
+      "endFenxing": {
+        "type": "top",
+        "highest": "3090.05",
+        "lowest": 3027.76,
+        "leftIds": [
+          710
+        ],
+        "middleIds": [
+          711
+        ],
+        "middleIndex": 42,
+        "rightIds": [
+          712
+        ],
+        "middleOriginId": 711
+      }
+    },
+    {
+      "startTime": "2024-03-20T16:00:00.000Z",
+      "endTime": "2024-03-27T16:00:00.000Z",
+      "highest": 3090.05,
+      "lowest": 2984.12,
+      "trend": "down",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        711,
+        712,
+        713,
+        714,
+        715,
+        716
+      ],
+      "originData": [
+        {
+          "id": 711,
+          "symbol": "000001",
+          "time": "2024-03-20T16:00:00.000Z",
+          "timestamp": 1710950400000,
+          "open": 3084.41,
+          "highest": 3090.05,
+          "lowest": 3069.27,
+          "close": 3077.11,
+          "amount": 43763464
         },
         {
           "id": 712,
@@ -8848,6 +8758,109 @@
           "close": 3031.48,
           "amount": 39641072
         },
+        {
+          "id": 715,
+          "symbol": "000001",
+          "time": "2024-03-26T16:00:00.000Z",
+          "timestamp": 1711468800000,
+          "open": 3026.81,
+          "highest": 3030.45,
+          "lowest": 2993.14,
+          "close": 2993.14,
+          "amount": 37624288
+        },
+        {
+          "id": 716,
+          "symbol": "000001",
+          "time": "2024-03-27T16:00:00.000Z",
+          "timestamp": 1711555200000,
+          "open": 2988.59,
+          "highest": 3033.37,
+          "lowest": 2984.12,
+          "close": 3010.66,
+          "amount": 39292908
+        }
+      ],
+      "independentCount": 6,
+      "startFenxing": {
+        "type": "top",
+        "highest": "3090.05",
+        "lowest": 3027.76,
+        "leftIds": [
+          710
+        ],
+        "middleIds": [
+          711
+        ],
+        "middleIndex": 42,
+        "rightIds": [
+          712
+        ],
+        "middleOriginId": 711
+      },
+      "endFenxing": {
+        "type": "bottom",
+        "highest": 3041.3,
+        "lowest": 2984.12,
+        "leftIds": [
+          714
+        ],
+        "middleIds": [
+          715,
+          716
+        ],
+        "middleIndex": 46,
+        "rightIds": [
+          717
+        ],
+        "middleOriginId": 716
+      }
+    },
+    {
+      "startTime": "2024-03-27T16:00:00.000Z",
+      "endTime": "2024-05-19T16:00:00.000Z",
+      "highest": 3174.27,
+      "lowest": 2984.12,
+      "trend": "up",
+      "type": "complete",
+      "status": 1,
+      "originIds": [
+        715,
+        716,
+        717,
+        718,
+        719,
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748
+      ],
+      "originData": [
         {
           "id": 715,
           "symbol": "000001",
@@ -9223,22 +9236,23 @@
           "amount": 44881692
         }
       ],
-      "independentCount": 65,
+      "independentCount": 34,
       "startFenxing": {
         "type": "bottom",
-        "highest": 2802.93,
-        "lowest": "2635.09",
+        "highest": 3041.3,
+        "lowest": 2984.12,
         "leftIds": [
-          683
+          714
         ],
         "middleIds": [
-          684
+          715,
+          716
         ],
-        "middleIndex": 21,
+        "middleIndex": 46,
         "rightIds": [
-          685
+          717
         ],
-        "middleOriginId": 684
+        "middleOriginId": 716
       },
       "endFenxing": {
         "type": "top",

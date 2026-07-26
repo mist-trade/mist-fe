@@ -1,7 +1,7 @@
 {
   "key": "shanghai-index-2024-2025",
   "name": "上证指数 2024-2025",
-  "generatedAt": "2026-07-14T20:47:33.847Z",
+  "generatedAt": "2026-07-25T19:06:42.780Z",
   "backendUrl": "offline:committed-merge-k",
   "testCase": {
     "code": "000001",
@@ -13,12 +13,12 @@
   "stats": {
     "kCount": 485,
     "mergeKCount": 386,
-    "biCount": 25,
-    "phaseABiCount": 35,
-    "phaseBBiCount": 25,
-    "channelCount": 10,
-    "phaseAChannelCount": 10,
-    "phaseBChannelCount": 10,
+    "biCount": 27,
+    "phaseABiCount": 33,
+    "phaseBBiCount": 27,
+    "channelCount": 1,
+    "phaseAChannelCount": 1,
+    "phaseBChannelCount": 1,
     "fenxingCount": 158
   }
 }
