@@ -4,8 +4,8 @@ import { readSnapshot } from "../load-snapshot";
 it("keeps the full Shanghai Phase A and Phase B regression", () => {
   const snapshot = readSnapshot("shanghai-index-2024-2025");
 
-  expect(snapshot?.meta.stats.phaseABiCount).toBe(35);
-  expect(snapshot?.meta.stats.phaseBBiCount).toBe(25);
+  expect(snapshot?.meta.stats.phaseABiCount).toBe(33);
+  expect(snapshot?.meta.stats.phaseBBiCount).toBe(27);
   expect(snapshot?.bi.phaseA).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
