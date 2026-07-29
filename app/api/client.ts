@@ -62,8 +62,8 @@ export interface StrategyDefinition {
   periods: number[];
   sources: DataSourceValue[];
   currentVersionId?: number | null;
-  createTime?: string;
-  updateTime?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface StrategyVersion {
@@ -73,7 +73,7 @@ export interface StrategyVersion {
   ruleSchemaVersion: string;
   rule: Record<string, unknown>;
   validationSummary?: Record<string, unknown>;
-  createTime?: string;
+  createdAt?: string;
 }
 
 export interface StrategySignalQuery {
@@ -94,7 +94,7 @@ export interface StrategySignal {
   signalSource: StrategySignalSource;
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
-  createTime?: string;
+  createdAt?: string;
 }
 
 export interface StrategyAlertEventQuery {
@@ -110,8 +110,8 @@ export interface StrategyAlertEvent {
   cooldownUntil?: string | null;
   deliveryResult?: Record<string, unknown> | null;
   acknowledgedAt?: string | null;
-  createTime?: string;
-  updateTime?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface StrategyScanRequest {
@@ -151,8 +151,8 @@ export interface StrategyBacktestRun {
   startedAt?: string | null;
   completedAt?: string | null;
   errorMessage?: string | null;
-  createTime?: string;
-  updateTime?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface StrategyBacktestSignalResult {
@@ -162,7 +162,7 @@ export interface StrategyBacktestSignalResult {
   signalTime: string;
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
-  createTime?: string;
+  createdAt?: string;
 }
 
 interface MistEnvelope<T> {
