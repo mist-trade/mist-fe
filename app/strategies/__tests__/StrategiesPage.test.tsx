@@ -105,11 +105,7 @@ const backtestRun = {
 const backtestSignal = {
   id: 12,
   backtestRunId: 11,
-  strategyDefinitionId: 3,
-  strategyVersionId: 5,
   securityCode: "600519",
-  period: 1440,
-  source: "tdx",
   signalTime: "2026-03-01T00:00:00.000Z",
   ruleSnapshot: version.rule,
   contextSnapshot: { k: { close: 121 } },
