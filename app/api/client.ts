@@ -92,8 +92,8 @@ export interface StrategySignal {
   source: DataSourceValue;
   signalTime: string;
   signalSource: StrategySignalSource;
-  contextSnapshot?: Record<string, unknown> | null;
-  ruleSnapshot?: Record<string, unknown> | null;
+  contextSnapshot: Record<string, unknown>;
+  ruleSnapshot: Record<string, unknown>;
   createTime?: string;
 }
 
@@ -158,14 +158,10 @@ export interface StrategyBacktestRun {
 export interface StrategyBacktestSignalResult {
   id: number;
   backtestRunId: number;
-  strategyDefinitionId: number;
-  strategyVersionId: number;
   securityCode: string;
-  period: number;
-  source: DataSourceValue;
   signalTime: string;
-  contextSnapshot?: Record<string, unknown> | null;
-  ruleSnapshot?: Record<string, unknown> | null;
+  contextSnapshot: Record<string, unknown>;
+  ruleSnapshot: Record<string, unknown>;
   createTime?: string;
 }
 

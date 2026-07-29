@@ -644,8 +644,8 @@ export default function StrategiesWorkspace() {
                   {backtestSignals.map((item) => (
                     <tr key={item.id}>
                       <td>{item.securityCode}</td>
-                      <td>{item.period}</td>
-                      <td>{item.source}</td>
+                      <td>{backtestRun?.period ?? "-"}</td>
+                      <td>{backtestRun?.source ?? "-"}</td>
                       <td>{formatDateTime(item.signalTime)}</td>
                       <td>{formatJson(item.ruleSnapshot)}</td>
                       <td>{formatJson(item.contextSnapshot)}</td>
