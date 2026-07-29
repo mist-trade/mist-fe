@@ -52,7 +52,7 @@ const strategy = {
   periods: [1440],
   sources: ["tdx"],
   currentVersionId: 5,
-  updateTime: "2026-07-07T10:00:00.000Z",
+  updatedAt: "2026-07-07T10:00:00.000Z",
 };
 
 const version = {
@@ -62,7 +62,7 @@ const version = {
   ruleSchemaVersion: "v1",
   rule: { field: "k.close", operator: "gt", value: 100 },
   validationSummary: { valid: true },
-  createTime: "2026-07-07T09:00:00.000Z",
+  createdAt: "2026-07-07T09:00:00.000Z",
 };
 
 const signal = {
@@ -83,7 +83,7 @@ const alert = {
   strategySignalId: 7,
   status: "pending",
   dedupeKey: "3:5:600519:1440:tdx:2026-07-07",
-  createTime: "2026-07-07T09:31:00.000Z",
+  createdAt: "2026-07-07T09:31:00.000Z",
 };
 
 const backtestRun = {

@@ -485,7 +485,7 @@ export default function StrategiesWorkspace() {
                       <tr key={item.id}>
                         <td>版本 {item.versionNumber}</td>
                         <td>{item.ruleSchemaVersion}</td>
-                        <td>{formatDateTime(item.createTime)}</td>
+                        <td>{formatDateTime(item.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>
