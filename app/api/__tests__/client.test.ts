@@ -129,19 +129,23 @@ describe("Mist frontend API client", () => {
           amount: 1000,
           open: 1,
           close: 2,
-          highest: 3,
-          lowest: 0.5,
+          high: 3,
+          low: 0.5,
         },
       ],
     });
 
-    await fetchK({
+    const result = await fetchK({
       code: "600519",
       source: "tdx",
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",
     });
+
+    expect(result[0]).toMatchObject({ high: 3, low: 0.5 });
+    expect(result[0]).not.toHaveProperty("highest");
+    expect(result[0]).not.toHaveProperty("lowest");
 
     expect(global.fetch).toHaveBeenCalledWith(
       "/api/chan/v1/indicators/k",

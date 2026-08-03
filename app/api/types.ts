@@ -5,8 +5,8 @@ export interface IFetchK {
   amount: number;
   open: number;
   close: number;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
 }
 
 export enum TrendDirection {
@@ -45,8 +45,8 @@ export enum ChannelStatus {
 export interface IMergeK {
   startTime: Date | string;
   endTime: Date | string;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
   trend: TrendDirection;
   mergedCount: number;
   mergedIds: number[];
@@ -57,8 +57,8 @@ export type FenxingType = "top" | "bottom";
 
 export interface IFenxing {
   type: FenxingType;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
   leftIds: number[];
   middleIds: number[];
   rightIds: number[];
@@ -69,8 +69,8 @@ export interface IFenxing {
 export interface IFetchBi {
   startTime: Date | string;
   endTime: Date | string;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
   trend: TrendDirection;
   type: BiType;
   status: BiStatus;

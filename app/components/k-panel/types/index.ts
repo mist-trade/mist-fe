@@ -43,8 +43,8 @@ export interface FenxingMappedData {
   type: FenxingType;
   date: string;
   price: number;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
 }
 
 export interface KPanelProps {
@@ -59,8 +59,8 @@ export interface KPanelProps {
 export interface MergeKRect {
   startIndex: number;
   endIndex: number;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
   trend: TrendDirection;
   rectId: number;
 }
@@ -76,8 +76,8 @@ export interface BiMappedData {
   status: BiStatus; // 笔的状态
   independentCount: number;
   originData: IFetchK[];
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
   biId: number; // 添加唯一的ID用于标识笔
 }
 

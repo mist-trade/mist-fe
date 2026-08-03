@@ -39,8 +39,8 @@ function createBi(status: BiStatus, endTime: string) {
   return {
     startTime: "2025-01-10T16:00:00.000Z",
     endTime,
-    highest: 10,
-    lowest: 1,
+    high: 10,
+    low: 1,
     trend: "up",
     type: "complete",
     status,

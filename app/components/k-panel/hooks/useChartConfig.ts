@@ -134,8 +134,8 @@ export function useChartConfig({
         }
 
         // 获取起始和结束位置的坐标
-        const startPoint = api.coord([rect.startIndex, rect.highest]);
-        const endPoint = api.coord([rect.endIndex, rect.lowest]);
+        const startPoint = api.coord([rect.startIndex, rect.high]);
+        const endPoint = api.coord([rect.endIndex, rect.low]);
 
         // 检查坐标是否有效
         if (!startPoint || !endPoint) {

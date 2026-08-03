@@ -5,8 +5,8 @@ import { snapshotToChart } from "../snapshot-to-chart";
 const baseBi = {
   startTime: "2025-01-10T16:00:00.000Z",
   endTime: "2025-01-11T16:00:00.000Z",
-  highest: 10,
-  lowest: 1,
+  high: 10,
+  low: 1,
   trend: "up",
   type: "complete",
   status: 0,
@@ -67,7 +67,11 @@ describe("snapshotToChart", () => {
     expect(chart.bi.phaseB[0]).toMatchObject({
       status: BiStatus.Valid,
       endTime: "2025-01-12T16:00:00.000Z",
+      high: 10,
+      low: 1,
     });
+    expect(chart.bi.phaseB[0]).not.toHaveProperty("highest");
+    expect(chart.bi.phaseB[0]).not.toHaveProperty("lowest");
   });
 
   it("normalizes each channel phase status independently", () => {
