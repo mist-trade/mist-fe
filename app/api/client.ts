@@ -280,7 +280,13 @@ const buildQueryPath = (path: string, query?: object) => {
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const hasOwn = (value: Record<string, unknown>, field: string) =>
+  Object.prototype.hasOwnProperty.call(value, field);
+
+const isSuccessfulHttpStatus = (status: number) =>
+  Number.isInteger(status) && status >= 200 && status < 300;
 
 const requireString = (
   value: unknown,
@@ -295,6 +301,33 @@ const requireString = (
     );
   }
   return value;
+};
+
+const parseEnvelopeErrors = (
+  value: unknown,
+  httpStatus: number,
+  requestId: string
+): ApiEnvelopeErrors => {
+  if (!isObject(value)) {
+    throw new MistApiContractError(
+      'Envelope field "errors" must be an object of string arrays',
+      { httpStatus, requestId }
+    );
+  }
+
+  for (const messages of Object.values(value)) {
+    if (
+      !Array.isArray(messages) ||
+      !messages.every((message) => typeof message === "string")
+    ) {
+      throw new MistApiContractError(
+        'Envelope field "errors" must be an object of string arrays',
+        { httpStatus, requestId }
+      );
+    }
+  }
+
+  return value as ApiEnvelopeErrors;
 };
 
 /**
@@ -331,9 +364,9 @@ export function parseEnvelope<T>(
   }
 
   const bodyStatus = body.statusCode;
-  if (typeof bodyStatus !== "number" || !Number.isFinite(bodyStatus)) {
+  if (typeof bodyStatus !== "number" || !Number.isInteger(bodyStatus)) {
     throw new MistApiContractError(
-      'Envelope field "statusCode" must be a number',
+      'Envelope field "statusCode" must be an integer',
       { httpStatus, requestId }
     );
   }
@@ -354,7 +387,27 @@ export function parseEnvelope<T>(
   requireString(body.timestamp, "timestamp", httpStatus, requestId);
   requireString(body.path, "path", httpStatus, requestId);
 
+  const successfulHttpStatus = isSuccessfulHttpStatus(httpStatus);
+  if (success && !successfulHttpStatus) {
+    throw new MistApiContractError(
+      `A non-2xx HTTP response cannot declare success=true (HTTP ${httpStatus})`,
+      { httpStatus, requestId: envelopeRequestId }
+    );
+  }
+  if (!success && successfulHttpStatus && httpStatus !== 200) {
+    throw new MistApiContractError(
+      `Only HTTP 200 may carry an expected business rejection (HTTP ${httpStatus})`,
+      { httpStatus, requestId: envelopeRequestId }
+    );
+  }
+
   if (success) {
+    if (!hasOwn(body, "data")) {
+      throw new MistApiContractError(
+        'Success envelope is missing the "data" field',
+        { httpStatus, requestId: envelopeRequestId }
+      );
+    }
     return body.data as T;
   }
 
@@ -362,13 +415,13 @@ export function parseEnvelope<T>(
   const rawErrors = body.errors;
   let errors: ApiEnvelopeErrors | undefined;
   if (rawErrors !== undefined) {
-    if (!isObject(rawErrors)) {
+    if (httpStatus !== 400 || code !== "VALIDATION_ERROR") {
       throw new MistApiContractError(
-        'Envelope field "errors" must be an object',
+        'Envelope field "errors" is only valid for HTTP 400 VALIDATION_ERROR',
         { httpStatus, requestId: envelopeRequestId }
       );
     }
-    errors = rawErrors as ApiEnvelopeErrors;
+    errors = parseEnvelopeErrors(rawErrors, httpStatus, envelopeRequestId);
   }
 
   throw new MistApiError<unknown>({
