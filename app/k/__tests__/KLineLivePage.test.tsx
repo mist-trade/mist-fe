@@ -57,8 +57,8 @@ const kLines = [
     amount: 1000,
     open: 1,
     close: 2,
-    highest: 3,
-    lowest: 0.5,
+    high: 3,
+    low: 0.5,
   },
 ];
 

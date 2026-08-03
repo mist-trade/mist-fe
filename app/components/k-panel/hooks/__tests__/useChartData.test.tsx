@@ -19,8 +19,8 @@ const k: IFetchK[] = [
     amount: 1,
     open: 1,
     close: 2,
-    highest: 3,
-    lowest: 1,
+    high: 3,
+    low: 1,
   },
   {
     id: 2,
@@ -29,8 +29,8 @@ const k: IFetchK[] = [
     amount: 1,
     open: 2,
     close: 3,
-    highest: 4,
-    lowest: 2,
+    high: 4,
+    low: 2,
   },
 ];
 
@@ -38,8 +38,8 @@ const bi: IFetchBi[] = [
   {
     startTime: "2026-01-01",
     endTime: "2026-01-02",
-    highest: 4,
-    lowest: 1,
+    high: 4,
+    low: 1,
     trend: TrendDirection.Up,
     type: BiType.Complete,
     status: BiStatus.Valid,

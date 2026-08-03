@@ -233,16 +233,16 @@ interface IFetchK {
   amount: number;
   open: number;
   close: number;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
 }
 
 // 合并 K
 interface IMergeK {
   startTime: Date;
   endTime: Date;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
   trend: TrendDirection;  // 'up' | 'down' | 'none'
   mergedCount: number;
   mergedIds: number[];
@@ -253,8 +253,8 @@ interface IMergeK {
 interface IFetchBi {
   startTime: Date;
   endTime: Date;
-  highest: number;
-  lowest: number;
+  high: number;
+  low: number;
   trend: TrendDirection;
   type: BiType;  // 'initial' | 'uncomplete' | 'complete'
   independentCount: number;

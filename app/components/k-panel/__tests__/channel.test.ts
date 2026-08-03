@@ -6,16 +6,16 @@ import { getChannelColor, hexToRgba } from '../config/chartColors';
 
 describe('Channel Data Processing', () => {
   const mockK: IFetchK[] = [
-    { id: 1, symbol: '000300', time: new Date('2024-01-01'), amount: 1000, open: 100, close: 105, highest: 110, lowest: 95 },
-    { id: 2, symbol: '000300', time: new Date('2024-01-02'), amount: 1200, open: 105, close: 108, highest: 112, lowest: 103 },
-    { id: 3, symbol: '000300', time: new Date('2024-01-03'), amount: 1100, open: 108, close: 102, highest: 115, lowest: 100 },
-    { id: 4, symbol: '000300', time: new Date('2024-01-04'), amount: 1300, open: 102, close: 107, highest: 110, lowest: 101 },
-    { id: 5, symbol: '000300', time: new Date('2024-01-05'), amount: 1400, open: 107, close: 112, highest: 115, lowest: 106 },
-    { id: 6, symbol: '000300', time: new Date('2024-01-06'), amount: 1500, open: 112, close: 109, highest: 118, lowest: 108 },
-    { id: 7, symbol: '000300', time: new Date('2024-01-07'), amount: 1600, open: 109, close: 111, highest: 113, lowest: 107 },
-    { id: 8, symbol: '000300', time: new Date('2024-01-08'), amount: 1700, open: 111, close: 114, highest: 116, lowest: 110 },
-    { id: 9, symbol: '000300', time: new Date('2024-01-09'), amount: 1800, open: 114, close: 117, highest: 120, lowest: 113 },
-    { id: 10, symbol: '000300', time: new Date('2024-01-10'), amount: 1900, open: 117, close: 115, highest: 122, lowest: 114 },
+    { id: 1, symbol: '000300', time: new Date('2024-01-01'), amount: 1000, open: 100, close: 105, high: 110, low: 95 },
+    { id: 2, symbol: '000300', time: new Date('2024-01-02'), amount: 1200, open: 105, close: 108, high: 112, low: 103 },
+    { id: 3, symbol: '000300', time: new Date('2024-01-03'), amount: 1100, open: 108, close: 102, high: 115, low: 100 },
+    { id: 4, symbol: '000300', time: new Date('2024-01-04'), amount: 1300, open: 102, close: 107, high: 110, low: 101 },
+    { id: 5, symbol: '000300', time: new Date('2024-01-05'), amount: 1400, open: 107, close: 112, high: 115, low: 106 },
+    { id: 6, symbol: '000300', time: new Date('2024-01-06'), amount: 1500, open: 112, close: 109, high: 118, low: 108 },
+    { id: 7, symbol: '000300', time: new Date('2024-01-07'), amount: 1600, open: 109, close: 111, high: 113, low: 107 },
+    { id: 8, symbol: '000300', time: new Date('2024-01-08'), amount: 1700, open: 111, close: 114, high: 116, low: 110 },
+    { id: 9, symbol: '000300', time: new Date('2024-01-09'), amount: 1800, open: 114, close: 117, high: 120, low: 113 },
+    { id: 10, symbol: '000300', time: new Date('2024-01-10'), amount: 1900, open: 117, close: 115, high: 122, low: 114 },
   ];
 
   const mockBiMappedData: BiMappedData[] = [
@@ -29,8 +29,8 @@ describe('Channel Data Processing', () => {
       status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[0], mockK[1], mockK[2]],
-      highest: 115,
-      lowest: 95,
+      high: 115,
+      low: 95,
       biId: 0,
     },
     {
@@ -43,8 +43,8 @@ describe('Channel Data Processing', () => {
       status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[2], mockK[3], mockK[4]],
-      highest: 115,
-      lowest: 101,
+      high: 115,
+      low: 101,
       biId: 1,
     },
     {
@@ -57,8 +57,8 @@ describe('Channel Data Processing', () => {
       status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[4], mockK[5], mockK[6]],
-      highest: 118,
-      lowest: 106,
+      high: 118,
+      low: 106,
       biId: 2,
     },
     {
@@ -71,8 +71,8 @@ describe('Channel Data Processing', () => {
       status: BiStatus.Valid,
       independentCount: 3,
       originData: [mockK[6], mockK[7], mockK[8]],
-      highest: 120,
-      lowest: 107,
+      high: 120,
+      low: 107,
       biId: 3,
     },
   ];
@@ -166,8 +166,8 @@ describe('Channel Data Processing', () => {
           bis: mockBiMappedData.map(bi => ({
             startTime: mockK[bi.startIndex].time,
             endTime: mockK[bi.endIndex].time,
-            highest: bi.highest,
-            lowest: bi.lowest,
+            high: bi.high,
+            low: bi.low,
             trend: bi.trend,
             type: bi.type,
             status: bi.status,
@@ -388,12 +388,12 @@ describe('Channel Data Processing', () => {
     it('should use displayStartId/displayEndId for x-axis range calculation', () => {
       // Create mockK with 6 elements (ids: 1, 2, 3, 10, 11, 12)
       const mockKWithGaps: IFetchK[] = [
-        { id: 1, symbol: '000300', time: new Date('2024-01-01'), amount: 1000, open: 100, close: 105, highest: 110, lowest: 95 },
-        { id: 2, symbol: '000300', time: new Date('2024-01-02'), amount: 1200, open: 105, close: 108, highest: 112, lowest: 103 },
-        { id: 3, symbol: '000300', time: new Date('2024-01-03'), amount: 1100, open: 108, close: 102, highest: 115, lowest: 100 },
-        { id: 10, symbol: '000300', time: new Date('2024-01-10'), amount: 1900, open: 117, close: 115, highest: 122, lowest: 114 },
-        { id: 11, symbol: '000300', time: new Date('2024-01-11'), amount: 2000, open: 115, close: 118, highest: 120, lowest: 113 },
-        { id: 12, symbol: '000300', time: new Date('2024-01-12'), amount: 2100, open: 118, close: 116, highest: 121, lowest: 115 },
+        { id: 1, symbol: '000300', time: new Date('2024-01-01'), amount: 1000, open: 100, close: 105, high: 110, low: 95 },
+        { id: 2, symbol: '000300', time: new Date('2024-01-02'), amount: 1200, open: 105, close: 108, high: 112, low: 103 },
+        { id: 3, symbol: '000300', time: new Date('2024-01-03'), amount: 1100, open: 108, close: 102, high: 115, low: 100 },
+        { id: 10, symbol: '000300', time: new Date('2024-01-10'), amount: 1900, open: 117, close: 115, high: 122, low: 114 },
+        { id: 11, symbol: '000300', time: new Date('2024-01-11'), amount: 2000, open: 115, close: 118, high: 120, low: 113 },
+        { id: 12, symbol: '000300', time: new Date('2024-01-12'), amount: 2100, open: 118, close: 116, high: 121, low: 115 },
       ];
 
       // Create mockChannel with displayStartId: 2, displayEndId: 11

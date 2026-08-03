@@ -51,8 +51,8 @@ export const calculateMergeKRects = (
       mergeKRects.push({
         startIndex,
         endIndex,
-        highest: merge.highest,
-        lowest: merge.lowest,
+        high: merge.high,
+        low: merge.low,
         trend: merge.trend,
         rectId: index,
       });
@@ -87,12 +87,12 @@ export const calculateBiData = (
 
     if (b.trend === TrendDirection.Up) {
       // 上升笔：从最低点 到 最高点
-      startPrice = b.lowest;
-      endPrice = b.highest;
+      startPrice = b.low;
+      endPrice = b.high;
     } else {
       // 下降笔：从最高点 到 最低点
-      startPrice = b.highest;
-      endPrice = b.lowest;
+      startPrice = b.high;
+      endPrice = b.low;
     }
 
     biData.push({
@@ -105,8 +105,8 @@ export const calculateBiData = (
       status: b.status,
       independentCount: b.independentCount,
       originData: b.originData,
-      highest: b.highest,
-      lowest: b.lowest,
+      high: b.high,
+      low: b.low,
       biId: index,
     });
   });
@@ -236,10 +236,10 @@ export const calculateFenxingData = (
     }
 
     // 找到分型价格对应的原始K线
-    // 顶分型：找到包含highest的K线
-    // 底分型：找到包含lowest的K线
+    // 顶分型：找到包含high的K线
+    // 底分型：找到包含low的K线
     const targetPrice =
-      fenxing.type === "top" ? fenxing.highest : fenxing.lowest;
+      fenxing.type === "top" ? fenxing.high : fenxing.low;
     let targetOriginId = fenxing.middleIds[0]; // 默认使用第一个
 
     // 在middleIds中找到包含目标价格的K线
@@ -247,11 +247,11 @@ export const calculateFenxingData = (
       const kIndex = indexes.byId.get(id);
       const sourceK = kIndex === undefined ? undefined : k[kIndex];
       if (sourceK) {
-        if (fenxing.type === "top" && sourceK.highest === targetPrice) {
+        if (fenxing.type === "top" && sourceK.high === targetPrice) {
           targetOriginId = id;
           break;
         }
-        if (fenxing.type === "bottom" && sourceK.lowest === targetPrice) {
+        if (fenxing.type === "bottom" && sourceK.low === targetPrice) {
           targetOriginId = id;
           break;
         }
@@ -271,8 +271,8 @@ export const calculateFenxingData = (
         type: fenxingType,
         date: toISODateString(now.time),
         price: price,
-        highest: fenxing.highest,
-        lowest: fenxing.lowest,
+        high: fenxing.high,
+        low: fenxing.low,
       });
     }
   });

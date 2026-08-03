@@ -21,7 +21,7 @@ export const formatKDate = (time: Date | string): string => {
 
 // 格式化 K 线数据为 Kline 格式
 export const formatKlineData = (k: IFetchK[]): number[][] => {
-  return k.map((item) => [item.open, item.close, item.lowest, item.highest]);
+  return k.map((item) => [item.open, item.close, item.low, item.high]);
 };
 
 // 格式化成交量数据
@@ -52,8 +52,8 @@ export const formatKTooltip = (
     `日期: ${dates[dataIndex] ?? ""}`,
     `开盘: ${item.open}`,
     `收盘: ${item.close}`,
-    `最低: ${item.lowest}`,
-    `最高: ${item.highest}`,
+    `最低: ${item.low}`,
+    `最高: ${item.high}`,
     `成交量: ${item.amount}`,
   ].join("<br/>");
 };
@@ -69,8 +69,8 @@ export const calculatePriceRange = (
   let minPrice = Number.POSITIVE_INFINITY;
   let maxPrice = Number.NEGATIVE_INFINITY;
   k.forEach((item) => {
-    minPrice = Math.min(minPrice, item.highest, item.lowest, item.open, item.close);
-    maxPrice = Math.max(maxPrice, item.highest, item.lowest, item.open, item.close);
+    minPrice = Math.min(minPrice, item.high, item.low, item.open, item.close);
+    maxPrice = Math.max(maxPrice, item.high, item.low, item.open, item.close);
   });
   const priceRange = maxPrice - minPrice;
 
