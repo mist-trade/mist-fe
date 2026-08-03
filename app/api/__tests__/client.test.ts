@@ -280,6 +280,101 @@ describe("Mist frontend API client", () => {
       ).toThrow(MistApiContractError);
     });
 
+    it("rejects a non-2xx response that declares success", () => {
+      expect(() =>
+        parseEnvelope(
+          {
+            success: true,
+            statusCode: 500,
+            message: "SUCCESS",
+            data: { unsafe: true },
+            timestamp: "2026-08-03T00:00:00.000Z",
+            requestId: "http-invalid-success",
+            path: "/v1/securities",
+          },
+          500,
+          undefined
+        )
+      ).toThrow(MistApiContractError);
+    });
+
+    it("rejects a non-200 2xx response that declares an error", () => {
+      expect(() =>
+        parseEnvelope(
+          {
+            success: false,
+            statusCode: 201,
+            code: "INVALID_CREATED_REJECTION",
+            message: "invalid branch",
+            timestamp: "2026-08-03T00:00:00.000Z",
+            requestId: "http-invalid-error",
+            path: "/v1/strategies",
+          },
+          201,
+          undefined
+        )
+      ).toThrow(MistApiContractError);
+    });
+
+    it("rejects a success envelope without the required data property", () => {
+      expect(() =>
+        parseEnvelope(
+          {
+            success: true,
+            statusCode: 200,
+            message: "SUCCESS",
+            timestamp: "2026-08-03T00:00:00.000Z",
+            requestId: "http-missing-data",
+            path: "/v1/securities",
+          },
+          200,
+          undefined
+        )
+      ).toThrow(MistApiContractError);
+    });
+
+    it.each([
+      [["not", "an", "object"]],
+      [{ code: "must be an array" }],
+      [{ code: ["valid", 1] }],
+    ])("rejects malformed validation errors: %p", (errors) => {
+      expect(() =>
+        parseEnvelope(
+          {
+            success: false,
+            statusCode: 400,
+            code: "VALIDATION_ERROR",
+            message: "Request validation failed",
+            errors,
+            timestamp: "2026-08-03T00:00:00.000Z",
+            requestId: "http-invalid-errors",
+            path: "/v1/securities",
+          },
+          400,
+          undefined
+        )
+      ).toThrow(MistApiContractError);
+    });
+
+    it("rejects validation errors on a non-validation error envelope", () => {
+      expect(() =>
+        parseEnvelope(
+          {
+            success: false,
+            statusCode: 500,
+            code: "INTERNAL_ERROR",
+            message: "Internal server error",
+            errors: { code: ["must not be empty"] },
+            timestamp: "2026-08-03T00:00:00.000Z",
+            requestId: "http-invalid-errors-owner",
+            path: "/v1/securities",
+          },
+          500,
+          undefined
+        )
+      ).toThrow(MistApiContractError);
+    });
+
     it("tolerates additive unknown fields while still validating known ones", () => {
       expect(
         parseEnvelope(
