@@ -165,12 +165,64 @@ export interface StrategyBacktestSignalResult {
   createdAt?: string;
 }
 
-interface MistEnvelope<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: { message?: string };
+/**
+ * Validation error map returned by the backend on a `VALIDATION_ERROR` response.
+ * Keys are stable dotted paths (including numeric array segments), values are
+ * the human-readable constraint messages for that path.
+ */
+export type ApiEnvelopeErrors = Record<string, string[]>;
+
+/**
+ * Raised when the backend returns a valid error envelope (HTTP-200 expected
+ * business rejection or a real non-2xx technical failure). The envelope's
+ * `code` carries the stable machine-readable identifier; `httpStatus` mirrors
+ * the real HTTP status for diagnostics only and MUST NOT drive business logic.
+ */
+export class MistApiError<TData = never> extends Error {
+  readonly code: string;
+  readonly httpStatus: number;
+  readonly requestId: string;
+  readonly data: TData | undefined;
+  readonly errors: ApiEnvelopeErrors | undefined;
+
+  constructor(args: {
+    code: string;
+    message: string;
+    httpStatus: number;
+    requestId: string;
+    data?: TData;
+    errors?: ApiEnvelopeErrors;
+  }) {
+    super(args.message);
+    this.name = "MistApiError";
+    this.code = args.code;
+    this.httpStatus = args.httpStatus;
+    this.requestId = args.requestId;
+    this.data = args.data;
+    this.errors = args.errors;
+  }
 }
+
+/**
+ * Raised when the response cannot be interpreted as the unified HTTP envelope:
+ * non-JSON body, bare business payload, missing/typed-wrong required fields,
+ * an error/success branch mismatch, or a body `statusCode` that disagrees with
+ * the real HTTP status. This is a consumer/contract failure, never a server
+ * declared API error, so it carries no stable `code`.
+ */
+export class MistApiContractError extends Error {
+  readonly httpStatus: number;
+  readonly requestId: string | undefined;
+
+  constructor(message: string, args: { httpStatus: number; requestId?: string }) {
+    super(message);
+    this.name = "MistApiContractError";
+    this.httpStatus = args.httpStatus;
+    this.requestId = args.requestId;
+  }
+}
+
+const REQUEST_ID_HEADER = "x-request-id";
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
@@ -227,24 +279,111 @@ const buildQueryPath = (path: string, query?: object) => {
   return queryString ? `${path}?${queryString}` : path;
 };
 
-const isEnvelope = <T>(payload: unknown): payload is MistEnvelope<T> =>
-  typeof payload === "object" &&
-  payload !== null &&
-  "success" in payload &&
-  typeof (payload as { success?: unknown }).success === "boolean";
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-export function unwrapApiResponse<T>(payload: unknown): T {
-  if (!isEnvelope<T>(payload)) {
-    return payload as T;
+const requireString = (
+  value: unknown,
+  field: string,
+  httpStatus: number,
+  requestId: string | undefined
+): string => {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new MistApiContractError(
+      `Envelope field "${field}" must be a non-empty string`,
+      { httpStatus, requestId }
+    );
   }
+  return value;
+};
 
-  if (!payload.success) {
-    throw new Error(
-      payload.message || payload.error?.message || "Mist API request failed"
+/**
+ * Strictly parse a non-204 JSON body against the unified backend HTTP envelope.
+ *
+ * Validates every required known field and the success/error branch, asserts
+ * that body `statusCode` equals the real HTTP status, and rejects bare
+ * payloads, malformed envelopes and status mismatches with
+ * `MistApiContractError`. Additive unknown fields are tolerated for forward
+ * compatibility, but a known field with the wrong type still fails closed.
+ *
+ * A valid success branch returns its typed `data`; a valid error branch
+ * (HTTP-200 business rejection or a real non-2xx technical failure) throws
+ * `MistApiError`.
+ */
+export function parseEnvelope<T>(
+  body: unknown,
+  httpStatus: number,
+  requestId: string | undefined
+): T {
+  if (!isObject(body)) {
+    throw new MistApiContractError(
+      "Response body is not a JSON object envelope",
+      { httpStatus, requestId }
     );
   }
 
-  return payload.data as T;
+  const success = body.success;
+  if (success !== true && success !== false) {
+    throw new MistApiContractError(
+      'Envelope field "success" must be a boolean',
+      { httpStatus, requestId }
+    );
+  }
+
+  const bodyStatus = body.statusCode;
+  if (typeof bodyStatus !== "number" || !Number.isFinite(bodyStatus)) {
+    throw new MistApiContractError(
+      'Envelope field "statusCode" must be a number',
+      { httpStatus, requestId }
+    );
+  }
+  if (bodyStatus !== httpStatus) {
+    throw new MistApiContractError(
+      `Envelope statusCode ${bodyStatus} does not match HTTP status ${httpStatus}`,
+      { httpStatus, requestId }
+    );
+  }
+
+  const message = requireString(body.message, "message", httpStatus, requestId);
+  const envelopeRequestId = requireString(
+    body.requestId,
+    "requestId",
+    httpStatus,
+    requestId
+  );
+  requireString(body.timestamp, "timestamp", httpStatus, requestId);
+  requireString(body.path, "path", httpStatus, requestId);
+
+  if (success) {
+    return body.data as T;
+  }
+
+  const code = requireString(body.code, "code", httpStatus, requestId);
+  const rawErrors = body.errors;
+  let errors: ApiEnvelopeErrors | undefined;
+  if (rawErrors !== undefined) {
+    if (!isObject(rawErrors)) {
+      throw new MistApiContractError(
+        'Envelope field "errors" must be an object',
+        { httpStatus, requestId: envelopeRequestId }
+      );
+    }
+    errors = rawErrors as ApiEnvelopeErrors;
+  }
+
+  throw new MistApiError<unknown>({
+    code,
+    message,
+    httpStatus,
+    requestId: envelopeRequestId,
+    data: body.data,
+    errors,
+  });
+}
+
+async function readRequestId(response: Response): Promise<string | undefined> {
+  const header = response.headers.get(REQUEST_ID_HEADER);
+  return header === null ? undefined : header;
 }
 
 async function requestJson<T>(
@@ -261,16 +400,57 @@ async function requestJson<T>(
     signal: AbortSignal.timeout(TIMEOUT),
   });
 
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    if (payload) {
-      return unwrapApiResponse<T>(payload);
-    }
-    throw new Error(`HTTP error! status: ${response.status}`);
+  if (response.status === 204) {
+    throw new MistApiContractError(
+      "Received 204 No Content for a data-returning request",
+      { httpStatus: 204, requestId: await readRequestId(response) }
+    );
   }
 
-  return unwrapApiResponse<T>(payload);
+  const requestId = await readRequestId(response);
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    throw new MistApiContractError(
+      `Response body is not valid JSON (HTTP ${response.status})`,
+      { httpStatus: response.status, requestId }
+    );
+  }
+
+  return parseEnvelope<T>(body, response.status, requestId);
+}
+
+/**
+ * Perform a request that is declared to return no content. Only an HTTP 204
+ * with an empty body is accepted; it never attempts to parse JSON. The
+ * server-generated `X-Request-Id` response header (if present) is returned for
+ * diagnostics. Any other status fails closed.
+ */
+export async function requestNoContent(
+  base: string,
+  path: string,
+  init: RequestInit
+): Promise<{ requestId: string | undefined }> {
+  const response = await fetch(buildUrl(base, path), {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init.headers || {}),
+    },
+    signal: AbortSignal.timeout(TIMEOUT),
+  });
+
+  const requestId = await readRequestId(response);
+
+  if (response.status !== 204) {
+    throw new MistApiContractError(
+      `Expected HTTP 204 No Content but received status ${response.status}`,
+      { httpStatus: response.status, requestId }
+    );
+  }
+
+  return { requestId };
 }
 
 export const fetchSecurities = () =>
