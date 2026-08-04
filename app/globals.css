@@ -646,3 +646,99 @@ table,
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* --- Realtime subscription operator page --- */
+
+.settings-realtime-subscriptions {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-realtime-subscriptions .strategy-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.settings-realtime-subscriptions h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.settings-realtime-subscriptions .capacity-summary,
+.settings-realtime-subscriptions .init-panel,
+.settings-realtime-subscriptions .inventory {
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  padding: 12px;
+}
+
+.settings-realtime-subscriptions .capacity-pill {
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.settings-realtime-subscriptions .capacity-pill[data-reached="true"] {
+  border-color: var(--sem-warn);
+  color: var(--sem-warn);
+}
+
+.settings-realtime-subscriptions .init-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.settings-realtime-subscriptions .init-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.settings-realtime-subscriptions .init-form input,
+.settings-realtime-subscriptions .init-form select {
+  min-height: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.settings-realtime-subscriptions table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.settings-realtime-subscriptions th,
+.settings-realtime-subscriptions td {
+  border: 1px solid var(--border-subtle);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.settings-realtime-subscriptions th {
+  background: var(--surface-sunken, var(--surface-raised));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.settings-realtime-subscriptions td:last-child button {
+  margin-right: 6px;
+}
