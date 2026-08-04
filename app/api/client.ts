@@ -90,7 +90,7 @@ export interface StrategyVersion {
 
 export interface StrategySignalQuery {
   strategyDefinitionId?: number;
-  securityCode?: string;
+  securityId?: number;
   period?: number;
   source?: DataSourceValue;
 }
@@ -99,11 +99,12 @@ export interface StrategySignal {
   id: number;
   strategyDefinitionId: number;
   strategyVersionId: number;
-  securityCode: string;
+  securityId: number;
   period: number;
   source: DataSourceValue;
   signalTime: string;
   signalSource: StrategySignalSource;
+  signalKind: StrategySignalKind;
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
   createdAt?: string;
@@ -124,19 +125,6 @@ export interface StrategyAlertEvent {
   acknowledgedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface StrategyScanRequest {
-  strategyDefinitionId?: number;
-  period?: number;
-  source?: DataSourceValue;
-}
-
-export interface StrategyScanResult {
-  createdSignalCount?: number;
-  createdAlertCount?: number;
-  skippedDuplicateCount?: number;
-  [key: string]: unknown;
 }
 
 export interface StrategyBacktestRequest {
@@ -580,16 +568,6 @@ export const acknowledgeStrategyAlertEvent = (id: number) =>
     getMistApiBase(),
     `/v1/strategy-alert-events/${id}/ack`,
     { method: "POST" }
-  );
-
-export const runStrategyScan = (payload: StrategyScanRequest = {}) =>
-  requestJson<StrategyScanResult>(
-    getMistApiBase(),
-    "/v1/strategy-scans/run",
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }
   );
 
 export const createStrategyBacktest = (payload: StrategyBacktestRequest) =>

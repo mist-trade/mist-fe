@@ -12,7 +12,6 @@ import {
   fetchStrategySignals,
   listStrategies,
   listStrategyVersions,
-  runStrategyScan,
   type BacktestRunStatus,
   type DataSourceValue,
   type StrategyAlertEvent,
@@ -73,7 +72,6 @@ export default function StrategiesWorkspace() {
   const [isActionRunning, setIsActionRunning] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [editorError, setEditorError] = useState("");
-  const [scanResult, setScanResult] = useState("");
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -225,26 +223,6 @@ export default function StrategiesWorkspace() {
     }
   };
 
-  const runScan = async () => {
-    setIsActionRunning(true);
-    try {
-      const result = await runStrategyScan({
-        strategyDefinitionId: selectedStrategy?.id,
-        period: selectedStrategy?.periods[0],
-        source: selectedStrategy?.sources[0],
-      });
-      setScanResult(
-        `新增信号 ${result.createdSignalCount ?? 0} / 新增告警 ${
-          result.createdAlertCount ?? 0
-        } / 跳过重复 ${result.skippedDuplicateCount ?? 0}`
-      );
-      setSignals(await fetchStrategySignals());
-      setAlerts(await fetchStrategyAlertEvents());
-    } finally {
-      setIsActionRunning(false);
-    }
-  };
-
   const runBacktest = async () => {
     setIsActionRunning(true);
     try {
@@ -269,12 +247,6 @@ export default function StrategiesWorkspace() {
         <div>
           <h1>策略工作台</h1>
           <p>管理策略定义、信号、告警和 signal-level 回测。</p>
-        </div>
-        <div className="strategy-header-actions">
-          <button disabled={isActionRunning} onClick={runScan} type="button">
-            运行扫描
-          </button>
-          {scanResult ? <span>{scanResult}</span> : null}
         </div>
         <nav className="strategy-nav" aria-label="主导航">
           <a href="/k">K 线</a>
@@ -380,13 +352,6 @@ export default function StrategiesWorkspace() {
                     >
                       启用
                     </button>
-                    <button
-                      disabled={isActionRunning}
-                      onClick={runScan}
-                      type="button"
-                    >
-                      扫描当前策略
-                    </button>
                   </div>
                 </div>
               ) : (
@@ -489,6 +454,7 @@ export default function StrategiesWorkspace() {
                     <th>策略</th>
                     <th>版本</th>
                     <th>证券</th>
+                    <th>类型</th>
                     <th>周期</th>
                     <th>来源</th>
                     <th>时间</th>
@@ -499,7 +465,8 @@ export default function StrategiesWorkspace() {
                     <tr key={item.id}>
                       <td>{item.strategyDefinitionId}</td>
                       <td>{item.strategyVersionId}</td>
-                      <td>{item.securityCode}</td>
+                      <td>{item.securityId}</td>
+                      <td>{item.signalKind}</td>
                       <td>{item.period}</td>
                       <td>{item.source}</td>
                       <td>{formatDateTime(item.signalTime)}</td>
