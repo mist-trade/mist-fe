@@ -19,6 +19,12 @@ export type StrategyStatus = "draft" | "enabled" | "disabled" | "archived";
 export type StrategyAlertStatus = "pending" | "delivered" | "acked" | "failed";
 export type BacktestRunStatus = "pending" | "running" | "completed" | "failed";
 export type StrategySignalSource = "live" | "backtest";
+/**
+ * Required signal kind declared by each immutable strategy version. A version
+ * expresses exactly one signal intent (`entry` or `exit`); operators create a
+ * separate definition when they need the other kind.
+ */
+export type StrategySignalKind = "entry" | "exit";
 
 export interface KLineQuery {
   code: string;
@@ -42,6 +48,12 @@ export interface CollectKLinesResult {
   count: number;
 }
 
+/**
+ * Creation-only strategy definition payload. The backend atomically creates the
+ * definition, its single immutable version 1 and the current-version pointer
+ * from this request. There is no content-update contract; changed content must
+ * be submitted as a new definition.
+ */
 export interface StrategyDefinitionPayload {
   name: string;
   description?: string;
@@ -49,9 +61,8 @@ export interface StrategyDefinitionPayload {
   periods: number[];
   sources: DataSourceValue[];
   rule: Record<string, unknown>;
+  signalKind: StrategySignalKind;
 }
-
-export type StrategyDefinitionUpdate = Partial<StrategyDefinitionPayload>;
 
 export interface StrategyDefinition {
   id: number;
@@ -72,6 +83,7 @@ export interface StrategyVersion {
   versionNumber: number;
   ruleSchemaVersion: string;
   rule: Record<string, unknown>;
+  signalKind: StrategySignalKind;
   validationSummary?: Record<string, unknown>;
   createdAt?: string;
 }
@@ -525,15 +537,6 @@ export const listStrategies = () =>
 export const createStrategyDefinition = (payload: StrategyDefinitionPayload) =>
   requestJson<StrategyDefinition>(getMistApiBase(), "/v1/strategies", {
     method: "POST",
-    body: JSON.stringify(payload),
-  });
-
-export const updateStrategyDefinition = (
-  id: number,
-  payload: StrategyDefinitionUpdate
-) =>
-  requestJson<StrategyDefinition>(getMistApiBase(), `/v1/strategies/${id}`, {
-    method: "PATCH",
     body: JSON.stringify(payload),
   });
 

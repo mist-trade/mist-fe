@@ -24,7 +24,6 @@ import {
   parseEnvelope,
   requestNoContent,
   runStrategyScan,
-  updateStrategyDefinition,
 } from "../client";
 
 const originalEnv = process.env;
@@ -454,6 +453,7 @@ describe("Mist frontend API client", () => {
           periods: [],
           sources: [],
           rule: {},
+          signalKind: "entry",
         })
       ).resolves.toEqual({ id: 7, name: "x" });
     });
@@ -830,16 +830,16 @@ describe("Mist frontend API client", () => {
 
     const strategyPayload = {
       name: "突破策略",
-      description: "close gt 100",
+      description: "volume gt 100",
       targetUniverse: ["600519"],
       periods: [1440],
       sources: ["tdx" as const],
-      rule: { field: "k.close", operator: "gt", value: 100 },
+      rule: { field: "k.volume", operator: "gt", value: "100" },
+      signalKind: "entry" as const,
     };
 
     await listStrategies();
     await createStrategyDefinition(strategyPayload);
-    await updateStrategyDefinition(3, { name: "突破策略 v2", rule: strategyPayload.rule });
     await enableStrategyDefinition(3);
     await disableStrategyDefinition(3);
     await listStrategyVersions(3);
@@ -859,24 +859,26 @@ describe("Mist frontend API client", () => {
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
       3,
-      "/api/mist/v1/strategies/3",
-      expect.objectContaining({ method: "PATCH" })
-    );
-    expect(global.fetch).toHaveBeenNthCalledWith(
-      4,
       "/api/mist/v1/strategies/3/enable",
       expect.objectContaining({ method: "POST" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
-      5,
+      4,
       "/api/mist/v1/strategies/3/disable",
       expect.objectContaining({ method: "POST" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
-      6,
+      5,
       "/api/mist/v1/strategies/3/versions",
       expect.objectContaining({ method: "GET" })
     );
+
+    // The content-update contract has been removed: no strategy PATCH request
+    // is ever issued by the client.
+    for (const [url, init] of (global.fetch as jest.Mock).mock.calls) {
+      expect(init?.method).not.toBe("PATCH");
+      expect(url).not.toMatch(/\/v1\/strategies\/\d+$/);
+    }
   });
 
   it("calls signal, alert, scan, and backtest endpoints through Mist v1 paths", async () => {

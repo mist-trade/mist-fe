@@ -13,7 +13,6 @@ import {
   listStrategies,
   listStrategyVersions,
   runStrategyScan,
-  updateStrategyDefinition,
   type BacktestRunStatus,
   type DataSourceValue,
   type StrategyAlertEvent,
@@ -21,15 +20,23 @@ import {
   type StrategyBacktestSignalResult,
   type StrategyDefinition,
   type StrategySignal,
+  type StrategySignalKind,
   type StrategyVersion,
 } from "@/app/api/client";
 
 type StrategyTab = "registry" | "signals" | "alerts" | "backtests";
 
+const STRATEGY_SIGNAL_KINDS: readonly StrategySignalKind[] = ["entry", "exit"];
+
+/**
+ * Default creation-form rule. `k.volume` thresholds are decimal strings; this
+ * sample keeps `"100"` as a string so the rule JSON editor demonstrates the
+ * canonical decimal-string threshold shape required by the backend.
+ */
 const DEFAULT_RULE = {
-  field: "k.close",
+  field: "k.volume",
   operator: "gt",
-  value: 100,
+  value: "100",
 };
 
 const formatJson = (value: unknown) => JSON.stringify(value ?? {}, null, 2);
@@ -73,6 +80,7 @@ export default function StrategiesWorkspace() {
   const [targetUniverse, setTargetUniverse] = useState("");
   const [periods, setPeriods] = useState("1440");
   const [sources, setSources] = useState("tdx");
+  const [signalKind, setSignalKind] = useState<StrategySignalKind>("entry");
   const [ruleText, setRuleText] = useState(formatJson(DEFAULT_RULE));
 
   const [backtestVersionId, setBacktestVersionId] = useState("");
@@ -151,19 +159,9 @@ export default function StrategiesWorkspace() {
 
   useEffect(() => {
     if (!selectedStrategy) return;
-    setName(selectedStrategy.name);
-    setDescription(selectedStrategy.description || "");
-    setTargetUniverse(selectedStrategy.targetUniverse.join(", "));
-    setPeriods(selectedStrategy.periods.join(", "));
-    setSources(selectedStrategy.sources.join(", "));
     setBacktestVersionId(String(selectedStrategy.currentVersionId || ""));
     setBacktestUniverse(selectedStrategy.targetUniverse.join(", "));
   }, [selectedStrategy]);
-
-  useEffect(() => {
-    if (!currentVersion) return;
-    setRuleText(formatJson(currentVersion.rule));
-  }, [currentVersion]);
 
   const parseRule = () => {
     try {
@@ -192,38 +190,9 @@ export default function StrategiesWorkspace() {
         periods: parseNumberCsv(periods),
         sources: parseCsv(sources) as DataSourceValue[],
         rule,
+        signalKind,
       });
       await refreshStrategies();
-    } catch (error) {
-      setEditorError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const updateCurrentStrategy = async () => {
-    if (!selectedStrategy) return;
-    setEditorError("");
-    let rule: Record<string, unknown>;
-    try {
-      rule = parseRule();
-    } catch (error) {
-      setEditorError(error instanceof Error ? error.message : String(error));
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await updateStrategyDefinition(selectedStrategy.id, {
-        name,
-        description,
-        targetUniverse: parseCsv(targetUniverse),
-        periods: parseNumberCsv(periods),
-        sources: parseCsv(sources) as DataSourceValue[],
-        rule,
-      });
-      await refreshStrategies();
-      setVersions(await listStrategyVersions(selectedStrategy.id));
     } catch (error) {
       setEditorError(error instanceof Error ? error.message : String(error));
     } finally {
@@ -378,6 +347,10 @@ export default function StrategiesWorkspace() {
                       <dd>当前版本 #{selectedStrategy.currentVersionId ?? "-"}</dd>
                     </div>
                     <div>
+                      <dt>信号类型</dt>
+                      <dd>{currentVersion?.signalKind ?? "-"}</dd>
+                    </div>
+                    <div>
                       <dt>目标证券</dt>
                       <dd>{selectedStrategy.targetUniverse.join(", ")}</dd>
                     </div>
@@ -389,6 +362,9 @@ export default function StrategiesWorkspace() {
                       </dd>
                     </div>
                   </dl>
+                  <p className="strategy-muted">
+                    策略定义为创建后只读；如需修改名称、标的、规则或信号类型，请在下方创建新的策略定义。
+                  </p>
                   <div className="strategy-actions">
                     <button
                       disabled={isActionRunning}
@@ -418,7 +394,7 @@ export default function StrategiesWorkspace() {
               )}
 
               <div className="strategy-editor">
-                <h2>策略编辑</h2>
+                <h2>创建策略定义</h2>
                 <label>
                   策略名称
                   <input value={name} onChange={(event) => setName(event.target.value)} />
@@ -448,6 +424,21 @@ export default function StrategiesWorkspace() {
                   </label>
                 </div>
                 <label>
+                  信号类型
+                  <select
+                    value={signalKind}
+                    onChange={(event) =>
+                      setSignalKind(event.target.value as StrategySignalKind)
+                    }
+                  >
+                    {STRATEGY_SIGNAL_KINDS.map((kind) => (
+                      <option key={kind} value={kind}>
+                        {kind}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
                   规则 JSON
                   <textarea
                     rows={8}
@@ -458,14 +449,7 @@ export default function StrategiesWorkspace() {
                 {editorError ? <p className="strategy-error">{editorError}</p> : null}
                 <div className="strategy-actions">
                   <button disabled={isSaving} onClick={saveStrategy} type="button">
-                    保存策略
-                  </button>
-                  <button
-                    disabled={isSaving || !selectedStrategy}
-                    onClick={updateCurrentStrategy}
-                    type="button"
-                  >
-                    更新当前策略
+                    创建策略
                   </button>
                 </div>
               </div>
@@ -477,6 +461,7 @@ export default function StrategiesWorkspace() {
                     <tr>
                       <th>版本</th>
                       <th>Schema</th>
+                      <th>信号类型</th>
                       <th>创建时间</th>
                     </tr>
                   </thead>
@@ -485,6 +470,7 @@ export default function StrategiesWorkspace() {
                       <tr key={item.id}>
                         <td>版本 {item.versionNumber}</td>
                         <td>{item.ruleSchemaVersion}</td>
+                        <td>{item.signalKind}</td>
                         <td>{formatDateTime(item.createdAt)}</td>
                       </tr>
                     ))}
