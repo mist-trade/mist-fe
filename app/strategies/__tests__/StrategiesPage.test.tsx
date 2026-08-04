@@ -12,7 +12,6 @@ import {
   fetchStrategySignals,
   listStrategies,
   listStrategyVersions,
-  runStrategyScan,
   type StrategyDefinitionPayload,
 } from "@/app/api/client";
 
@@ -27,7 +26,6 @@ jest.mock("@/app/api/client", () => ({
   fetchStrategySignals: jest.fn(),
   listStrategies: jest.fn(),
   listStrategyVersions: jest.fn(),
-  runStrategyScan: jest.fn(),
 }));
 
 const mockedListStrategies = listStrategies as jest.Mock;
@@ -38,7 +36,6 @@ const mockedListStrategyVersions = listStrategyVersions as jest.Mock;
 const mockedFetchStrategySignals = fetchStrategySignals as jest.Mock;
 const mockedFetchStrategyAlertEvents = fetchStrategyAlertEvents as jest.Mock;
 const mockedAcknowledgeStrategyAlertEvent = acknowledgeStrategyAlertEvent as jest.Mock;
-const mockedRunStrategyScan = runStrategyScan as jest.Mock;
 const mockedCreateStrategyBacktest = createStrategyBacktest as jest.Mock;
 const mockedFetchStrategyBacktestSignals = fetchStrategyBacktestSignals as jest.Mock;
 
@@ -69,11 +66,12 @@ const signal = {
   id: 7,
   strategyDefinitionId: 3,
   strategyVersionId: 5,
-  securityCode: "600519",
+  securityId: 17,
   period: 1440,
   source: "tdx",
   signalTime: "2026-07-07T09:30:00.000Z",
   signalSource: "live",
+  signalKind: "entry",
   ruleSnapshot: version.rule,
   contextSnapshot: { k: { close: 120 } },
 };
@@ -117,11 +115,6 @@ function setupMocks() {
   mockedFetchStrategySignals.mockResolvedValue([signal]);
   mockedFetchStrategyAlertEvents.mockResolvedValue([alert]);
   mockedAcknowledgeStrategyAlertEvent.mockResolvedValue({ ...alert, status: "acked" });
-  mockedRunStrategyScan.mockResolvedValue({
-    createdSignalCount: 1,
-    createdAlertCount: 1,
-    skippedDuplicateCount: 0,
-  });
   mockedCreateStrategyDefinition.mockResolvedValue(strategy);
   mockedEnableStrategyDefinition.mockResolvedValue({ ...strategy, status: "enabled" });
   mockedDisableStrategyDefinition.mockResolvedValue({ ...strategy, status: "disabled" });
@@ -345,7 +338,7 @@ describe("StrategiesPage", () => {
     await awaitCreateSettled();
   });
 
-  it("runs strategy lifecycle, alert acknowledgement, and manual scan actions", async () => {
+  it("runs strategy lifecycle and alert acknowledgement actions", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
@@ -358,9 +351,17 @@ describe("StrategiesPage", () => {
     fireEvent.click(screen.getByRole("tab", { name: "告警事件" }));
     fireEvent.click(await screen.findByRole("button", { name: "确认告警" }));
     await waitFor(() => expect(mockedAcknowledgeStrategyAlertEvent).toHaveBeenCalledWith(9));
+  });
 
-    fireEvent.click(screen.getByRole("button", { name: "运行扫描" }));
-    expect(await screen.findByText("新增信号 1 / 新增告警 1 / 跳过重复 0")).toBeInTheDocument();
+  it("renders canonical live signal identity and signal kind", async () => {
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("tab", { name: "信号历史" }));
+
+    expect(await screen.findByText("17")).toBeInTheDocument();
+    expect(screen.getByText("entry")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /扫描/ })).not.toBeInTheDocument();
   });
 
   it("creates signal-level backtests and renders aggregate signal rows", async () => {

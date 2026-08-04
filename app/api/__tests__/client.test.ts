@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   MistApiContractError,
   MistApiError,
@@ -23,7 +25,6 @@ import {
   listStrategyVersions,
   parseEnvelope,
   requestNoContent,
-  runStrategyScan,
 } from "../client";
 
 const originalEnv = process.env;
@@ -881,18 +882,17 @@ describe("Mist frontend API client", () => {
     }
   });
 
-  it("calls signal, alert, scan, and backtest endpoints through Mist v1 paths", async () => {
+  it("calls signal, alert, and backtest endpoints through Mist v1 paths", async () => {
     (global.fetch as jest.Mock).mockResolvedValue(successEnvelope([]));
 
     await fetchStrategySignals({
       strategyDefinitionId: 3,
-      securityCode: "600519",
+      securityId: 17,
       period: 1440,
       source: "tdx",
     });
     await fetchStrategyAlertEvents({ status: "pending", strategySignalId: 8 });
     await acknowledgeStrategyAlertEvent(9);
-    await runStrategyScan({ strategyDefinitionId: 3, period: 1440, source: "tdx" });
     await createStrategyBacktest({
       strategyVersionId: 5,
       targetUniverse: ["600519"],
@@ -906,7 +906,7 @@ describe("Mist frontend API client", () => {
 
     expect(global.fetch).toHaveBeenNthCalledWith(
       1,
-      "/api/mist/v1/strategy-signals?strategyDefinitionId=3&securityCode=600519&period=1440&source=tdx",
+      "/api/mist/v1/strategy-signals?strategyDefinitionId=3&securityId=17&period=1440&source=tdx",
       expect.objectContaining({ method: "GET" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
@@ -921,24 +921,26 @@ describe("Mist frontend API client", () => {
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
       4,
-      "/api/mist/v1/strategy-scans/run",
-      expect.objectContaining({ method: "POST" })
-    );
-    expect(global.fetch).toHaveBeenNthCalledWith(
-      5,
       "/api/mist/v1/strategy-backtests",
       expect.objectContaining({ method: "POST" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
-      6,
+      5,
       "/api/mist/v1/strategy-backtests/11",
       expect.objectContaining({ method: "GET" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
-      7,
+      6,
       "/api/mist/v1/strategy-backtests/11/signals",
       expect.objectContaining({ method: "GET" })
     );
+  });
+
+  it("does not expose the retired manual live-scan client", () => {
+    const clientSource = readFileSync(join(process.cwd(), "app/api/client.ts"), "utf8");
+
+    expect(clientSource).not.toContain("runStrategyScan");
+    expect(clientSource).not.toContain("/v1/strategy-scans/run");
   });
 
   it("keeps strategy API calls off the analysis and datasource base paths", async () => {
