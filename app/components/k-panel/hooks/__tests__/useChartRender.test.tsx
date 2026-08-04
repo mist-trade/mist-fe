@@ -4,6 +4,7 @@ import { useChartRender } from "../useChartRender";
 
 jest.mock("echarts/core", () => ({
   init: jest.fn(),
+  registerTheme: jest.fn(),
 }));
 
 const resize = jest.fn();

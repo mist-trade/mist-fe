@@ -1,0 +1,113 @@
+/*
+ * Institutional Quant Workbench — Theme CSS Variables
+ *
+ * 与 app/styles/tokens.ts 的 LIGHT_TOKENS / DARK_TOKENS 一一对应，必须保持同步。
+ * 主题切换通过 [data-theme="light"|"dark"] 属性驱动（由 next-themes 写入）。
+ *
+ * 消费方：
+ *  - Tailwind v4 @theme inline（globals.css）
+ *  - 直接 var(--xxx) 在组件 CSS
+ *  - ECharts 主题（运行期由 JS 读取 getComputedStyle）
+ */
+
+/* 字体栈（与主题无关，全局统一）。值与 tokens.ts FONT_SANS/FONT_MONO 保持同步。 */
+:root {
+  --font-sans-stack: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono-stack: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    monospace;
+}
+
+:root,
+:root[data-theme="light"] {
+  /* 表面 / 中性 */
+  --surface-base: #f7f8fa;
+  --surface-raised: #ffffff;
+  --surface-overlay: #ffffff;
+  --border-subtle: #e5e7eb;
+  --border-strong: #cbd3df;
+  --text-primary: #151a24;
+  --text-secondary: #5a6472;
+  --text-muted: #8b95a5;
+
+  /* 业务语义（红涨绿跌） */
+  --sem-up: #ef5350;
+  --sem-down: #26a69a;
+  --sem-profit: #ef5350;
+  --sem-loss: #26a69a;
+  --sem-benchmark: #6366f1;
+  --sem-excess: #8b5cf6;
+  --sem-risk: #f59e0b;
+  --sem-warn: #f59e0b;
+  --sem-danger: #dc2626;
+  --sem-success: #16a34a;
+
+  /* 品牌（非语义强调，不用于涨跌/盈亏） */
+  --brand: #1f7a8c;
+  --brand-fg: #ffffff;
+
+  /* 缠论结构色 */
+  --chan-bi-valid: #00bcd4;
+  --chan-bi-invalid: #ec407a;
+  --chan-bi-unknown: #ff9800;
+  --chan-fenxing-top: #2196f3;
+  --chan-fenxing-bottom: #ff9800;
+  --chan-zhongshu-complete: #00e676;
+  --chan-zhongshu-uncomplete: #ffab00;
+
+  /* 阴影：克制，禁玻璃拟态 */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="dark"] {
+  /* 表面 / 中性 */
+  --surface-base: #0e1116;
+  --surface-raised: #161b22;
+  --surface-overlay: #1c2330;
+  --border-subtle: #262d3a;
+  --border-strong: #3a4456;
+  --text-primary: #e6edf3;
+  --text-secondary: #9aa7b8;
+  --text-muted: #6b7689;
+
+  /* 业务语义：深色下红/绿/橙提亮 8–12%、降饱和，保证 AA 对比 */
+  --sem-up: #ff6b6b;
+  --sem-down: #2dd4bf;
+  --sem-profit: #ff6b6b;
+  --sem-loss: #2dd4bf;
+  --sem-benchmark: #818cf8;
+  --sem-excess: #a78bfa;
+  --sem-risk: #fbbf24;
+  --sem-warn: #fbbf24;
+  --sem-danger: #f87171;
+  --sem-success: #4ade80;
+
+  /* 品牌 */
+  --brand: #2ba9c0;
+  --brand-fg: #0e1116;
+
+  /* 缠论结构色：深色提亮 */
+  --chan-bi-valid: #22d3ee;
+  --chan-bi-invalid: #f472b6;
+  --chan-bi-unknown: #fbbf24;
+  --chan-fenxing-top: #60a5fa;
+  --chan-fenxing-bottom: #fbbf24;
+  --chan-zhongshu-complete: #4ade80;
+  --chan-zhongshu-uncomplete: #fcd34d;
+
+  /* 阴影：深色下加深 */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/*
+ * 防止主题切换闪烁的过渡（仅颜色相关属性，避免布局抖动）。
+ * 全局温和过渡，不构成"装饰性动画"。
+ */
+:root {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
