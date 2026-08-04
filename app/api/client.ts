@@ -14,7 +14,13 @@ const TIMEOUT = Number.parseInt(
   10
 );
 
-export type DataSourceValue = "ef" | "tdx" | "mqmt";
+/**
+ * Backend `DataSource` enum wire values. The realtime subscription contract
+ * restricts the public realtime source to exactly `tdx|qmt`; the legacy
+ * `mqmt` value was renamed to `qmt` and MUST NOT be re-introduced as an alias
+ * or silently remapped. `ef` remains for the historical/EastMoney K-line paths.
+ */
+export type DataSourceValue = "ef" | "tdx" | "qmt";
 export type StrategyStatus = "draft" | "enabled" | "disabled" | "archived";
 export type StrategyAlertStatus = "pending" | "delivered" | "acked" | "failed";
 export type BacktestRunStatus = "pending" | "running" | "completed" | "failed";
@@ -164,6 +170,160 @@ export interface StrategyBacktestSignalResult {
   ruleSnapshot: Record<string, unknown>;
   createdAt?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Realtime subscription contract (frozen by integrate-production-realtime-
+// subscription-lifecycle task 1.4). Pinned copies live under
+// __fixtures__/contracts/realtime-subscriptions/ with SHA-256 sidecars.
+// ---------------------------------------------------------------------------
+
+/**
+ * Public realtime source. The backend enum is exactly `tdx|qmt`; the legacy
+ * `mqmt` value is invalid and must fail closed, never silently remapped.
+ */
+export type RealtimeSource = "tdx" | "qmt";
+
+export type RealtimeSecurityStatus = "ACTIVE" | "SUSPENDED" | "DELISTED";
+
+/**
+ * Provider-specific active evidence. TDX evidence comes from the terminal
+ * native list; QMT evidence comes from the verified durable registry and is
+ * NOT a provider-native active list.
+ */
+export type RealtimeActiveEvidence = "tdx_native_list" | "qmt_durable_registry";
+
+export type RealtimeConvergence =
+  | "converged"
+  | "pending"
+  | "drifted"
+  | "blocked"
+  | "unknown";
+
+export type RealtimeConvergenceReason =
+  | "lifecycle_disabled"
+  | "transport_not_ready"
+  | "readback_stale"
+  | "control_outcome_unknown"
+  | "desired_missing_active"
+  | "awaiting_full_reset"
+  | "control_failed"
+  | "qmt_reconciliation_required"
+  | "qmt_journal_unhealthy"
+  | "source_capacity_blocked";
+
+export type RealtimeDeferredRemovalReason = "awaiting_full_reset";
+
+/**
+ * Realtime subscription routing assignment. `desired` is computed from
+ * `securityStatus=ACTIVE` and is never writable here. `active` is the trusted
+ * provider readback: `null` means no trustworthy current evidence and MUST NOT
+ * be coerced to `false` or displayed as unsubscribed.
+ */
+export interface RealtimeSubscriptionVo {
+  assignmentId: number;
+  securityId: number;
+  securitySourceConfigId: number;
+  securityCode: string;
+  securityName: string;
+  securityType: "STOCK";
+  securityStatus: RealtimeSecurityStatus;
+  source: RealtimeSource;
+  providerSymbol: string;
+  desired: boolean;
+  active: boolean | null;
+  activeEvidence: RealtimeActiveEvidence | null;
+  convergence: RealtimeConvergence;
+  convergenceReason: RealtimeConvergenceReason | null;
+  deferredRemovalReason: RealtimeDeferredRemovalReason | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Pagination-independent ACTIVE capacity summary for one source. `limit` is the
+ * fixed backend per-source ACTIVE assignment cap (currently 5). Counts reflect
+ * ACTIVE assignments globally, not the current page rows.
+ */
+export interface RealtimeSourceCapacityVo {
+  source: RealtimeSource;
+  activeAssignmentCount: number;
+  limit: 5;
+}
+
+/**
+ * Bounded assignment page. Cursor is `assignmentId ASC`; `nextAfterId` is
+ * `null` when no further page exists. `sourceCapacities` always carries both
+ * sources and is independent of the returned page.
+ */
+export interface RealtimeSubscriptionPageVo {
+  items: RealtimeSubscriptionVo[];
+  nextAfterId: number | null;
+  sourceCapacities: RealtimeSourceCapacityVo[];
+}
+
+/**
+ * Existing one-Security source config. `formatCode` is the authoritative
+ * provider symbol; the operator UI displays it read-only and submits only the
+ * stable `id` (`securitySourceConfigId`) when binding.
+ */
+export interface SecuritySourceVo {
+  id: number;
+  securityId: number;
+  source: DataSourceValue;
+  formatCode: string;
+  priority: number;
+  enabled: boolean;
+}
+
+/** Query for bounded realtime subscription assignment listing. */
+export interface RealtimeSubscriptionQuery {
+  afterId?: number;
+  limit?: number;
+}
+
+/** New ACTIVE STOCK initialization request. */
+export interface NewRealtimeSubscriptionDto {
+  mode: "new";
+  securityCode: string;
+  securityName: string;
+  securityType: "STOCK";
+  source: RealtimeSource;
+  providerSymbol: string;
+}
+
+/** Existing source-config binding request. Submits only the stable config ID. */
+export interface ExistingRealtimeSubscriptionDto {
+  mode: "existing";
+  securitySourceConfigId: number;
+}
+
+export type InitializeRealtimeSubscriptionDto =
+  | NewRealtimeSubscriptionDto
+  | ExistingRealtimeSubscriptionDto;
+
+/**
+ * Stable realtime subscription business-rejection codes. Each maps to a typed
+ * `data` shape on the shared error envelope (HTTP 200, success=false).
+ */
+export const REALTIME_SUBSCRIPTION_BUSINESS_CODES = [
+  "REALTIME_SOURCE_LOCKED",
+  "REALTIME_ACTIVE_CAPACITY_REACHED",
+  "REALTIME_ASSIGNMENT_EXISTS",
+  "REALTIME_SECURITY_EXISTS",
+  "REALTIME_SOURCE_CONFIG_NOT_FOUND",
+  "REALTIME_SECURITY_NOT_ELIGIBLE",
+  "REALTIME_SOURCE_CONFIG_NOT_ELIGIBLE",
+] as const;
+export type RealtimeSubscriptionBusinessCode =
+  (typeof REALTIME_SUBSCRIPTION_BUSINESS_CODES)[number];
+
+export type RealtimeSecurityIneligibleReason =
+  | "security_not_active"
+  | "security_not_stock";
+export type RealtimeSourceConfigIneligibleReason =
+  | "source_not_realtime"
+  | "source_disabled"
+  | "provider_symbol_invalid";
 
 /**
  * Validation error map returned by the backend on a `VALIDATION_ERROR` response.
@@ -510,6 +670,71 @@ export const fetchSecurities = () =>
   requestJson<SecurityOption[]>(getMistApiBase(), "/v1/securities", {
     method: "GET",
   });
+
+// --- Realtime subscription client (bounded, contract-driven) ---
+
+/**
+ * List bounded realtime routing assignments. Cursor is `assignmentId ASC`;
+ * pass `afterId` from the previous page's `nextAfterId` to fetch the next
+ * bounded page. The response carries pagination-independent `sourceCapacities`.
+ */
+export const listRealtimeSubscriptions = (query?: RealtimeSubscriptionQuery) =>
+  requestJson<RealtimeSubscriptionPageVo>(
+    getMistApiBase(),
+    buildQueryPath("/v1/realtime-subscriptions", query),
+    { method: "GET" }
+  );
+
+/**
+ * Initialize one immutable realtime routing assignment. Submits the frozen
+ * discriminated-union payload (`mode=new|existing`). Expected business
+ * rejections (HTTP 200, success=false) throw `MistApiError` carrying the stable
+ * `code` and typed `data`.
+ */
+export const initializeRealtimeSubscription = (
+  dto: InitializeRealtimeSubscriptionDto
+) =>
+  requestJson<RealtimeSubscriptionVo>(
+    getMistApiBase(),
+    "/v1/realtime-subscriptions",
+    { method: "POST", body: JSON.stringify(dto) }
+  );
+
+/**
+ * Existing one-Security source lookup. Fetches source configs for exactly one
+ * canonical Security code; never enumerates all securities or issues per-row
+ * N+1 lookups. `formatCode` is the authoritative provider symbol (read-only).
+ */
+export const lookupSecuritySources = (code: string) =>
+  requestJson<SecuritySourceVo[]>(
+    getMistApiBase(),
+    `/v1/securities/${encodeURIComponent(code)}/sources`,
+    { method: "GET" }
+  );
+
+/**
+ * Activate a Security's realtime desired state. Success is the existing PUT
+ * contract: HTTP 200 shared envelope with `data=null`. Uses the data-returning
+ * envelope parser (NOT the 204-only helper); returns `null` on success.
+ */
+export const activateSecurity = (code: string) =>
+  requestJson<null>(
+    getMistApiBase(),
+    `/v1/securities/${encodeURIComponent(code)}/activate`,
+    { method: "PUT" }
+  );
+
+/**
+ * Deactivate a Security's realtime desired state. Provider removal is deferred
+ * (waits for ready/reconnect or weekday 09:15 reset); this PUT only persists
+ * desired=false. Success is HTTP 200 shared envelope with `data=null`.
+ */
+export const deactivateSecurity = (code: string) =>
+  requestJson<null>(
+    getMistApiBase(),
+    `/v1/securities/${encodeURIComponent(code)}/deactivate`,
+    { method: "PUT" }
+  );
 
 export const collectKLines = (query: KLineQuery) =>
   requestJson<CollectKLinesResult>(getMistApiBase(), "/v1/collector/collect", {
