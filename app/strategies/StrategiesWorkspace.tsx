@@ -253,6 +253,7 @@ export default function StrategiesWorkspace() {
           <a href="/strategies" aria-current="page">
             策略
           </a>
+          <a href="/settings/realtime-subscriptions">实时订阅</a>
         </nav>
       </header>
 
@@ -548,7 +549,7 @@ export default function StrategiesWorkspace() {
                   >
                     <option value="tdx">tdx</option>
                     <option value="ef">ef</option>
-                    <option value="mqmt">mqmt</option>
+                    <option value="qmt">qmt</option>
                   </select>
                 </label>
                 <label>
