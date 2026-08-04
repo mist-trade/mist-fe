@@ -2,20 +2,22 @@ import type { IFetchK } from "@/app/api/types";
 import type { CustomSeriesOption } from "echarts/charts";
 import * as echarts from "echarts/core";
 import { useCallback, useEffect, useRef } from "react";
+import { useThemeName } from "@/app/styles/ThemeProvider";
 import {
-  COLORS,
-  FENXING_COLORS,
-  getBiColor,
+  getThemeColors,
+  getBiColorForTheme,
   getBiStyle,
-  getChannelColor,
+  getChannelColorForTheme,
   hexToRgba,
+  type ThemeChartColors,
 } from "../config/chartColors";
 import {
   DATAZOOM_CONFIG,
   GRID_CONFIG,
   LEGEND_CONFIG,
   TITLE_CONFIG,
-  TOOLTIP_CONFIG,
+  getTooltipConfig,
+  getAxisPointerLabelBg,
 } from "../config/chartOptions";
 import type {
   BiMappedData,
@@ -77,6 +79,9 @@ export function useChartConfig({
   const fenxingPlaceholdersRef =
     useRef<Array<number | null>>(fenxingPlaceholders);
 
+  // 当前主题（驱动 tooltip/涨跌/缠论结构色随深浅切换）
+  const themeName = useThemeName();
+
   // Update refs using useEffect to avoid accessing refs during render
   useEffect(() => {
     mergeKRectsRef.current = mergeKRects;
@@ -109,6 +114,13 @@ export function useChartConfig({
   useEffect(() => {
     fenxingPlaceholdersRef.current = fenxingPlaceholders;
   }, [fenxingPlaceholders]);
+
+  // 当前主题图表色（随主题更新，renderItem 闭包内读取最新值）
+  const colors = getThemeColors(themeName);
+  const colorsRef = useRef<ThemeChartColors>(colors);
+  useEffect(() => {
+    colorsRef.current = colors;
+  }, [colors]);
 
   // 创建合并k线的数据
   const createMergeKSeries = useCallback((): CustomSeriesOption => {
@@ -145,6 +157,7 @@ export function useChartConfig({
         // 获取 K 线柱子的宽度信息
         const barWidth = getBarWidth(api.size?.([1, 0]));
 
+        const c = colorsRef.current;
         const halfBarWidth = barWidth * 0.4;
         // 计算矩形的位置和大小
         const x = startPoint[0] - halfBarWidth;
@@ -161,8 +174,8 @@ export function useChartConfig({
             height,
           },
           style: {
-            fill: rect.trend === "up" ? COLORS.upFill : COLORS.downFill,
-            stroke: rect.trend === "up" ? COLORS.up : COLORS.down,
+            fill: rect.trend === "up" ? c.upFill : c.downFill,
+            stroke: rect.trend === "up" ? c.up : c.down,
             lineWidth: 1,
             lineDash: [5, 5],
           },
@@ -206,7 +219,11 @@ export function useChartConfig({
           return null;
         }
 
-        const color = getBiColor(biItem.type, biItem.status);
+        const color = getBiColorForTheme(
+          biItem.type,
+          biItem.status,
+          colorsRef.current
+        );
         const style = getBiStyle(biItem.trend);
 
         return {
@@ -273,7 +290,10 @@ export function useChartConfig({
         const width = endPoint[0] - startPoint[0] + barWidth * 0.8;
         const height = endPoint[1] - startPoint[1];  // zd 到 zg 的距离
 
-        const color = getChannelColor(channel.type);
+        const color = getChannelColorForTheme(
+          channel.type,
+          colorsRef.current
+        );
         const fillColor = hexToRgba(
           color,
           channel.type === "complete" ? 0.20 : 0.12
@@ -406,7 +426,9 @@ export function useChartConfig({
         // 获取 K 线柱子的宽度信息
         const barWidth = getBarWidth(api.size?.([1, 0]));
 
-        const color = FENXING_COLORS[fenxing.type];
+        const c = colorsRef.current;
+        const color =
+          fenxing.type === "top" ? c.fenxingTop : c.fenxingBottom;
         const size = barWidth * 0.4; // 减小标记大小
         const halfSize = size / 2;
         const offset = barWidth * 1.5; // 距离K线的偏移量
@@ -425,7 +447,7 @@ export function useChartConfig({
             },
             style: {
               fill: color,
-              stroke: "#fff",
+              stroke: c.fenxingStroke,
               lineWidth: 2,
             },
             z: 15,
@@ -442,7 +464,7 @@ export function useChartConfig({
             },
             style: {
               fill: color,
-              stroke: "#fff",
+              stroke: c.fenxingStroke,
               lineWidth: 2,
             },
             z: 15,
@@ -471,7 +493,7 @@ export function useChartConfig({
         title: TITLE_CONFIG,
         legend: LEGEND_CONFIG,
         tooltip: {
-          ...TOOLTIP_CONFIG,
+          ...getTooltipConfig(themeName),
           formatter: function (params: unknown) {
             const paramsArray = isKTooltipParams(params) ? params : [];
             return formatKTooltip(paramsArray, k, dates);
@@ -479,7 +501,7 @@ export function useChartConfig({
         },
         axisPointer: {
           link: [{ xAxisIndex: "all" }],
-          label: { backgroundColor: "#777" },
+          label: { backgroundColor: getAxisPointerLabelBg(themeName) },
         },
         grid: GRID_CONFIG,
         xAxis: [
@@ -532,10 +554,10 @@ export function useChartConfig({
             type: "candlestick",
             data: klineData,
             itemStyle: {
-              color: COLORS.up,
-              color0: COLORS.down,
-              borderColor: COLORS.up,
-              borderColor0: COLORS.down,
+              color: colors.up,
+              color0: colors.down,
+              borderColor: colors.up,
+              borderColor0: colors.down,
             },
           },
           // Channel series - render Zhongshu (central channels) z=3
@@ -556,8 +578,8 @@ export function useChartConfig({
               color: function (params: { dataIndex: number }) {
                 const dataIndex = params.dataIndex;
                 const kline = klineData[dataIndex];
-                if (!kline) return COLORS.down;
-                return kline[1] > kline[0] ? COLORS.up : COLORS.down;
+                if (!kline) return colors.down;
+                return kline[1] > kline[0] ? colors.up : colors.down;
               },
             },
           },
@@ -566,7 +588,15 @@ export function useChartConfig({
 
       chart.setOption(options, true);
     },
-    [k, createMergeKSeries, createChannelSeries, createBiSeries, createFenxingSeries]
+    [
+      k,
+      createMergeKSeries,
+      createChannelSeries,
+      createBiSeries,
+      createFenxingSeries,
+      themeName,
+      colors,
+    ]
   );
 
   return { setOption };
