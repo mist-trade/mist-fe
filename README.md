@@ -44,10 +44,9 @@ Mist Frontend 是一个基于 Next.js 的金融图表和技术分析应用，专
 
 ```
 app/
-├── api/                   # API 路由与数据获取
-│   ├── fetch.ts           # API 客户端与数据获取
-│   └── mock-data/         # 开发用模拟数据
-│       └── index.ts       # 统一模拟数据源
+├── api/                   # API 客户端与类型
+│   ├── client.ts          # 统一 API 边界与数据获取
+│   └── types.ts           # API 类型定义
 ├── components/
 │   ├── k-panel/           # 主 K 线图组件
 │   │   ├── index.tsx      # K 线图主组件
@@ -175,9 +174,12 @@ NEXT_PUBLIC_CHAN_API_BASE_PATH=/api/chan
 | `pnpm build` | 构建生产版本 |
 | `pnpm start` | 启动生产服务器 |
 | `pnpm lint` | 运行 ESLint |
+| `pnpm typecheck` | 运行 `tsc --noEmit` 类型检查 |
 | `pnpm test` | 运行 Jest 测试 |
+| `pnpm test:ci` | CI 串行运行 Jest 测试 |
 | `pnpm test:watch` | 监听模式运行测试 |
 | `pnpm test:coverage` | 生成测试覆盖率报告 |
+| `pnpm snapshots:generate` | 生成缠论回归快照（`__fixtures__/snapshots`） |
 
 ---
 
@@ -185,14 +187,14 @@ NEXT_PUBLIC_CHAN_API_BASE_PATH=/api/chan
 
 ### 数据流模式
 
-**核心架构**：Server components 通过 `app/api/fetch.ts` 获取初始数据，将**未解析的 Promises** 传递给 client components，后者使用 React 19 的 `use()` hook 来解包 Promises。
+**核心架构**：Server components 通过 `app/api/client.ts` 获取初始数据，将**未解析的 Promises** 传递给 client components，后者使用 React 19 的 `use()` hook 来解包 Promises。
 
 **为什么使用这种模式**：支持流式传输和渐进式渲染。`use()` hook 会暂停组件直到数据可用。
 
 ```
 Server Component (page.tsx)
     ↓
-fetch.ts 返回 Promises
+client.ts 返回 Promises
     ↓
 Client Component (KPanel) 接收 Promises
     ↓
@@ -387,43 +389,14 @@ pnpm test:coverage
 ### 当前覆盖率
 
 - 数据处理函数：100% 覆盖率
-- 11 个通过的测试
 
 ---
 
-## 🧪 测试数据管理
+## 🧪 测试数据（缠论回归快照）
 
-### 目录结构
-
-```
-test-data/
-├── fixtures/              # 静态 fixtures（本地）
-│   └── k-line/           # K 线 fixtures
-└── results/              # 从后端同步
-    ├── json/             # 原始 JSON 结果
-    └── types/            # TypeScript 定义
-```
-
-### 从后端同步
-
-```bash
-# 从后端拉取最新数据
-pnpm run sync:from-backend
-
-# 同步 + 启动开发服务器
-pnpm run dev:sync
-```
-
-### 使用方式
-
-```typescript
-// 导入同步的结果
-import { shanghaiIndex20242025Results } from '@/test-data/results/types';
-
-// 使用数据
-const kData = shanghaiIndex20242025Results.data.originalKLines;
-const summary = shanghaiIndex20242025Results.summary;
-```
+缠论回归测试的声明式用例与机器生成快照位于 `__fixtures__/`（用例定义、golden
+snapshots），详情见 [`__fixtures__/README.md`](__fixtures__/README.md)。通过
+`pnpm run snapshots:generate` 重新生成快照，并用 `git diff` 对比。
 
 ---
 
@@ -472,13 +445,15 @@ NODE_ENV=development
 
 应用实现了多层错误处理：
 
-1. **API 层**：`fetch.ts` 中的 try/catch 与超时处理
+1. **API 层**：`client.ts` 中的 try/catch 与超时处理
 2. **组件层**：ErrorBoundary 包装图表组件
 3. **用户反馈**：优雅的降级 UI 与重试选项
 
 ### 错误边界位置
 
-`app/components/ErrorBoundary.tsx` 包装主 KPanel 组件。
+`app/components/ErrorBoundary.tsx` 提供组件级错误边界。`/k` 页面依赖 App Router
+的路由级 `app/error.tsx`，不再额外包裹 `ErrorBoundary`（详见 `app/k/page.tsx`
+注释）。
 
 ---
 
@@ -494,11 +469,9 @@ NODE_ENV=development
 
 ### 模拟数据
 
-开发中，应用使用来自 `app/api/mock-data/` 的模拟数据。可通过以下方式配置活动数据集：
-
-```env
-NEXT_PUBLIC_MOCK_DATASET=development  # 或 'testing', 'production'
-```
+`NEXT_PUBLIC_ENABLE_MOCK_KLINE_FALLBACK=true` 仅用于开发调试。当实时 K 线请求失败
+时，页面会显示 fallback 状态，避免误认为是真实行情。该变量定义在 `.env.example`
+中。
 
 ---
 
