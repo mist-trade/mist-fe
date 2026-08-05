@@ -36,7 +36,8 @@ pnpm run snapshots:generate
 pnpm run snapshots:generate -- --case=shanghai-index-2025
 ```
 
-默认后端地址 `https://www.moyui.mist`，可通过环境变量覆盖：
+默认后端地址 `http://192.168.31.182:8008`（Windows 实机 chan 服务），可通过环境变量
+覆盖：
 
 ```bash
 SNAPSHOT_BACKEND_URL=http://127.0.0.1:8008 pnpm run snapshots:generate
