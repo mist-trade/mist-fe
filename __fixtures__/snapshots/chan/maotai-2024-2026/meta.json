@@ -1,0 +1,24 @@
+{
+  "key": "maotai-2024-2026",
+  "name": "贵州茅台 2024-2026",
+  "generatedAt": "2026-08-23T12:38:44.355Z",
+  "backendUrl": "offline:audit-real-data",
+  "testCase": {
+    "code": "600519",
+    "source": "tdx",
+    "period": 1440,
+    "startDate": "2024-01-01",
+    "endDate": "2026-08-21"
+  },
+  "stats": {
+    "kCount": 1241,
+    "mergeKCount": 1060,
+    "biCount": 49,
+    "phaseABiCount": 49,
+    "phaseBBiCount": 49,
+    "channelCount": 1,
+    "phaseAChannelCount": 6,
+    "phaseBChannelCount": 1,
+    "fenxingCount": 940
+  }
+}

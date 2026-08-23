@@ -31,12 +31,14 @@ import { shanghaiIndex2024_2025 } from "./chan/shanghai-index-2024-2025";
 import { csi300_2024_2025 } from "./chan/csi300-2024-2025";
 import { chiNext2024_2025 } from "./chan/chi-next-2024-2025";
 import { maotai2024_2025 } from "./chan/maotai-2024-2025";
+import { maotai2024_2026 } from "./chan/maotai-2024-2026";
 
 export const chanTestCases: ChanTestCase[] = [
   shanghaiIndex2024_2025,
   csi300_2024_2025,
   chiNext2024_2025,
   maotai2024_2025,
+  maotai2024_2026,
 ];
 
 /** 按 key 查找用例 */
