@@ -3,14 +3,21 @@ import type {
   IFenxing,
   IFetchBi,
   IFetchChannel,
+  IFetchDuan,
+  IFetchDuanChannel,
   IFetchK,
   IMergeK,
 } from "@/app/api/types";
 import { TrendDirection } from "@/app/api/types";
 import type {
   BiMappedData,
+  BspSignalMappedData,
+  BspSignalSourceData,
   ChannelMappedData,
+  DuanChannelMappedData,
+  DuanMappedData,
   FenxingMappedData,
+  MacdData,
   MergeKRect,
 } from "../types";
 
@@ -312,3 +319,260 @@ export const createChannelPlaceholders = (
 
   return placeholders;
 };
+
+// 计算线段数据 (Duan)
+export const calculateDuanData = (
+  k: IFetchK[],
+  duans?: IFetchDuan[]
+): DuanMappedData[] => {
+  if (k.length === 0 || !duans || duans.length === 0) return [];
+
+  const duanData: DuanMappedData[] = [];
+  const indexes = buildKLineIndexes(k);
+
+  duans.forEach((d, index) => {
+    const startIndex = indexes.byTime.get(timeKey(d.startTime)) ?? -1;
+    const endIndex = indexes.byTime.get(timeKey(d.endTime)) ?? -1;
+
+    if (startIndex === -1 || endIndex === -1) {
+      return;
+    }
+
+    let startPrice: number;
+    let endPrice: number;
+
+    if (d.trend === TrendDirection.Up) {
+      startPrice = d.low;
+      endPrice = d.high;
+    } else {
+      startPrice = d.high;
+      endPrice = d.low;
+    }
+
+    duanData.push({
+      duanId: index,
+      startIndex,
+      endIndex,
+      startPrice,
+      endPrice,
+      trend: d.trend,
+      type: d.type,
+      status: d.status,
+      independentCount: d.independentCount,
+      high: d.high,
+      low: d.low,
+    });
+  });
+
+  return duanData;
+};
+
+// 创建线段的占位符数组（放置在中间索引）
+export const createDuanPlaceholders = (
+  duanData: DuanMappedData[],
+  kLength: number
+): Array<number | null> => {
+  const placeholders: Array<number | null> = new Array(kLength).fill(null);
+
+  duanData.forEach((duanItem) => {
+    const midIndex = Math.floor((duanItem.startIndex + duanItem.endIndex) / 2);
+    if (midIndex >= 0 && midIndex < placeholders.length) {
+      placeholders[midIndex] = duanItem.duanId;
+    }
+  });
+
+  return placeholders;
+};
+
+// 计算段中枢数据 (DuanChannel)
+export const calculateDuanChannelData = (
+  k: IFetchK[],
+  duanChannels?: IFetchDuanChannel[]
+): DuanChannelMappedData[] => {
+  if (k.length === 0 || !duanChannels || duanChannels.length === 0) return [];
+
+  const duanChannelData: DuanChannelMappedData[] = [];
+  const indexes = buildKLineIndexes(k);
+
+  duanChannels.forEach((dc, index) => {
+    const startIdToUse = dc.displayStartId ?? dc.startId;
+    const endIdToUse = dc.displayEndId ?? dc.endId;
+
+    let startIndex = indexes.byId.get(startIdToUse) ?? -1;
+    let endIndex = indexes.byId.get(endIdToUse) ?? -1;
+
+    if ((startIndex === -1 || endIndex === -1) && dc.duans && dc.duans.length > 0) {
+      const first = dc.duans[0];
+      const last = dc.duans[dc.duans.length - 1];
+      if (first && last) {
+        startIndex = indexes.byTime.get(timeKey(first.startTime)) ?? -1;
+        endIndex = indexes.byTime.get(timeKey(last.endTime)) ?? -1;
+      }
+    }
+
+    if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+      return;
+    }
+
+    duanChannelData.push({
+      channelId: index,
+      startIndex,
+      endIndex,
+      zg: dc.zg,
+      zd: dc.zd,
+      gg: dc.gg,
+      dd: dc.dd,
+      type: dc.type,
+      level: dc.level,
+      expanded: dc.expanded,
+    });
+  });
+
+  return duanChannelData;
+};
+
+// 创建段中枢占位符数组
+export const createDuanChannelPlaceholders = (
+  duanChannels: DuanChannelMappedData[],
+  kLength: number
+): Array<number | null> => {
+  const placeholders: Array<number | null> = new Array(kLength).fill(null);
+
+  duanChannels.forEach((channel) => {
+    if (channel.startIndex >= 0 && channel.startIndex < placeholders.length) {
+      placeholders[channel.startIndex] = channel.channelId;
+    }
+  });
+
+  return placeholders;
+};
+
+const BSP_LABEL_MAP: Record<string, string> = {
+  first_buy: "1买",
+  first_sell: "1卖",
+  second_buy: "2买",
+  second_sell: "2卖",
+  third_buy: "3买",
+  third_sell: "3卖",
+  entry: "买入",
+  exit: "卖出",
+};
+
+// 计算买卖点映射数据 (BSP)
+export const calculateBspData = (
+  k: IFetchK[],
+  signals?: BspSignalSourceData[]
+): BspSignalMappedData[] => {
+  if (k.length === 0 || !signals || signals.length === 0) return [];
+
+  const bspMappedData: BspSignalMappedData[] = [];
+  const indexes = buildKLineIndexes(k);
+
+  signals.forEach((sig, index) => {
+    const sigTimeMs = timeKey(sig.signalTime);
+    let kIndex = indexes.byTime.get(sigTimeMs) ?? -1;
+
+    // 如果未精确匹配，寻找时间最接近且 <= sigTimeMs 的 K 线
+    if (kIndex === -1) {
+      for (let i = k.length - 1; i >= 0; i--) {
+        if (timeKey(k[i].time) <= sigTimeMs) {
+          kIndex = i;
+          break;
+        }
+      }
+    }
+
+    if (kIndex === -1) return;
+
+    const rawType = String(sig.type || sig.signalKind || "signal");
+    const label = BSP_LABEL_MAP[rawType] || (rawType.includes("buy") ? "买点" : rawType.includes("sell") ? "卖点" : "信号");
+    const isBuy =
+      rawType === "first_buy" ||
+      rawType === "second_buy" ||
+      rawType === "third_buy" ||
+      rawType === "entry" ||
+      label.includes("买");
+
+    const price =
+      typeof sig.price === "number" && Number.isFinite(sig.price)
+        ? sig.price
+        : isBuy
+        ? k[kIndex].low
+        : k[kIndex].high;
+
+    bspMappedData.push({
+      bspId: index,
+      index: kIndex,
+      time: toISODateString(sig.signalTime),
+      price,
+      type: rawType,
+      label,
+      isBuy,
+      rawSignal: sig,
+    });
+  });
+
+  return bspMappedData;
+};
+
+// 创建买卖点占位符数组
+export const createBspPlaceholders = (
+  bspData: BspSignalMappedData[],
+  kLength: number
+): Array<number | null> => {
+  const placeholders: Array<number | null> = new Array(kLength).fill(null);
+
+  bspData.forEach((bsp) => {
+    if (bsp.index >= 0 && bsp.index < placeholders.length) {
+      placeholders[bsp.index] = bsp.bspId;
+    }
+  });
+
+  return placeholders;
+};
+
+// 计算标准 MACD (12, 26, 9) 指标序列
+export const calculateMacd = (
+  k: IFetchK[],
+  shortPeriod = 12,
+  longPeriod = 26,
+  signalPeriod = 9
+): MacdData => {
+  if (k.length === 0) {
+    return { dif: [], dea: [], hist: [] };
+  }
+
+  const dif: Array<number | null> = new Array(k.length).fill(null);
+  const dea: Array<number | null> = new Array(k.length).fill(null);
+  const hist: Array<number | null> = new Array(k.length).fill(null);
+
+  const k1 = 2 / (shortPeriod + 1);
+  const k2 = 2 / (longPeriod + 1);
+  const kSig = 2 / (signalPeriod + 1);
+
+  let emaShort = k[0].close;
+  let emaLong = k[0].close;
+  let emaDea = 0;
+
+  for (let i = 0; i < k.length; i++) {
+    const close = k[i].close;
+    emaShort = close * k1 + emaShort * (1 - k1);
+    emaLong = close * k2 + emaLong * (1 - k2);
+
+    const curDif = emaShort - emaLong;
+    dif[i] = Number(curDif.toFixed(4));
+
+    if (i === 0) {
+      emaDea = curDif;
+    } else {
+      emaDea = curDif * kSig + emaDea * (1 - kSig);
+    }
+    dea[i] = Number(emaDea.toFixed(4));
+
+    const curHist = (curDif - emaDea) * 2;
+    hist[i] = Number(curHist.toFixed(4));
+  }
+
+  return { dif, dea, hist };
+};
+

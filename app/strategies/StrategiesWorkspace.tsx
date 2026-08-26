@@ -253,6 +253,7 @@ export default function StrategiesWorkspace() {
           <a href="/strategies" aria-current="page">
             策略
           </a>
+          <a href="/backtests">回测</a>
           <a href="/settings/realtime-subscriptions">实时订阅</a>
         </nav>
       </header>

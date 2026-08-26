@@ -97,6 +97,61 @@ export interface IFetchChannel {
   displayEndId: number;
 }
 
+export enum DuanType {
+  UnComplete = "uncomplete",
+  Complete = "complete",
+}
+
+export enum DuanStatus {
+  Unknown = 0,
+  Valid = 1,
+  Invalid = 2,
+}
+
+export interface IFetchDuan {
+  startTime: Date | string;
+  endTime: Date | string;
+  high: number;
+  low: number;
+  trend: TrendDirection;
+  type: DuanType;
+  status: DuanStatus;
+  independentCount: number;
+  originIds: number[];
+  originBis: IFetchBi[];
+  startBi: IFetchBi | null;
+  endBi: IFetchBi | null;
+}
+
+export interface IFetchDuanChannel {
+  zg: number;
+  zd: number;
+  gg: number;
+  dd: number;
+  level: ChannelLevel;
+  type: ChannelType;
+  status?: ChannelStatus;
+  expanded?: boolean;
+  startId: number;
+  endId: number;
+  duans: IFetchDuan[];
+  displayStartId: number;
+  displayEndId: number;
+}
+
+export interface IFetchDuanChannelPhases {
+  phaseA: IFetchDuanChannel[];
+  phaseB: IFetchDuanChannel[];
+}
+
+export type ChanBspEventType =
+  | "first_buy"
+  | "first_sell"
+  | "second_buy"
+  | "second_sell"
+  | "third_buy"
+  | "third_sell";
+
 /**
  * 两阶段中枢结果（镜像后端 ChannelTwoPhaseResult）：
  * - phaseA: 固定5笔滑窗枚举的所有基础中枢
@@ -116,3 +171,4 @@ export interface IFetchBiPhases {
   phaseA: IFetchBi[];
   phaseB: IFetchBi[];
 }
+

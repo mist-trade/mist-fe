@@ -4,9 +4,16 @@ import {
   calculateBiData,
   createMergeKPlaceholders,
   createBiPlaceholders,
+  calculateDuanData,
+  createDuanPlaceholders,
+  calculateDuanChannelData,
+  createDuanChannelPlaceholders,
+  calculateBspData,
+  createBspPlaceholders,
+  calculateMacd,
 } from '../utils/dataProcessor';
-import { TrendDirection, BiType, BiStatus } from '@/app/api/types';
-import type { IFetchK, IMergeK, IFetchBi } from '@/app/api/types';
+import { TrendDirection, BiType, BiStatus, DuanType, DuanStatus, ChannelLevel, ChannelType } from '@/app/api/types';
+import type { IFetchK, IMergeK, IFetchBi, IFetchDuan, IFetchDuanChannel } from '@/app/api/types';
 
 describe('DataProcessor', () => {
   const mockK: IFetchK[] = [
@@ -111,6 +118,143 @@ describe('DataProcessor', () => {
     });
   });
 
+  describe('calculateDuanData and createDuanPlaceholders', () => {
+    const mockDuan: IFetchDuan[] = [
+      {
+        startTime: new Date('2024-01-01'),
+        endTime: new Date('2024-01-05'),
+        high: 115,
+        low: 95,
+        trend: TrendDirection.Up,
+        type: DuanType.Complete,
+        status: DuanStatus.Valid,
+        independentCount: 5,
+        originIds: [1, 2, 3, 4, 5],
+        originBis: mockBi,
+        startBi: mockBi[0],
+        endBi: mockBi[1],
+      },
+    ];
+
+    it('should calculate Duan mapped data correctly', () => {
+      const result = calculateDuanData(mockK, mockDuan);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        duanId: 0,
+        startIndex: 0,
+        endIndex: 4,
+        startPrice: 95,
+        endPrice: 115,
+        trend: TrendDirection.Up,
+      });
+    });
+
+    it('should create duan placeholders at midpoint', () => {
+      const duanData = calculateDuanData(mockK, mockDuan);
+      const placeholders = createDuanPlaceholders(duanData, 5);
+      expect(placeholders).toHaveLength(5);
+      expect(placeholders[2]).toBe(0); // mid of 0..4 is 2
+    });
+  });
+
+  describe('calculateDuanChannelData', () => {
+    const mockDuanChannel: IFetchDuanChannel[] = [
+      {
+        startId: 1,
+        endId: 5,
+        displayStartId: 1,
+        displayEndId: 5,
+        zg: 108,
+        zd: 102,
+        gg: 115,
+        dd: 95,
+        level: ChannelLevel.Duan,
+        type: ChannelType.Complete,
+        duans: [],
+      },
+    ];
+
+    it('should calculate DuanChannel mapped data correctly', () => {
+      const result = calculateDuanChannelData(mockK, mockDuanChannel);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        channelId: 0,
+        startIndex: 0,
+        endIndex: 4,
+        zg: 108,
+        zd: 102,
+      });
+    });
+
+    it('should create duanChannel placeholders at startIndex', () => {
+      const channelData = calculateDuanChannelData(mockK, mockDuanChannel);
+      const placeholders = createDuanChannelPlaceholders(channelData, 5);
+      expect(placeholders).toHaveLength(5);
+      expect(placeholders[0]).toBe(0);
+    });
+  });
+
+  describe('calculateBspData and placeholders', () => {
+    const mockSignals = [
+      {
+        signalTime: '2024-01-03',
+        type: 'first_sell',
+        price: 115,
+      },
+      {
+        signalTime: '2024-01-01',
+        type: 'first_buy',
+        price: 95,
+      },
+    ];
+
+    it('should map buy/sell points accurately to K-lines', () => {
+      const result = calculateBspData(mockK, mockSignals);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        type: 'first_sell',
+        label: '1卖',
+        isBuy: false,
+        price: 115,
+        index: 2,
+      });
+      expect(result[1]).toMatchObject({
+        type: 'first_buy',
+        label: '1买',
+        isBuy: true,
+        price: 95,
+        index: 0,
+      });
+    });
+
+    it('should create bsp placeholders at respective indices', () => {
+      const bspData = calculateBspData(mockK, mockSignals);
+      const placeholders = createBspPlaceholders(bspData, 5);
+      expect(placeholders[2]).toBe(0);
+      expect(placeholders[0]).toBe(1);
+      expect(placeholders[1]).toBeNull();
+    });
+  });
+
+  describe('calculateMacd', () => {
+    it('should compute MACD values for valid K series', () => {
+      const macd = calculateMacd(mockK);
+      expect(macd.dif).toHaveLength(5);
+      expect(macd.dea).toHaveLength(5);
+      expect(macd.hist).toHaveLength(5);
+      expect(typeof macd.dif[0]).toBe('number');
+      expect(typeof macd.dea[0]).toBe('number');
+      expect(typeof macd.hist[0]).toBe('number');
+    });
+
+    it('should handle empty K series gracefully', () => {
+      const macd = calculateMacd([]);
+      expect(macd.dif).toEqual([]);
+      expect(macd.dea).toEqual([]);
+      expect(macd.hist).toEqual([]);
+    });
+  });
+
   describe('createMergeKPlaceholders', () => {
     const mergeKRects = [
       { startIndex: 0, endIndex: 2, high: 120, low: 90, trend: TrendDirection.Up, rectId: 0 },
@@ -168,3 +312,4 @@ describe('DataProcessor', () => {
     });
   });
 });
+

@@ -351,6 +351,7 @@ export default function RealtimeSubscriptionsPage() {
         <nav className="strategy-nav" aria-label="主导航">
           <a href="/k">K 线</a>
           <a href="/strategies">策略</a>
+          <a href="/backtests">回测</a>
           <a href="/settings/realtime-subscriptions" aria-current="page">
             实时订阅
           </a>
