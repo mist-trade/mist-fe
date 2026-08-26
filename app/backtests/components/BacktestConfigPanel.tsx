@@ -60,7 +60,9 @@ export function BacktestConfigPanel({
   const [endDateTime, setEndDateTime] = useState(defaultDates.end);
   const [formError, setFormError] = useState("");
 
-  const activeVersionId = selectedVersionId ?? (versions[0]?.id ?? null);
+  const activeVersion =
+    versions.find((v) => v.id === selectedVersionId) ?? versions[0];
+  const activeVersionId = activeVersion?.id ?? null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +116,10 @@ export function BacktestConfigPanel({
           策略定义
           <select
             value={selectedStrategyId ?? ""}
-            onChange={(e) => onSelectStrategyId(Number(e.target.value))}
+            onChange={(e) => {
+              setSelectedVersionId(null);
+              onSelectStrategyId(Number(e.target.value));
+            }}
           >
             {strategies.map((strat) => (
               <option key={strat.id} value={strat.id}>

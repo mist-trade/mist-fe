@@ -90,8 +90,8 @@ describe("BacktestConfigPanel", () => {
         targetUniverse: ["000001"],
         period: 5,
         source: "tdx",
-        startDate: expect.stringMatching(/2026-08-26T/),
-        endDate: expect.stringMatching(/2026-08-26T/),
+        startDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+        endDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
       })
     );
   });

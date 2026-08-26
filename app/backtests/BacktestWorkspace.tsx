@@ -189,6 +189,11 @@ export function BacktestWorkspace() {
   // 轮询回测任务直至完成
   const pollRunUntilComplete = useCallback(
     (runId: number) => {
+      if (!runId || isNaN(runId)) {
+        console.error("Invalid runId provided to pollRunUntilComplete:", runId);
+        return;
+      }
+
       if (pollingTimerRef.current) {
         clearInterval(pollingTimerRef.current);
       }
@@ -251,7 +256,7 @@ export function BacktestWorkspace() {
     setLoadError("");
     setStatusMessage("正在提交回测任务…");
     try {
-      const initialRun = await createStrategyBacktest({
+      const receipt = await createStrategyBacktest({
         strategyVersionId: values.strategyVersionId,
         targetUniverse: values.targetUniverse,
         period: values.period,
@@ -260,9 +265,28 @@ export function BacktestWorkspace() {
         endDate: values.endDate,
       });
 
-      setRuns((prev) => [initialRun, ...prev.filter((r) => r.id !== initialRun.id)]);
-      setActiveRun(initialRun);
-      pollRunUntilComplete(initialRun.id);
+      const runId = receipt?.runId;
+      if (!runId) {
+        throw new Error("后端未返回有效的回测任务 runId");
+      }
+
+      const placeholderRun: StrategyBacktestRun = {
+        id: runId,
+        strategyDefinitionId: selectedStrategyId || 0,
+        strategyVersionId: values.strategyVersionId,
+        targetUniverse: values.targetUniverse,
+        period: values.period,
+        source: values.source,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        status: "pending",
+        signalCount: 0,
+        matchedSecurityCount: 0,
+      };
+
+      setRuns((prev) => [placeholderRun, ...prev.filter((r) => r.id !== runId)]);
+      setActiveRun(placeholderRun);
+      pollRunUntilComplete(runId);
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : String(err));
       setStatusMessage("");

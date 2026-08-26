@@ -8,6 +8,7 @@ import {
   disableStrategyDefinition,
   enableStrategyDefinition,
   fetchStrategyAlertEvents,
+  fetchStrategyBacktestRun,
   fetchStrategyBacktestSignals,
   fetchStrategySignals,
   listStrategies,
@@ -22,6 +23,7 @@ jest.mock("@/app/api/client", () => ({
   disableStrategyDefinition: jest.fn(),
   enableStrategyDefinition: jest.fn(),
   fetchStrategyAlertEvents: jest.fn(),
+  fetchStrategyBacktestRun: jest.fn(),
   fetchStrategyBacktestSignals: jest.fn(),
   fetchStrategySignals: jest.fn(),
   listStrategies: jest.fn(),
@@ -37,6 +39,7 @@ const mockedFetchStrategySignals = fetchStrategySignals as jest.Mock;
 const mockedFetchStrategyAlertEvents = fetchStrategyAlertEvents as jest.Mock;
 const mockedAcknowledgeStrategyAlertEvent = acknowledgeStrategyAlertEvent as jest.Mock;
 const mockedCreateStrategyBacktest = createStrategyBacktest as jest.Mock;
+const mockedFetchStrategyBacktestRun = fetchStrategyBacktestRun as jest.Mock;
 const mockedFetchStrategyBacktestSignals = fetchStrategyBacktestSignals as jest.Mock;
 
 const strategy = {
@@ -118,7 +121,11 @@ function setupMocks() {
   mockedCreateStrategyDefinition.mockResolvedValue(strategy);
   mockedEnableStrategyDefinition.mockResolvedValue({ ...strategy, status: "enabled" });
   mockedDisableStrategyDefinition.mockResolvedValue({ ...strategy, status: "disabled" });
-  mockedCreateStrategyBacktest.mockResolvedValue(backtestRun);
+  mockedCreateStrategyBacktest.mockResolvedValue({
+    runId: 11,
+    initialStatus: "PENDING",
+  });
+  mockedFetchStrategyBacktestRun.mockResolvedValue(backtestRun);
   mockedFetchStrategyBacktestSignals.mockResolvedValue([backtestSignal]);
 }
 

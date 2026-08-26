@@ -8,6 +8,7 @@ import {
   disableStrategyDefinition,
   enableStrategyDefinition,
   fetchStrategyAlertEvents,
+  fetchStrategyBacktestRun,
   fetchStrategyBacktestSignals,
   fetchStrategySignals,
   listStrategies,
@@ -226,7 +227,7 @@ export default function StrategiesWorkspace() {
   const runBacktest = async () => {
     setIsActionRunning(true);
     try {
-      const run = await createStrategyBacktest({
+      const receipt = await createStrategyBacktest({
         strategyVersionId: Number(backtestVersionId),
         targetUniverse: parseCsv(backtestUniverse),
         period: Number(backtestPeriod),
@@ -234,8 +235,9 @@ export default function StrategiesWorkspace() {
         startDate: backtestStartDate,
         endDate: backtestEndDate,
       });
+      const run = await fetchStrategyBacktestRun(receipt.runId);
       setBacktestRun(run);
-      setBacktestSignals(await fetchStrategyBacktestSignals(run.id));
+      setBacktestSignals(await fetchStrategyBacktestSignals(receipt.runId));
     } finally {
       setIsActionRunning(false);
     }

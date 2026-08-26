@@ -150,7 +150,10 @@ describe("BacktestWorkspace", () => {
     jest.resetAllMocks();
     (listStrategies as jest.Mock).mockResolvedValue([mockStrategy]);
     (listStrategyVersions as jest.Mock).mockResolvedValue([mockVersion]);
-    (createStrategyBacktest as jest.Mock).mockResolvedValue(mockBacktestRunPending);
+    (createStrategyBacktest as jest.Mock).mockResolvedValue({
+      runId: 88,
+      initialStatus: "PENDING",
+    });
     (fetchStrategyBacktestRun as jest.Mock)
       .mockResolvedValueOnce(mockBacktestRunPending)
       .mockResolvedValue(mockBacktestRunCompleted);
