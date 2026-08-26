@@ -144,6 +144,16 @@ export interface StrategyBacktestRequest {
   endDate: string;
 }
 
+export interface BacktestRunReceipt {
+  runId: number;
+  initialStatus: "PENDING" | string;
+}
+
+export interface BacktestSignalPageVo {
+  items: StrategyBacktestSignalResult[];
+  nextCursor?: string | null;
+}
+
 export interface StrategyBacktestRun {
   id: number;
   strategyDefinitionId: number;
@@ -798,7 +808,7 @@ export const acknowledgeStrategyAlertEvent = (id: number) =>
   );
 
 export const createStrategyBacktest = (payload: StrategyBacktestRequest) =>
-  requestJson<StrategyBacktestRun>(
+  requestJson<BacktestRunReceipt>(
     getMistApiBase(),
     "/v1/strategy-backtests",
     {
@@ -814,12 +824,22 @@ export const fetchStrategyBacktestRun = (runId: number) =>
     { method: "GET" }
   );
 
-export const fetchStrategyBacktestSignals = (runId: number) =>
-  requestJson<StrategyBacktestSignalResult[]>(
-    getMistApiBase(),
-    `/v1/strategy-backtests/${runId}/signals`,
-    { method: "GET" }
-  );
+export const fetchStrategyBacktestSignals = async (
+  runId: number
+): Promise<StrategyBacktestSignalResult[]> => {
+  const result = await requestJson<
+    BacktestSignalPageVo | StrategyBacktestSignalResult[]
+  >(getMistApiBase(), `/v1/strategy-backtests/${runId}/signals`, {
+    method: "GET",
+  });
+  if (Array.isArray(result)) {
+    return result;
+  }
+  if (result && Array.isArray(result.items)) {
+    return result.items;
+  }
+  return [];
+};
 
 export const fetchK = (query: KLineQuery) =>
   requestJson<IFetchK[]>(getAnalysisApiBase(), "/v1/indicators/k", {
