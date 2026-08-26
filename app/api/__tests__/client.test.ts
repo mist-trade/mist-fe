@@ -11,6 +11,8 @@ import {
   enableStrategyDefinition,
   fetchBi,
   fetchChannel,
+  fetchDuan,
+  fetchDuanChannel,
   fetchFenxing,
   fetchK,
   fetchMergeK,
@@ -825,6 +827,70 @@ describe("Mist frontend API client", () => {
       "channel response must be an array or contain phaseA and phaseB arrays"
     );
   });
+
+  it("fetches Duan and DuanChannel overlays with the selected query shape", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(successEnvelope([]));
+
+    const query = {
+      code: "600519",
+      source: "tdx" as const,
+      period: 1440,
+      startDate: "2026-01-01",
+      endDate: "2026-06-30",
+    };
+
+    await fetchDuan(query);
+    await fetchDuanChannel(query);
+
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      1,
+      "/api/chan/v1/chan/duan",
+      expect.objectContaining({ method: "POST", body: JSON.stringify(query) })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      2,
+      "/api/chan/v1/chan/duan-channel",
+      expect.objectContaining({ method: "POST", body: JSON.stringify(query) })
+    );
+  });
+
+  it("normalizes an array duan-channel envelope into both phases", async () => {
+    const array = [{ startId: 1, endId: 5 }];
+    (global.fetch as jest.Mock).mockResolvedValue(successEnvelope(array));
+
+    await expect(
+      fetchDuanChannel({
+        code: "600519",
+        source: "tdx",
+        period: 1440,
+        startDate: "2026-01-01",
+        endDate: "2026-06-30",
+      })
+    ).resolves.toEqual({ phaseA: array, phaseB: array });
+  });
+
+  it("preserves canonical duan-channel phases and rejects partial objects", async () => {
+    const query = {
+      code: "600519",
+      source: "tdx" as const,
+      period: 1440,
+      startDate: "2026-01-01",
+      endDate: "2026-06-30",
+    };
+    const canonical = {
+      phaseA: [{ startId: 1 }],
+      phaseB: [{ startId: 2 }],
+    };
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(successEnvelope(canonical))
+      .mockResolvedValueOnce(successEnvelope({ phaseA: [] }));
+
+    await expect(fetchDuanChannel(query)).resolves.toEqual(canonical);
+    await expect(fetchDuanChannel(query)).rejects.toThrow(
+      "duan-channel response must be an array or contain phaseA and phaseB arrays"
+    );
+  });
+
 
   it("calls strategy registry endpoints through the Mist v1 gateway path", async () => {
     (global.fetch as jest.Mock).mockResolvedValue(successEnvelope([]));

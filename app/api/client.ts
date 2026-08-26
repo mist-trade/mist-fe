@@ -2,6 +2,8 @@ import type {
   IFenxing,
   IFetchBiPhases,
   IFetchChannelPhases,
+  IFetchDuan,
+  IFetchDuanChannelPhases,
   IFetchK,
   IMergeK,
 } from "./types";
@@ -892,3 +894,42 @@ export const fetchChannel = async (query: KLineQuery) =>
       }
     )
   );
+
+export const fetchDuan = (query: KLineQuery) =>
+  requestJson<IFetchDuan[]>(getAnalysisApiBase(), "/v1/chan/duan", {
+    method: "POST",
+    body: JSON.stringify(query),
+  });
+
+export function normalizeDuanChannelPhases(
+  value: unknown
+): IFetchDuanChannelPhases {
+  if (Array.isArray(value)) {
+    return { phaseA: value, phaseB: value } as IFetchDuanChannelPhases;
+  }
+  if (
+    value &&
+    typeof value === "object" &&
+    Array.isArray((value as { phaseA?: unknown }).phaseA) &&
+    Array.isArray((value as { phaseB?: unknown }).phaseB)
+  ) {
+    const { phaseA, phaseB } = value as IFetchDuanChannelPhases;
+    return { phaseA, phaseB };
+  }
+  throw new Error(
+    "duan-channel response must be an array or contain phaseA and phaseB arrays"
+  );
+}
+
+export const fetchDuanChannel = async (query: KLineQuery) =>
+  normalizeDuanChannelPhases(
+    await requestJson<unknown>(
+      getAnalysisApiBase(),
+      "/v1/chan/duan-channel",
+      {
+        method: "POST",
+        body: JSON.stringify(query),
+      }
+    )
+  );
+
