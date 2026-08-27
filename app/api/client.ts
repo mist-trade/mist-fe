@@ -807,16 +807,27 @@ export const acknowledgeStrategyAlertEvent = (id: number) =>
     { method: "POST" }
   );
 
-export const listStrategyBacktestRuns = () =>
-  requestJson<StrategyBacktestRun[]>(
+export interface ListStrategyBacktestRunsQuery {
+  strategyDefinitionId?: number;
+  limit?: number;
+}
+
+export const listStrategyBacktestRuns = (query?: ListStrategyBacktestRunsQuery) => {
+  const params: Record<string, string> = {};
+  if (query?.strategyDefinitionId) params.strategyDefinitionId = String(query.strategyDefinitionId);
+  if (query?.limit) params.limit = String(query.limit);
+  const search = new URLSearchParams(params).toString();
+  return requestJson<StrategyBacktestRun[]>(
     getMistApiBase(),
-    "/v1/strategy-backtests",
+    `/v1/strategy-backtests${search ? `?${search}` : ""}`,
     { method: "GET" }
   );
+};
 
 export const fetchStrategyBacktestRuns = listStrategyBacktestRuns;
 export const fetchStrategyDefinitions = listStrategies;
 export const fetchStrategyVersions = listStrategyVersions;
+
 
 export const createStrategyBacktest = (payload: StrategyBacktestRequest) =>
   requestJson<BacktestRunReceipt>(
@@ -1029,6 +1040,3 @@ export const fetchVisualCommands = (query: VisualCommandQuery) => {
     { method: "GET" }
   );
 };
-
-
-
