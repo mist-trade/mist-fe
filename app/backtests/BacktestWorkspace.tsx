@@ -1,45 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import {
+  listStrategies,
+  listStrategyVersions,
+  fetchStrategyBacktestRun,
+  listStrategyBacktestRuns,
+  fetchStrategyBacktestSignals,
   createStrategyBacktest,
   fetchK,
   fetchVisualCommands,
-  fetchStrategyBacktestRun,
-  fetchStrategyBacktestSignals,
-  listStrategies,
-  listStrategyVersions,
-  type DataSourceValue,
-  type StrategyBacktestRun,
-  type StrategyBacktestSignalResult,
   type StrategyDefinition,
   type StrategyVersion,
+  type StrategyBacktestRun,
+  type StrategyBacktestSignalResult,
   type VisualCommandVo,
 } from "@/app/api/client";
 import type { IFetchK } from "@/app/api/types";
-import {
-  BacktestConfigPanel,
-  type BacktestConfigValues,
-} from "./components/BacktestConfigPanel";
+import { BacktestConfigPanel, type BacktestConfigValues } from "./components/BacktestConfigPanel";
 import { BacktestRunHistory } from "./components/BacktestRunHistory";
 import { BacktestSignalTable } from "./components/BacktestSignalTable";
 import { ChanDiagnosisDrawer } from "./components/ChanDiagnosisDrawer";
 
-// 懒加载 TradingViewChart，防止在服务端渲染 SSR
+// 动态载入 TradingView Canvas 渲染容器（禁用 SSR 避免 Canvas node 错误）
 const TradingViewChart = dynamic(
   () => import("@/app/components/tv-chart/TradingViewChart"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[520px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
-        加载 TradingView 回测图表...
-      </div>
-    ),
-  }
+  { ssr: false, loading: () => <div className="kline-chart-loading">图表引擎加载中…</div> }
 );
 
-interface BacktestChartState {
+interface ChartWorkspaceState {
+  symbol: string;
   k: IFetchK[];
   commands: VisualCommandVo[];
 }
@@ -50,206 +41,230 @@ export function BacktestWorkspace() {
   const [versions, setVersions] = useState<StrategyVersion[]>([]);
   const [runs, setRuns] = useState<StrategyBacktestRun[]>([]);
   const [activeRun, setActiveRun] = useState<StrategyBacktestRun | null>(null);
-  const [signals, setSignals] = useState<StrategyBacktestSignalResult[]>([]);
-  const [selectedSignal, setSelectedSignal] =
-    useState<StrategyBacktestSignalResult | null>(null);
+
   const [selectedSymbol, setSelectedSymbol] = useState<string>("");
+  const [signals, setSignals] = useState<StrategyBacktestSignalResult[]>([]);
+  const [selectedSignal, setSelectedSignal] = useState<StrategyBacktestSignalResult | null>(null);
+  const [showVolume, setShowVolume] = useState(true);
 
+  const [chart, setChart] = useState<ChartWorkspaceState | null>(null);
   const [isRunning, setIsRunning] = useState(false);
-  const [chart, setChart] = useState<BacktestChartState | null>(null);
-
-  const [loadError, setLoadError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  const [loadError, setLoadError] = useState("");
 
-  const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // 初始化拉取策略列表
+  // 1. 初始化拉取策略列表、版本与历史回测记录
   useEffect(() => {
-    let active = true;
-    listStrategies()
-      .then((defs) => {
-        if (!active) return;
-        setStrategies(defs);
-        if (defs.length > 0) {
-          setSelectedStrategyId(defs[0].id);
-        }
-      })
-      .catch((err) => {
-        if (!active) return;
-        setLoadError(err instanceof Error ? err.message : String(err));
-      });
+    let cancelled = false;
 
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  // 策略变更后加载版本列表
-  useEffect(() => {
-    if (!selectedStrategyId) {
-      setVersions([]);
-      return;
-    }
-    let active = true;
-    listStrategyVersions(selectedStrategyId)
-      .then((vers) => {
-        if (!active) return;
-        setVersions(vers);
-      })
-      .catch((err) => {
-        if (!active) return;
-        setLoadError(err instanceof Error ? err.message : String(err));
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [selectedStrategyId]);
-
-  // 加载回测图表数据（K 线 + 视觉指令 + 回测信号）
-  const loadChartForRun = useCallback(
-    async (
-      run: StrategyBacktestRun,
-      targetCode: string,
-      signalResults: StrategyBacktestSignalResult[]
-    ) => {
-      setLoadError("");
-      setChart(null);
-      setStatusMessage("正在加载 K 线与全图层缠论结构…");
+    async function initWorkspace() {
       try {
-        const query = {
-          code: targetCode,
-          source: run.source as DataSourceValue,
-          period: run.period,
-          startDate: run.startDate.split("T")[0],
-          endDate: run.endDate.split("T")[0],
-        };
+        const stratPromise = typeof listStrategies === "function" ? listStrategies().catch(() => []) : Promise.resolve([]);
+        const runPromise = typeof listStrategyBacktestRuns === "function" ? listStrategyBacktestRuns().catch(() => []) : Promise.resolve([]);
 
-        const [k, visualRes] = await Promise.all([
-          fetchK(query),
-          fetchVisualCommands({
-            code: targetCode,
-            period: run.period,
-            source: run.source as DataSourceValue,
-            startDate: query.startDate,
-            endDate: query.endDate,
-          }),
+        const [stratResult, runResult] = await Promise.all([
+          stratPromise,
+          runPromise,
         ]);
 
-        if (k.length === 0) {
-          setStatusMessage("该时间段无可用 K 线数据");
-          return;
+        if (cancelled) return;
+        const strats = Array.isArray(stratResult) ? stratResult : [];
+        const runList = Array.isArray(runResult) ? runResult : [];
+
+        setStrategies(strats);
+        setRuns(runList);
+
+        if (strats.length > 0) {
+          const firstStratId = strats[0].id;
+          setSelectedStrategyId(firstStratId);
+          if (typeof listStrategyVersions === "function") {
+            const versResult = await listStrategyVersions(firstStratId).catch(() => []);
+            if (!cancelled) {
+              setVersions(Array.isArray(versResult) ? versResult : []);
+            }
+          }
         }
 
-        // 过滤属于当前标的的信号并转换为 VisualCommand
-        const signalCommands: VisualCommandVo[] = signalResults
-          .filter((s) => s.securityCode === targetCode)
-          .map((s) => {
-            const rawType = String(s.contextSnapshot?.type || "");
-            const isSell =
-              rawType.includes("sell") ||
-              rawType.includes("exit") ||
-              rawType.includes("卖");
-            return {
-              id: `backtest_sig_${s.id}`,
-              type: "text" as const,
-              layer: "chan_bsp",
-              time: s.signalTime,
-              price: (s.contextSnapshot?.price as number | undefined) ?? undefined,
-              text: isSell ? "卖" : "买",
-              position: isSell ? ("above" as const) : ("below" as const),
-              color: isSell ? "#22C55E" : "#EF4444",
-            };
-          });
 
-        const mergedCommands = [...visualRes.commands, ...signalCommands];
-
-        setChart({
-          k,
-          commands: mergedCommands,
-        });
-
-        setStatusMessage(
-          `已加载 ${targetCode} 的 ${k.length} 根 K 线，共触发 ${signalCommands.length} 个买卖点`
-        );
-      } catch (err) {
-        setLoadError(err instanceof Error ? err.message : String(err));
-        setStatusMessage("");
-      }
-    },
-    []
-  );
-
-  // 轮询回测任务直至完成
-  const pollRunUntilComplete = useCallback(
-    (runId: number) => {
-      if (!runId || isNaN(runId)) {
-        console.error("Invalid runId provided to pollRunUntilComplete:", runId);
-        return;
-      }
-
-      if (pollingTimerRef.current) {
-        clearInterval(pollingTimerRef.current);
-      }
-
-      setIsRunning(true);
-      setStatusMessage(`回测任务 #${runId} 正在排队执行…`);
-
-      const check = async () => {
-        try {
-          const run = await fetchStrategyBacktestRun(runId);
-          setActiveRun(run);
-
-          // 更新 runs 列表中该项
-          setRuns((prev) =>
-            prev.map((item) => (item.id === run.id ? run : item))
-          );
-
-          if (run.status === "completed") {
-            if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
-            setIsRunning(false);
-
-            const fetchedSignals = await fetchStrategyBacktestSignals(run.id);
-            setSignals(fetchedSignals);
-
-            const firstSymbol = run.targetUniverse[0] || "";
+        if (runList.length > 0) {
+          const firstCompleted = runList.find((r: StrategyBacktestRun) => r.status === "completed") || runList[0];
+          setActiveRun(firstCompleted);
+          if (firstCompleted.status === "completed") {
+            const firstSymbol = firstCompleted.targetUniverse?.[0] || "";
             setSelectedSymbol(firstSymbol);
-
-            if (firstSymbol) {
-              await loadChartForRun(run, firstSymbol, fetchedSignals);
-            }
-          } else if (run.status === "failed") {
-            if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
-            setIsRunning(false);
-            setLoadError(`回测任务失败: ${run.errorMessage || "未知异常"}`);
-            setStatusMessage("");
+            void loadRunSignalsAndChart(firstCompleted, firstSymbol);
           }
-        } catch (err) {
-          if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
-          setIsRunning(false);
+        }
+      } catch (err) {
+        if (!cancelled) {
           setLoadError(err instanceof Error ? err.message : String(err));
         }
-      };
+      }
+    }
 
-      const intervalMs = process.env.NODE_ENV === "test" ? 30 : 300;
-      pollingTimerRef.current = setInterval(check, intervalMs);
-      void check();
-    },
-    [loadChartForRun]
-  );
-
-  // 清除轮询定时器
-  useEffect(() => {
+    void initWorkspace();
     return () => {
-      if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
+      cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 提交并发起回测
+
+  // 2. 当用户主动切换策略时，加载对应版本
+  const handleSelectStrategyId = async (id: number) => {
+    setSelectedStrategyId(id);
+    try {
+      const versResult = await listStrategyVersions(id).catch(() => []);
+      setVersions(Array.isArray(versResult) ? versResult : []);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  // 3. 加载回测记录的信号和图表
+  const loadRunSignalsAndChart = async (
+    run: StrategyBacktestRun,
+    symbol: string
+  ) => {
+    try {
+      setStatusMessage("加载回测买卖点信号与 K 线图表…");
+      const fetchedSignals = await fetchStrategyBacktestSignals(run.id).catch(() => []);
+      const sigList = Array.isArray(fetchedSignals) ? fetchedSignals : [];
+      setSignals(sigList);
+
+      if (symbol) {
+        await loadChartForRun(run, symbol, sigList);
+      }
+      setStatusMessage("");
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : String(err));
+      setStatusMessage("");
+    }
+  };
+
+  // 4. 为指定标的拉取 K 线与图层视觉指令
+  const loadChartForRun = async (
+    run: StrategyBacktestRun,
+    symbol: string,
+    runSignals: StrategyBacktestSignalResult[]
+  ) => {
+    try {
+      const symbolSignals = runSignals.filter((s) => s.securityCode === symbol);
+
+      // 并发拉取 K 线数据与缠论视觉指令
+      const [kLines, visualPayload] = await Promise.all([
+        fetchK({
+          code: symbol,
+          period: run.period,
+          source: run.source,
+          startDate: run.startDate.substring(0, 10),
+          endDate: run.endDate.substring(0, 10),
+        }),
+        fetchVisualCommands({
+          code: symbol,
+          period: run.period,
+          source: run.source,
+          startDate: run.startDate.substring(0, 10),
+          endDate: run.endDate.substring(0, 10),
+        }).catch(() => ({ totalKlines: 0, commands: [] })),
+      ]);
+
+      // 将回测信号转化为视觉 Marker 指令
+      const signalCommands: VisualCommandVo[] = symbolSignals.map((sig) => {
+        const ctx = (sig.contextSnapshot || {}) as Record<string, unknown>;
+        const rawType = String(ctx.type || ctx.signalKind || "signal");
+        const isSell = rawType.includes("sell") || rawType === "exit";
+
+        let label = "买点";
+        if (rawType === "first_buy") label = "1买";
+        else if (rawType === "first_sell") label = "1卖";
+        else if (rawType === "second_buy") label = "2买";
+        else if (rawType === "second_sell") label = "2卖";
+        else if (rawType === "third_buy") label = "3买";
+        else if (rawType === "third_sell") label = "3卖";
+
+        return {
+          id: `backtest_sig_${sig.id}`,
+          type: "text",
+          layer: "backtest_signals",
+          time: sig.signalTime,
+          text: label,
+          position: isSell ? "above" : "below",
+          color: isSell ? "#22C55E" : "#EF4444",
+        };
+      });
+
+      const mergedCommands = [...(visualPayload.commands || []), ...signalCommands];
+
+      setChart({
+        symbol,
+        k: kLines,
+        commands: mergedCommands,
+      });
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  // 轮询回测执行状态
+  const pollRunUntilComplete = (runId: number) => {
+    setIsRunning(true);
+    setStatusMessage(`回测任务 #${runId} 执行计算中…`);
+
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+
+    const checkOnce = async () => {
+      try {
+        const current = await fetchStrategyBacktestRun(runId);
+        if (current) {
+          setActiveRun(current);
+          setRuns((prev) => {
+            const index = prev.findIndex((r) => r.id === runId);
+            if (index >= 0) {
+              const copy = [...prev];
+              copy[index] = current;
+              return copy;
+            }
+            return [current, ...prev];
+          });
+
+          if (current.status === "completed") {
+            if (timer) clearInterval(timer);
+            setIsRunning(false);
+            setStatusMessage(`回测任务 #${runId} 计算完成！`);
+            const firstSym = current.targetUniverse?.[0] || "";
+            setSelectedSymbol(firstSym);
+            await loadRunSignalsAndChart(current, firstSym);
+            setTimeout(() => setStatusMessage(""), 3000);
+            return;
+          } else if (current.status === "failed") {
+            if (timer) clearInterval(timer);
+            setIsRunning(false);
+            setLoadError(`回测任务 #${runId} 计算失败: ${current.errorMessage || "未知错误"}`);
+            setStatusMessage("");
+            return;
+          }
+        }
+      } catch (err) {
+        if (timer) clearInterval(timer);
+        setIsRunning(false);
+        setLoadError(err instanceof Error ? err.message : String(err));
+      }
+    };
+
+    void checkOnce();
+    timer = setInterval(() => {
+      void checkOnce();
+    }, 500);
+  };
+
+
+
+  // 提交并发起新的回测任务
   const handleStartBacktest = async (values: BacktestConfigValues) => {
     setLoadError("");
-    setStatusMessage("正在提交回测任务…");
     try {
+      setStatusMessage("正在提交回测计算任务…");
       const receipt = await createStrategyBacktest({
         strategyVersionId: values.strategyVersionId,
         targetUniverse: values.targetUniverse,
@@ -279,7 +294,6 @@ export function BacktestWorkspace() {
         createdAt: new Date().toISOString(),
       };
 
-
       setRuns((prev) => [placeholderRun, ...prev]);
       setActiveRun(placeholderRun);
       pollRunUntilComplete(runId);
@@ -293,16 +307,16 @@ export function BacktestWorkspace() {
   const handleSelectRun = async (run: StrategyBacktestRun) => {
     setActiveRun(run);
     setSelectedSignal(null);
-    setLoadError("");
 
     if (run.status === "completed") {
       try {
         const fetchedSignals = await fetchStrategyBacktestSignals(run.id);
-        setSignals(fetchedSignals);
-        const firstSymbol = run.targetUniverse[0] || "";
+        const sigList = Array.isArray(fetchedSignals) ? fetchedSignals : [];
+        setSignals(sigList);
+        const firstSymbol = run.targetUniverse?.[0] || "";
         setSelectedSymbol(firstSymbol);
         if (firstSymbol) {
-          await loadChartForRun(run, firstSymbol, fetchedSignals);
+          await loadChartForRun(run, firstSymbol, sigList);
         }
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : String(err));
@@ -320,7 +334,7 @@ export function BacktestWorkspace() {
     }
   };
 
-  // 信号点击聚焦与打开诊断抽屉
+  // 信号点击聚焦并打开诊断抽屉
   const handleSelectSignal = (sig: StrategyBacktestSignalResult) => {
     setSelectedSignal(sig);
     if (sig.securityCode !== selectedSymbol && activeRun) {
@@ -328,14 +342,19 @@ export function BacktestWorkspace() {
     }
   };
 
+  const symbolSignalCounts = (signals || []).reduce<Record<string, number>>((acc, s) => {
+    acc[s.securityCode] = (acc[s.securityCode] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
-    <main className="backtest-workspace-page">
+    <main className="backtest-page">
       {/* 顶部标题区与主导航 */}
       <header className="kline-header">
         <div>
           <h1>回测工作台</h1>
           <p>
-            配置多标的与历史区间，执行缠论与策略回测，全图层可视化复盘买卖点。
+            基于 TradingView 硬件加速画布，执行多标的与历史区间策略回测，全图层毫秒级复盘缠论与买卖点。
           </p>
         </div>
         <nav className="strategy-nav" aria-label="主导航">
@@ -357,13 +376,13 @@ export function BacktestWorkspace() {
       )}
 
       {/* 主工作区双栏布局 */}
-      <section className="backtest-main-grid">
+      <section className="backtest-shell">
         {/* 左侧：回测配置表单 + 历史记录 */}
-        <aside className="backtest-sidebar">
+        <aside className="backtest-sidebar-col">
           <BacktestConfigPanel
             strategies={strategies}
             selectedStrategyId={selectedStrategyId}
-            onSelectStrategyId={setSelectedStrategyId}
+            onSelectStrategyId={handleSelectStrategyId}
             versions={versions}
             onSubmit={handleStartBacktest}
             isRunning={isRunning}
@@ -375,30 +394,61 @@ export function BacktestWorkspace() {
           />
         </aside>
 
-        {/* 右侧：标的切换 Tabs + K 线图表 + 信号明细表格 */}
-        <section className="backtest-content-area">
+        {/* 右侧：指标参数条 + 标的切换 Tabs + K 线图表 + 信号明细表格 */}
+        <section className="backtest-main-col">
+          {activeRun && (
+            <div className="backtest-metrics-bar">
+              <div className="metrics-bar-left">
+                <strong>#{activeRun.id} 回测复盘</strong>
+                <span className="info-pill">{selectedSymbol || activeRun.targetUniverse?.[0]}</span>
+                <span className="info-pill">{activeRun.period} 分钟</span>
+                <span className="info-pill">{activeRun.source.toUpperCase()}</span>
+                <span className="info-pill tnum">
+                  {activeRun.startDate.substring(0, 10)} ~ {activeRun.endDate.substring(0, 10)}
+                </span>
+                <span className="signal-count-badge">
+                  🎯 命中信号: {signals.length} 个
+                </span>
+              </div>
+
+              <div className="subchart-toggle">
+                <button
+                  type="button"
+                  className={showVolume ? "active" : ""}
+                  onClick={() => setShowVolume(!showVolume)}
+                >
+                  {showVolume ? "📊 成交量 (显示中)" : "📊 成交量 (已隐藏)"}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 多标的快速切换 Tabs */}
           {activeRun && activeRun.targetUniverse?.length > 1 ? (
             <div className="symbol-tabs-bar" role="tablist">
-              {activeRun.targetUniverse.map((symbol) => (
-                <button
-                  key={symbol}
-                  type="button"
-                  role="tab"
-                  aria-selected={selectedSymbol === symbol}
-                  className={`symbol-tab ${
-                    selectedSymbol === symbol ? "active" : ""
-                  }`}
-                  onClick={() => void handleSelectSymbol(symbol)}
-                >
-                  {symbol}
-                </button>
-              ))}
+              {activeRun.targetUniverse.map((symbol) => {
+                const count = symbolSignalCounts[symbol] || 0;
+                return (
+                  <button
+                    key={symbol}
+                    type="button"
+                    role="tab"
+                    aria-selected={selectedSymbol === symbol}
+                    className={`symbol-tab ${
+                      selectedSymbol === symbol ? "active" : ""
+                    }`}
+                    onClick={() => void handleSelectSymbol(symbol)}
+                  >
+                    <span>{symbol}</span>
+                    {count > 0 && <span className="tab-count-badge">{count}</span>}
+                  </button>
+                );
+              })}
             </div>
           ) : null}
 
           {/* 图表展示区 */}
-          <div className="kline-chart-area backtest-chart-box">
+          <div className="backtest-chart-box">
             {!chart ? (
               <div className="empty-state">
                 {isRunning
@@ -410,6 +460,8 @@ export function BacktestWorkspace() {
                 k={chart.k}
                 commands={chart.commands}
                 height={520}
+                subChartType={showVolume ? "volume" : "none"}
+                focusedSignalTime={selectedSignal?.signalTime ?? null}
               />
             )}
           </div>
@@ -433,6 +485,5 @@ export function BacktestWorkspace() {
     </main>
   );
 }
-
 
 export default BacktestWorkspace;

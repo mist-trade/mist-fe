@@ -149,12 +149,13 @@ describe("BacktestWorkspace", () => {
 
     // Wait for completed poll and chart load
     expect(await screen.findByTestId("mock-tv-chart")).toBeInTheDocument();
-    expect(screen.getByText(/已加载 000001 的 1 根 K 线/)).toBeInTheDocument();
+    expect(screen.getByText(/Mock TradingViewChart loaded with 1 bars/)).toBeInTheDocument();
 
     // Verify signal table row
     expect(screen.getByText("1卖")).toBeInTheDocument();
     expect(screen.getByText("3850.50")).toBeInTheDocument();
   });
+
 
   it("opens ChanDiagnosisDrawer when clicking a signal in table", async () => {
     render(<BacktestWorkspace />);

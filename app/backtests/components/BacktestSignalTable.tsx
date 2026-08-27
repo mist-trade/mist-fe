@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import type { StrategyBacktestSignalResult } from "@/app/api/client";
 
 interface BacktestSignalTableProps {
@@ -35,6 +36,7 @@ function parseSignalInfo(sig: StrategyBacktestSignalResult) {
   const price = typeof ctx.price === "number" ? ctx.price : Number(ctx.price ?? 0);
 
   return {
+    rawType,
     label: parsed.label,
     isBuy: parsed.isBuy,
     price: price > 0 ? price.toFixed(2) : "-",
@@ -46,6 +48,33 @@ export function BacktestSignalTable({
   selectedSignalId,
   onSelectSignal,
 }: BacktestSignalTableProps) {
+  const [filterType, setFilterType] = useState<"all" | "buy" | "sell" | "1bsp" | "2bsp" | "3bsp">("all");
+  const [keyword, setKeyword] = useState("");
+
+  const parsedSignals = useMemo(() => {
+    return signals.map((rawSignal) => ({
+      rawSignal,
+      parsed: parseSignalInfo(rawSignal),
+    }));
+  }, [signals]);
+
+  const filteredSignals = useMemo(() => {
+    return parsedSignals.filter(({ rawSignal, parsed }) => {
+      if (keyword.trim() && !rawSignal.securityCode.includes(keyword.trim())) {
+        return false;
+      }
+      if (filterType === "buy" && !parsed.isBuy) return false;
+      if (filterType === "sell" && parsed.isBuy) return false;
+      if (filterType === "1bsp" && !parsed.label.includes("1")) return false;
+      if (filterType === "2bsp" && !parsed.label.includes("2")) return false;
+      if (filterType === "3bsp" && !parsed.label.includes("3")) return false;
+      return true;
+    });
+  }, [parsedSignals, filterType, keyword]);
+
+  const buyCount = useMemo(() => parsedSignals.filter((s) => s.parsed.isBuy).length, [parsedSignals]);
+  const sellCount = parsedSignals.length - buyCount;
+
   if (signals.length === 0) {
     return (
       <div className="backtest-signal-empty">
@@ -56,64 +85,127 @@ export function BacktestSignalTable({
 
   return (
     <div className="backtest-signal-table-wrap">
-      <div className="strategy-section-title">
-        <h2>命中信号列表</h2>
-        <span>共 {signals.length} 条信号（点击某行可在图表中居中聚焦并查看中枢诊断）</span>
+      <div className="strategy-section-title" style={{ flexWrap: "wrap", gap: "8px" }}>
+        <div>
+          <h2>命中信号列表</h2>
+          <span className="strategy-muted">
+            共 {signals.length} 条信号（买点 {buyCount} / 卖点 {sellCount}）· 点击信号可在图表自动定位并查看缠论中枢几何
+          </span>
+        </div>
+
+        {/* 筛选过滤工具条 */}
+        <div className="signal-filter-bar">
+          <input
+            className="signal-search-input"
+            placeholder="筛选标的…"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+          <div className="filter-pill-group">
+            <button
+              type="button"
+              className={`filter-pill ${filterType === "all" ? "active" : ""}`}
+              onClick={() => setFilterType("all")}
+            >
+              全部 ({signals.length})
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${filterType === "buy" ? "active" : ""}`}
+              onClick={() => setFilterType("buy")}
+            >
+              🟢 买点 ({buyCount})
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${filterType === "sell" ? "active" : ""}`}
+              onClick={() => setFilterType("sell")}
+            >
+              🔴 卖点 ({sellCount})
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${filterType === "1bsp" ? "active" : ""}`}
+              onClick={() => setFilterType("1bsp")}
+            >
+              1买/1卖
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${filterType === "2bsp" ? "active" : ""}`}
+              onClick={() => setFilterType("2bsp")}
+            >
+              2买/2卖
+            </button>
+            <button
+              type="button"
+              className={`filter-pill ${filterType === "3bsp" ? "active" : ""}`}
+              onClick={() => setFilterType("3bsp")}
+            >
+              3买/3卖
+            </button>
+          </div>
+        </div>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>标的代码</th>
-            <th>信号类型</th>
-            <th>触发价格</th>
-            <th>信号时间</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {signals.map((sig, idx) => {
-            const isSelected = sig.id === selectedSignalId;
-            const { label, isBuy, price } = parseSignalInfo(sig);
+      <div className="table-responsive-container">
+        <table>
+          <thead>
+            <tr>
+              <th style={{ width: "45px" }}>#</th>
+              <th>标的代码</th>
+              <th>信号类型</th>
+              <th>触发价格</th>
+              <th>信号时间</th>
+              <th style={{ width: "100px" }}>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredSignals.map(({ rawSignal, parsed }, idx) => {
+              const isSelected = rawSignal.id === selectedSignalId;
+              const { label, isBuy, price } = parsed;
 
-            return (
-              <tr
-                key={sig.id}
-                className={isSelected ? "selected-row" : ""}
-                onClick={() => onSelectSignal(sig)}
-                style={{ cursor: "pointer" }}
-              >
-                <td className="tnum">{idx + 1}</td>
-                <td>
-                  <strong>{sig.securityCode}</strong>
-                </td>
-                <td>
-                  <span
-                    className={`bsp-tag ${isBuy ? "bsp-buy" : "bsp-sell"}`}
-                  >
-                    {label}
-                  </span>
-                </td>
-                <td className="tnum">{price}</td>
-                <td className="tnum">{formatDateTime(sig.signalTime)}</td>
-                <td>
-                  <button
-                    type="button"
-                    className="action-link-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectSignal(sig);
-                    }}
-                  >
-                    诊断 & 定位
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              return (
+                <tr
+                  key={rawSignal.id}
+                  className={isSelected ? "selected-row" : ""}
+                  onClick={() => onSelectSignal(rawSignal)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <td className="tnum">{idx + 1}</td>
+                  <td>
+                    <strong>{rawSignal.securityCode}</strong>
+                  </td>
+                  <td>
+                    <span
+                      className={`bsp-tag ${isBuy ? "bsp-buy" : "bsp-sell"}`}
+                    >
+                      <span className="bsp-arrow">{isBuy ? "▲" : "▼"}</span>
+                      {label}
+                    </span>
+                  </td>
+                  <td className="tnum">{price}</td>
+                  <td className="tnum">{formatDateTime(rawSignal.signalTime)}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="action-link-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectSignal(rawSignal);
+                      }}
+                    >
+                      诊断 & 定位
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
+
+export default BacktestSignalTable;

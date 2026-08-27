@@ -807,6 +807,17 @@ export const acknowledgeStrategyAlertEvent = (id: number) =>
     { method: "POST" }
   );
 
+export const listStrategyBacktestRuns = () =>
+  requestJson<StrategyBacktestRun[]>(
+    getMistApiBase(),
+    "/v1/strategy-backtests",
+    { method: "GET" }
+  );
+
+export const fetchStrategyBacktestRuns = listStrategyBacktestRuns;
+export const fetchStrategyDefinitions = listStrategies;
+export const fetchStrategyVersions = listStrategyVersions;
+
 export const createStrategyBacktest = (payload: StrategyBacktestRequest) =>
   requestJson<BacktestRunReceipt>(
     getMistApiBase(),
@@ -816,6 +827,7 @@ export const createStrategyBacktest = (payload: StrategyBacktestRequest) =>
       body: JSON.stringify(payload),
     }
   );
+
 
 export const fetchStrategyBacktestRun = (runId: number) =>
   requestJson<StrategyBacktestRun>(
