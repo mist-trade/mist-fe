@@ -113,13 +113,35 @@ table,
   gap: 12px;
   align-items: end;
   max-width: 1440px;
-  margin: 0 auto 12px;
+  margin: 0 auto 10px;
   padding: 14px;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: var(--surface-raised);
   box-shadow: 0 8px 24px rgb(20 28 40 / 7%);
 }
+
+.kline-quick-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1440px;
+  margin: 0 auto 12px;
+  padding: 8px 14px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.preset-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 
 .field {
   display: flex;
