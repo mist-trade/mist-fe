@@ -19,7 +19,9 @@ import {
   fetchSecurities,
   fetchStrategyAlertEvents,
   fetchStrategyBacktestRun,
+  listStrategyBacktestRuns,
   fetchStrategyBacktestSignals,
+
   fetchStrategySignals,
   getAnalysisApiBase,
   getMistApiBase,
@@ -1001,6 +1003,20 @@ describe("Mist frontend API client", () => {
       expect.objectContaining({ method: "GET" })
     );
   });
+
+  it("queries strategy backtest runs list with optional parameters", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      successEnvelope([{ id: 1, strategyDefinitionId: 5 }])
+    );
+
+    const result = await listStrategyBacktestRuns({ strategyDefinitionId: 5, limit: 10 });
+    expect(result).toEqual([{ id: 1, strategyDefinitionId: 5 }]);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/mist/v1/strategy-backtests?strategyDefinitionId=5&limit=10",
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
 
   it("does not expose the retired manual live-scan client", () => {
     const clientSource = readFileSync(join(process.cwd(), "app/api/client.ts"), "utf8");
