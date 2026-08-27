@@ -86,7 +86,13 @@ export function BacktestWorkspace() {
 
 
         if (runList.length > 0) {
-          const firstCompleted = runList.find((r: StrategyBacktestRun) => r.status === "completed") || runList[0];
+          const completedWithSignals = runList.find(
+            (r: StrategyBacktestRun) => r.status === "completed" && (r.signalCount ?? 0) > 0
+          );
+          const firstCompleted =
+            completedWithSignals ||
+            runList.find((r: StrategyBacktestRun) => r.status === "completed") ||
+            runList[0];
           setActiveRun(firstCompleted);
           if (firstCompleted.status === "completed") {
             const firstSymbol = firstCompleted.targetUniverse?.[0] || "";
@@ -94,6 +100,7 @@ export function BacktestWorkspace() {
             void loadRunSignalsAndChart(firstCompleted, firstSymbol);
           }
         }
+
       } catch (err) {
         if (!cancelled) {
           setLoadError(err instanceof Error ? err.message : String(err));

@@ -62,10 +62,34 @@ export function TradingViewChart({
       crosshair: {
         mode: CrosshairMode.Normal,
       },
+      localization: {
+        dateFormat: "yyyy-MM-dd",
+        timeFormatter: (timestamp: number) => {
+          const d = new Date(timestamp * 1000);
+          return d.toLocaleString("zh-CN", {
+            timeZone: "Asia/Shanghai",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+        },
+      },
       timeScale: {
         borderColor: gridColor,
         timeVisible: true,
         secondsVisible: false,
+        tickMarkFormatter: (timestamp: number) => {
+          const d = new Date(timestamp * 1000);
+          return d.toLocaleTimeString("zh-CN", {
+            timeZone: "Asia/Shanghai",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+        },
       },
       rightPriceScale: {
         borderColor: gridColor,
@@ -133,9 +157,28 @@ export function TradingViewChart({
     const volumeSeries = volumeSeriesRef.current;
     if (!chart || !candleSeries || !k || k.length === 0) return;
 
-    // Deduplicate and sort K-lines by ascending timestamp
+    // Deduplicate and convert K-lines by ascending timestamp
     const sortedK = [...k]
-      .filter((item) => Number.isFinite(item.open) && Number.isFinite(item.close))
+      .map((item) => ({
+        time: item.time,
+        open: Number(item.open),
+        high: Number(item.high),
+        low: Number(item.low),
+        close: Number(item.close),
+        volume:
+          item.volume !== undefined && item.volume !== null
+            ? Number(item.volume)
+            : item.amount !== undefined && item.amount !== null
+            ? Number(item.amount)
+            : undefined,
+      }))
+      .filter(
+        (item) =>
+          Number.isFinite(item.open) &&
+          Number.isFinite(item.high) &&
+          Number.isFinite(item.low) &&
+          Number.isFinite(item.close)
+      )
       .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
     const seenTimes = new Set<number>();
@@ -147,22 +190,22 @@ export function TradingViewChart({
       if (seenTimes.has(t)) continue;
       seenTimes.add(t);
 
-      const open = Number(item.open);
-      const close = Number(item.close);
+      const open = item.open;
+      const close = item.close;
       const isUp = close >= open;
 
       candleData.push({
         time: t,
         open,
-        high: Number(item.high),
-        low: Number(item.low),
+        high: item.high,
+        low: item.low,
         close,
       });
 
-      if (item.volume !== undefined) {
+      if (item.volume !== undefined && Number.isFinite(item.volume)) {
         volumeData.push({
           time: t,
-          value: Number(item.volume),
+          value: item.volume,
           color: isUp ? "rgba(239, 68, 68, 0.4)" : "rgba(34, 197, 94, 0.4)",
         });
       }
@@ -229,22 +272,26 @@ export function TradingViewChart({
       for (const line of biLines) {
         if (line.startTime && line.startPrice !== undefined) {
           const t1 = toUTCTimestamp(line.startTime);
-          if (!biSeen.has(t1)) {
+          const p1 = Number(line.startPrice);
+          if (!biSeen.has(t1) && Number.isFinite(p1)) {
             biSeen.add(t1);
-            biDataPoints.push({ time: t1, value: line.startPrice });
+            biDataPoints.push({ time: t1, value: p1 });
           }
         }
         if (line.endTime && line.endPrice !== undefined) {
           const t2 = toUTCTimestamp(line.endTime);
-          if (!biSeen.has(t2)) {
+          const p2 = Number(line.endPrice);
+          if (!biSeen.has(t2) && Number.isFinite(p2)) {
             biSeen.add(t2);
-            biDataPoints.push({ time: t2, value: line.endPrice });
+            biDataPoints.push({ time: t2, value: p2 });
           }
         }
       }
       biDataPoints.sort((a, b) => (a.time as number) - (b.time as number));
-      biSeries.setData(biDataPoints);
-      strokeSeriesRef.current.set("chan_bi", biSeries);
+      if (biDataPoints.length > 0) {
+        biSeries.setData(biDataPoints);
+        strokeSeriesRef.current.set("chan_bi", biSeries);
+      }
     }
 
     // 3.2 Draw Duan Lines (Magenta, 2px)
@@ -261,22 +308,26 @@ export function TradingViewChart({
       for (const line of duanLines) {
         if (line.startTime && line.startPrice !== undefined) {
           const t1 = toUTCTimestamp(line.startTime);
-          if (!duanSeen.has(t1)) {
+          const p1 = Number(line.startPrice);
+          if (!duanSeen.has(t1) && Number.isFinite(p1)) {
             duanSeen.add(t1);
-            duanDataPoints.push({ time: t1, value: line.startPrice });
+            duanDataPoints.push({ time: t1, value: p1 });
           }
         }
         if (line.endTime && line.endPrice !== undefined) {
           const t2 = toUTCTimestamp(line.endTime);
-          if (!duanSeen.has(t2)) {
+          const p2 = Number(line.endPrice);
+          if (!duanSeen.has(t2) && Number.isFinite(p2)) {
             duanSeen.add(t2);
-            duanDataPoints.push({ time: t2, value: line.endPrice });
+            duanDataPoints.push({ time: t2, value: p2 });
           }
         }
       }
       duanDataPoints.sort((a, b) => (a.time as number) - (b.time as number));
-      duanSeries.setData(duanDataPoints);
-      strokeSeriesRef.current.set("chan_duan", duanSeries);
+      if (duanDataPoints.length > 0) {
+        duanSeries.setData(duanDataPoints);
+        strokeSeriesRef.current.set("chan_duan", duanSeries);
+      }
     }
 
     // 3.3 Draw Zhongshu Upper/Lower Boundaries
@@ -284,7 +335,9 @@ export function TradingViewChart({
       if (band.fromTime && band.toTime && band.top !== undefined && band.bottom !== undefined) {
         const t1 = toUTCTimestamp(band.fromTime);
         const t2 = toUTCTimestamp(band.toTime);
-        if (t2 > t1) {
+        const top = Number(band.top);
+        const bottom = Number(band.bottom);
+        if (t2 > t1 && Number.isFinite(top) && Number.isFinite(bottom)) {
           const color = band.color || "#38BDF8";
           const zgSeries = chart.addLineSeries({
             color,
@@ -302,12 +355,12 @@ export function TradingViewChart({
           });
 
           zgSeries.setData([
-            { time: t1, value: band.top },
-            { time: t2, value: band.top },
+            { time: t1, value: top },
+            { time: t2, value: top },
           ]);
           zdSeries.setData([
-            { time: t1, value: band.bottom },
-            { time: t2, value: band.bottom },
+            { time: t1, value: bottom },
+            { time: t2, value: bottom },
           ]);
 
           strokeSeriesRef.current.set(`zs_zg_${idx}`, zgSeries);
@@ -321,6 +374,7 @@ export function TradingViewChart({
       markers.sort((a, b) => (a.time as number) - (b.time as number));
       candleSeries.setMarkers(markers);
     }
+
 
     // 3.5 Auto-Focus or FitContent
     if (focusedSignalTime) {
