@@ -3,14 +3,22 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { CaseWithMeta, SnapshotData } from "./lib/load-snapshot";
-
-// 懒加载 KPanel（含 echarts/core），不进 /chan-tests 首屏 bundle。
-const KPanel = dynamic(() => import("@/app/components/k-panel"), {
-  ssr: false,
-});
 import { CaseList } from "./components/CaseList";
 import { StatsPanel } from "./components/StatsPanel";
-import { snapshotToChart } from "./lib/snapshot-to-chart";
+import { snapshotToVisualCommands } from "./lib/snapshot-to-chart";
+
+// 懒加载 TradingViewChart，不进首屏 SSR
+const TradingViewChart = dynamic(
+  () => import("@/app/components/tv-chart/TradingViewChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[550px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
+        加载 TradingView 快照图表...
+      </div>
+    ),
+  }
+);
 
 interface ChanTestsPageProps {
   cases: CaseWithMeta[];
@@ -82,7 +90,7 @@ export function ChanTestsPage({ cases, snapshots }: ChanTestsPageProps) {
         <StatsPanel meta={meta} />
         <div style={{ flex: 1, padding: 16, overflow: "auto" }}>
           {snap ? (
-            <KPanelChartFromSnapshot snap={snap} selectedPhase={selectedPhase} />
+            <TradingViewChartFromSnapshot snap={snap} selectedPhase={selectedPhase} />
           ) : (
             <div style={{ color: "#9ca3af" }}>该用例暂无快照数据。</div>
           )}
@@ -92,24 +100,20 @@ export function ChanTestsPage({ cases, snapshots }: ChanTestsPageProps) {
   );
 }
 
-/** 用快照数据驱动 KPanel */
-function KPanelChartFromSnapshot({
+/** 用快照数据驱动 TradingViewChart */
+function TradingViewChartFromSnapshot({
   snap,
   selectedPhase,
 }: {
   snap: SnapshotData;
   selectedPhase: BiPhase;
 }) {
-  const chart = useMemo(() => snapshotToChart(snap), [snap]);
-  // KPanel 期望 mergeK/bi/fenxing/channel 为 Promise（实时页是异步获取）。
-  // 快照已就绪，直接包成已 resolve 的 Promise。
-  return (
-    <KPanel
-      k={chart.k}
-      mergeK={Promise.resolve(chart.mergeK)}
-      bi={Promise.resolve(chart.bi[selectedPhase])}
-      fenxing={Promise.resolve(chart.fenxing)}
-      channel={Promise.resolve(chart.channel[selectedPhase])}
-    />
+  const { k, commands } = useMemo(
+    () => snapshotToVisualCommands(snap, selectedPhase),
+    [snap, selectedPhase]
   );
+
+  return <TradingViewChart k={k} commands={commands} height={550} />;
 }
+
+export default ChanTestsPage;

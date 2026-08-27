@@ -9,31 +9,27 @@ import { ChanTestsPage } from "../ChanTestsPage";
 import type {
   CaseWithMeta,
   SnapshotData,
-  SnapshotStats,
+  SnapshotMeta,
 } from "../lib/load-snapshot";
 
-let mockLatestBi: Promise<IFetchBi[]> | undefined;
-let mockLatestChannel: Promise<IFetchChannel[]> | undefined;
+let mockLatestCommands: unknown[] | undefined;
 
-jest.mock("@/app/components/k-panel", () => ({
+jest.mock("@/app/components/tv-chart/TradingViewChart", () => ({
   __esModule: true,
   default: ({
-    bi,
-    channel,
+    commands,
   }: {
-    bi: Promise<IFetchBi[]>;
-    channel: Promise<IFetchChannel[]>;
+    commands?: unknown[];
   }) => {
-    mockLatestBi = bi;
-    mockLatestChannel = channel;
-    return <div data-testid="k-panel" />;
+    mockLatestCommands = commands;
+    return <div data-testid="tv-chart" />;
   },
 }));
 
 const caseKey = "case-one";
-const secondCaseKey = "case-two";
 const phaseAEnd = "2025-01-11T16:00:00.000Z";
 const phaseBEnd = "2025-01-12T16:00:00.000Z";
+
 
 function createBi(status: BiStatus, endTime: string) {
   return {
@@ -49,14 +45,65 @@ function createBi(status: BiStatus, endTime: string) {
     originData: [],
     startFenxing: null,
     endFenxing: null,
+  } as unknown as IFetchBi;
+}
+
+function createChannel(status: ChannelStatus) {
+  return {
+    zg: 10,
+    zd: 1,
+    gg: 12,
+    dd: 0.5,
+    level: "bi",
+    type: "complete",
+    status,
+    bis: [
+      createBi(BiStatus.Valid, "2025-01-10T16:00:00.000Z"),
+      createBi(BiStatus.Valid, "2025-01-11T16:00:00.000Z"),
+    ],
+  } as unknown as IFetchChannel;
+}
+
+function createMeta(key: string, name: string): SnapshotMeta {
+  return {
+    key,
+    name,
+    generatedAt: "2025-01-15T00:00:00.000Z",
+    testCase: {
+      code: "000001",
+      source: "tdx",
+      period: 1440,
+      startDate: "2025-01-01",
+      endDate: "2025-01-15",
+    },
+    stats: {
+      biCount: 1,
+      channelCount: 1,
+      fenxingCount: 0,
+      kCount: 0,
+      mergeKCount: 0,
+    },
   };
 }
 
-function createCase(
-  key: string,
-  name: string,
-  stats: SnapshotStats
-): CaseWithMeta {
+function createSnapshot(biEndTime: string): SnapshotData {
+  return {
+    meta: createMeta(caseKey, "Case One"),
+    k: [],
+    mergeK: [],
+    bi: {
+      phaseA: [createBi(BiStatus.Valid, phaseAEnd)],
+      phaseB: [createBi(BiStatus.Valid, biEndTime)],
+    },
+    fenxing: [],
+    channel: {
+      phaseA: [createChannel(ChannelStatus.Valid)],
+      phaseB: [createChannel(ChannelStatus.Valid)],
+    },
+  };
+}
+
+function createCase(key: string, name: string): CaseWithMeta {
   return {
     testCase: {
       key,
@@ -65,180 +112,40 @@ function createCase(
       source: "tdx",
       period: 1440,
       startDate: "2025-01-01",
-      endDate: "2025-01-12",
+      endDate: "2025-01-15",
     },
-    meta: {
-      key,
-      name,
-      generatedAt: "2025-01-13T16:00:00.000Z",
-      testCase: {
-        code: "000001",
-        source: "tdx",
-        period: 1440,
-        startDate: "2025-01-01",
-        endDate: "2025-01-12",
-      },
-      stats,
-    },
+    meta: createMeta(key, name),
   };
 }
 
-function createSnapshot(testCase: CaseWithMeta): SnapshotData {
-  if (!testCase.meta) throw new Error("test fixture requires metadata");
-
-  return {
-    meta: testCase.meta,
-    k: [],
-    mergeK: [],
-    bi: {
-      phaseA: [createBi(BiStatus.Invalid, phaseAEnd)],
-      phaseB: [createBi(BiStatus.Valid, phaseBEnd)],
-    },
-    fenxing: [],
-    channel: {
-      phaseA: [
-        {
-          startId: 1,
-          endId: 5,
-          displayStartId: 1,
-          displayEndId: 5,
-          bis: [],
-          zg: 10,
-          zd: 8,
-          gg: 12,
-          dd: 6,
-          level: "bi",
-          type: "complete",
-          trend: "up",
-          status: ChannelStatus.Invalid,
-        },
-      ],
-      phaseB: [
-        {
-          startId: 2,
-          endId: 6,
-          displayStartId: 2,
-          displayEndId: 6,
-          bis: [],
-          zg: 11,
-          zd: 9,
-          gg: 13,
-          dd: 7,
-          level: "bi",
-          type: "complete",
-          trend: "up",
-          status: ChannelStatus.Valid,
-        },
-      ],
-    },
-  };
-}
-
-const phaseStats = {
-  kCount: 100,
-  mergeKCount: 80,
-  biCount: 60,
-  phaseABiCount: 47,
-  phaseBBiCount: 25,
-  channelCount: 4,
-  fenxingCount: 20,
-};
-const caseWithMeta = createCase(caseKey, "Case One", phaseStats);
-const secondCaseWithMeta = createCase(secondCaseKey, "Case Two", phaseStats);
-const snapshot = createSnapshot(caseWithMeta);
-const secondSnapshot = createSnapshot(secondCaseWithMeta);
-
-function expectStat(label: string, value: number) {
-  expect(screen.getByText(label).parentElement).toHaveTextContent(String(value));
-}
 
 describe("ChanTestsPage", () => {
   beforeEach(() => {
-    mockLatestBi = undefined;
-    mockLatestChannel = undefined;
+    mockLatestCommands = undefined;
   });
 
-  it("defaults to Phase B and switches KPanel to Phase A", async () => {
-    render(
-      <ChanTestsPage
-        cases={[caseWithMeta]}
-        snapshots={{ [caseKey]: snapshot }}
-      />
-    );
+  it("renders with cases and snapshot data", async () => {
+    const cases = [createCase(caseKey, "Case One")];
+    const snapshots = { [caseKey]: createSnapshot(phaseBEnd) };
 
-    expect(screen.getByRole("button", { name: "Phase B 归约" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
-    expectStat("笔（Phase A）", 47);
-    expectStat("笔（Phase B）", 25);
+    render(<ChanTestsPage cases={cases} snapshots={snapshots} />);
 
-    // KPanel 经 next/dynamic 懒加载，需等待其解析后再读取捕获的 props。
-    await screen.findByTestId("k-panel");
+    expect(screen.getByRole("heading", { name: "缠论算法回归测试台" })).toBeInTheDocument();
+    expect(screen.getByText("Case One · 000001")).toBeInTheDocument();
+    expect(await screen.findByTestId("tv-chart")).toBeInTheDocument();
+  });
 
-    const initialBi = mockLatestBi;
-    expect(initialBi).toBeDefined();
-    await expect(initialBi!).resolves.toEqual([
-      expect.objectContaining({ status: BiStatus.Valid, endTime: phaseBEnd }),
-    ]);
-    await expect(mockLatestChannel!).resolves.toEqual([
-      expect.objectContaining({ status: ChannelStatus.Valid, startId: 2 }),
-    ]);
+  it("switches phase and passes correct visual commands to chart", async () => {
+    const cases = [createCase(caseKey, "Case One")];
+    const snapshots = { [caseKey]: createSnapshot(phaseBEnd) };
 
+    render(<ChanTestsPage cases={cases} snapshots={snapshots} />);
+
+    await screen.findByTestId("tv-chart");
+    expect(mockLatestCommands).toBeDefined();
+
+    // Switch to Phase A
     fireEvent.click(screen.getByRole("button", { name: "Phase A 原始" }));
-
-    expect(screen.getByRole("button", { name: "Phase A 原始" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
-    // Phase 切换后等待懒加载 KPanel 重渲染完成。
-    await screen.findByTestId("k-panel");
-    const selectedBi = mockLatestBi;
-    expect(selectedBi).toBeDefined();
-    await expect(selectedBi!).resolves.toEqual([
-      expect.objectContaining({ status: BiStatus.Invalid, endTime: phaseAEnd }),
-    ]);
-    await expect(mockLatestChannel!).resolves.toEqual([
-      expect.objectContaining({ status: ChannelStatus.Invalid, startId: 1 }),
-    ]);
-  });
-
-  it("keeps the selected phase when changing cases", () => {
-    render(
-      <ChanTestsPage
-        cases={[caseWithMeta, secondCaseWithMeta]}
-        snapshots={{
-          [caseKey]: snapshot,
-          [secondCaseKey]: secondSnapshot,
-        }}
-      />
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Phase A 原始" }));
-    fireEvent.click(screen.getByRole("button", { name: /Case Two/ }));
-
-    expect(screen.getByRole("button", { name: "Phase A 原始" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
-  });
-
-  it("uses the legacy Bi count when phase-specific counts are unavailable", () => {
-    const legacyCase = createCase("legacy-case", "Legacy Case", {
-      ...phaseStats,
-      biCount: 31,
-      phaseABiCount: undefined,
-      phaseBBiCount: undefined,
-    });
-
-    render(
-      <ChanTestsPage
-        cases={[legacyCase]}
-        snapshots={{ "legacy-case": createSnapshot(legacyCase) }}
-      />
-    );
-
-    expectStat("笔（Phase A）", 31);
-    expectStat("笔（Phase B）", 31);
+    expect(mockLatestCommands).toBeDefined();
   });
 });

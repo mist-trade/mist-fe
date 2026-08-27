@@ -12,12 +12,8 @@ import {
   type IFenxing,
   type FenxingType,
 } from "@/app/api/types";
+import type { VisualCommandVo } from "@/app/api/client";
 import type { SnapshotData } from "./load-snapshot";
-
-/**
- * 把快照 JSON 转成 KPanel 期望的类型。
- * 快照是后端 API 原样返回，字段名一致，仅需把 string enum / string date 归一化。
- */
 
 export interface ChartBiPhases {
   phaseA: IFetchBi[];
@@ -79,7 +75,6 @@ function asFenxingType(v: unknown): FenxingType {
   return v === "top" ? "top" : "bottom";
 }
 
-/** 归一化单个 bi（channel.bis 复用） */
 function asBi(x: IFetchBi): IFetchBi {
   return {
     ...x,
@@ -133,3 +128,52 @@ export function snapshotToChart(snap: SnapshotData): ChartData {
       };
   return { k, mergeK, bi, fenxing, channel };
 }
+
+export function snapshotToVisualCommands(
+  snap: SnapshotData,
+  phase: "phaseA" | "phaseB" = "phaseB"
+): { k: IFetchK[]; commands: VisualCommandVo[] } {
+  const chart = snapshotToChart(snap);
+  const commands: VisualCommandVo[] = [];
+
+  const biList = chart.bi[phase] || [];
+  biList.forEach((b, idx) => {
+    const isUp = b.trend === TrendDirection.Up;
+    commands.push({
+      id: `snap_bi_${phase}_${idx}`,
+      type: "line",
+      layer: "chan_bi",
+      startTime: String(b.startTime),
+      endTime: String(b.endTime),
+      startPrice: isUp ? b.low : b.high,
+      endPrice: isUp ? b.high : b.low,
+      color: "#FACC15",
+      width: 1,
+      style: "solid",
+    });
+  });
+
+  const channelList = chart.channel[phase] || [];
+  channelList.forEach((c, idx) => {
+    const firstBi = c.bis[0];
+    const lastBi = c.bis[c.bis.length - 1];
+    if (firstBi && lastBi) {
+      commands.push({
+        id: `snap_zs_${phase}_${idx}`,
+        type: "band",
+        layer: "chan_zs_bi",
+        fromTime: String(firstBi.startTime),
+        toTime: String(lastBi.endTime),
+        top: c.zg,
+        bottom: c.zd,
+        gg: c.gg,
+        dd: c.dd,
+        color: "#38BDF8",
+        fill: true,
+      });
+    }
+  });
+
+  return { k: chart.k, commands };
+}
+
