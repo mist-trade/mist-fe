@@ -953,3 +953,70 @@ export const fetchDuanChannel = async (query: KLineQuery) =>
     )
   );
 
+export interface VisualCommandVo {
+  id: string;
+  type: "line" | "band" | "text" | "icon";
+  layer: string;
+  startIndex?: number;
+  endIndex?: number;
+  fromIndex?: number;
+  toIndex?: number;
+  startTime?: string;
+  endTime?: string;
+  fromTime?: string;
+  toTime?: string;
+  startPrice?: number;
+  endPrice?: number;
+  top?: number;
+  bottom?: number;
+  gg?: number;
+  dd?: number;
+  index?: number;
+  time?: string;
+  price?: number;
+  text?: string;
+  color?: string;
+  width?: number;
+  style?: "solid" | "dashed" | "dotted";
+  fill?: boolean;
+  position?: "above" | "below" | "center";
+}
+
+export interface VisualCommandPayloadVo {
+  code: string;
+  period: number;
+  source: string;
+  totalKlines: number;
+  commands: VisualCommandVo[];
+}
+
+export interface VisualCommandQuery {
+  code: string;
+  period: number;
+  source?: DataSourceValue;
+  layers?: string;
+  count?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const fetchVisualCommands = (query: VisualCommandQuery) => {
+  const params: Record<string, string> = {
+    code: query.code,
+    period: String(query.period),
+  };
+  if (query.source) params.source = query.source;
+  if (query.layers) params.layers = query.layers;
+  if (query.count) params.count = String(query.count);
+  if (query.startDate) params.startDate = query.startDate;
+  if (query.endDate) params.endDate = query.endDate;
+
+  return requestJson<VisualCommandPayloadVo>(
+    getMistApiBase(),
+    `/v1/visual/commands?${new URLSearchParams(params).toString()}`,
+    { method: "GET" }
+  );
+};
+
+
+

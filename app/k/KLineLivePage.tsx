@@ -3,39 +3,32 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   collectKLines,
-  fetchBi,
-  fetchChannel,
-  fetchFenxing,
   fetchK,
-  fetchMergeK,
+  fetchVisualCommands,
   fetchSecurities,
   type DataSourceValue,
   type KLineQuery,
   type SecurityOption,
+  type VisualCommandVo,
 } from "@/app/api/client";
 import dynamic from "next/dynamic";
-import KPanelSkeleton from "@/app/components/k-panel/skeleton";
+import type { IFetchK } from "@/app/api/types";
 
-// 懒加载 KPanel（含 echarts/core），不进 /k 首屏 bundle。
-// ssr:false 避免 ECharts 在服务端访问 DOM。
-const KPanel = dynamic(() => import("@/app/components/k-panel"), {
-  ssr: false,
-  loading: () => <KPanelSkeleton />,
-});
-import type {
-  IFenxing,
-  IFetchBi,
-  IFetchChannel,
-  IFetchK,
-  IMergeK,
-} from "@/app/api/types";
+const TradingViewChart = dynamic(
+  () => import("@/app/components/tv-chart/TradingViewChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[550px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
+        加载 TradingView 图表...
+      </div>
+    ),
+  }
+);
 
-interface ChartState {
+interface VisualChartState {
   k: IFetchK[];
-  mergeK: Promise<IMergeK[]>;
-  bi: Promise<IFetchBi[]>;
-  fenxing: Promise<IFenxing[]>;
-  channel: Promise<IFetchChannel[]>;
+  commands: VisualCommandVo[];
 }
 
 const DEFAULT_SOURCE: DataSourceValue = "tdx";
@@ -104,7 +97,7 @@ export default function KLineLivePage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [chart, setChart] = useState<ChartState | null>(null);
+  const [chartState, setChartState] = useState<VisualChartState | null>(null);
   const chartRequestIdRef = useRef(0);
 
   const selectedSecurity = useMemo(
@@ -132,65 +125,54 @@ export default function KLineLivePage() {
     });
   }, []);
 
-  const createChartState = useCallback(
-    async (k: IFetchK[], nextQuery: KLineQuery): Promise<ChartState> => {
-      const mergeKData = await fetchMergeK(nextQuery);
-      const biData = await fetchBi(nextQuery);
-      const fenxingData = await fetchFenxing(nextQuery);
-      const channelData = await fetchChannel(nextQuery);
+  const loadChart = useCallback(async (nextQuery: KLineQuery) => {
+    const requestId = chartRequestIdRef.current + 1;
+    chartRequestIdRef.current = requestId;
+    const isCurrentRequest = () => chartRequestIdRef.current === requestId;
 
-      // 后端返回两阶段结果 { phaseA, phaseB }，渲染统一用 phaseB（干净序列）
-      return {
-        k,
-        mergeK: Promise.resolve(mergeKData),
-        bi: Promise.resolve(biData.phaseB),
-        fenxing: Promise.resolve(fenxingData),
-        channel: Promise.resolve(channelData.phaseB),
-      };
-    },
-    []
-  );
+    if (!hasCompleteQuery(nextQuery)) {
+      setChartState(null);
+      setChartError("");
+      setStatusMessage("");
+      return;
+    }
 
-  const loadChart = useCallback(
-    async (nextQuery: KLineQuery) => {
-      const requestId = chartRequestIdRef.current + 1;
-      chartRequestIdRef.current = requestId;
-      const isCurrentRequest = () => chartRequestIdRef.current === requestId;
+    setIsLoading(true);
+    setChartState(null);
+    setChartError("");
+    setStatusMessage("");
 
-      if (!hasCompleteQuery(nextQuery)) {
-        setChart(null);
-        setChartError("");
-        setStatusMessage("");
+    try {
+      const [k, visualRes] = await Promise.all([
+        fetchK(nextQuery),
+        fetchVisualCommands({
+          code: nextQuery.code,
+          period: nextQuery.period,
+          source: nextQuery.source,
+          startDate: nextQuery.startDate,
+          endDate: nextQuery.endDate,
+        }),
+      ]);
+
+      if (!isCurrentRequest()) return;
+      if (k.length === 0) {
+        setStatusMessage("当前查询没有 K 线数据");
         return;
       }
 
-      setIsLoading(true);
-      setChart(null);
-      setChartError("");
-      setStatusMessage("");
-
-      try {
-        const k = await fetchK(nextQuery);
-        if (!isCurrentRequest()) return;
-        if (k.length === 0) {
-          setStatusMessage("当前查询没有 K 线数据");
-          return;
-        }
-
-        const nextChart = await createChartState(k, nextQuery);
-        if (!isCurrentRequest()) return;
-        setChart(nextChart);
-      } catch (error) {
-        if (!isCurrentRequest()) return;
-        setChartError(error instanceof Error ? error.message : String(error));
-      } finally {
-        if (isCurrentRequest()) {
-          setIsLoading(false);
-        }
+      setChartState({
+        k,
+        commands: visualRes.commands,
+      });
+    } catch (error) {
+      if (!isCurrentRequest()) return;
+      setChartError(error instanceof Error ? error.message : String(error));
+    } finally {
+      if (isCurrentRequest()) {
+        setIsLoading(false);
       }
-    },
-    [createChartState]
-  );
+    }
+  }, []);
 
   useEffect(() => {
     setQuery(getQueryFromUrl());
@@ -246,7 +228,7 @@ export default function KLineLivePage() {
       <header className="kline-header">
         <div>
           <h1>K 线工作台</h1>
-          <p>查询行情、刷新采集数据并检查缠论结构。</p>
+          <p>基于 TradingView Lightweight Charts 的专业金融看盘与缠论分析工作台。</p>
         </div>
         <nav className="strategy-nav" aria-label="主导航">
           <a href="/k" aria-current="page">
@@ -364,17 +346,19 @@ export default function KLineLivePage() {
 
       <section className="kline-chart-area" aria-label="K 线图表">
         {!query.code && <div className="empty-state">选择股票后加载 K 线</div>}
-        {query.code && isLoading && <KPanelSkeleton />}
-        {query.code && !isLoading && !chart && !chartError && statusMessage && (
+        {query.code && isLoading && (
+          <div className="w-full h-[550px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
+            加载数据与绘制指令中...
+          </div>
+        )}
+        {query.code && !isLoading && !chartState && !chartError && statusMessage && (
           <div className="empty-state">{statusMessage}</div>
         )}
-        {chart && (
-          <KPanel
-            k={chart.k}
-            mergeK={chart.mergeK}
-            bi={chart.bi}
-            fenxing={chart.fenxing}
-            channel={chart.channel}
+        {chartState && (
+          <TradingViewChart
+            k={chartState.k}
+            commands={chartState.commands}
+            height={550}
           />
         )}
       </section>

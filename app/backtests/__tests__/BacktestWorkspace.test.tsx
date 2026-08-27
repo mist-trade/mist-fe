@@ -2,13 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BacktestWorkspace } from "../BacktestWorkspace";
 import {
   createStrategyBacktest,
-  fetchBi,
-  fetchChannel,
-  fetchDuan,
-  fetchDuanChannel,
-  fetchFenxing,
   fetchK,
-  fetchMergeK,
+  fetchVisualCommands,
   fetchStrategyBacktestRun,
   fetchStrategyBacktestSignals,
   listStrategies,
@@ -17,52 +12,20 @@ import {
 
 jest.mock("@/app/api/client", () => ({
   createStrategyBacktest: jest.fn(),
-  fetchBi: jest.fn(),
-  fetchChannel: jest.fn(),
-  fetchDuan: jest.fn(),
-  fetchDuanChannel: jest.fn(),
-  fetchFenxing: jest.fn(),
   fetchK: jest.fn(),
-  fetchMergeK: jest.fn(),
+  fetchVisualCommands: jest.fn(),
   fetchStrategyBacktestRun: jest.fn(),
   fetchStrategyBacktestSignals: jest.fn(),
   listStrategies: jest.fn(),
   listStrategyVersions: jest.fn(),
 }));
 
-import type { KPanelProps } from "@/app/components/k-panel/types";
-
-// Mock dynamic KPanel to avoid echarts canvas rendering in JSDOM
-jest.mock("@/app/components/k-panel", () => {
-  return function MockKPanel(props: KPanelProps) {
+// Mock dynamic TradingViewChart
+jest.mock("@/app/components/tv-chart/TradingViewChart", () => {
+  return function MockTradingViewChart(props: { k: unknown[]; commands?: unknown[] }) {
     return (
-      <div data-testid="mock-k-panel">
-        <span>Mock KPanel loaded with {props.k?.length || 0} bars</span>
-        <button
-          type="button"
-          data-testid="mock-bsp-click"
-          onClick={() =>
-            props.onSignalClick?.({
-              bspId: 0,
-              index: 0,
-              time: "2026-08-26",
-              price: 3850,
-              type: "first_sell",
-              label: "1卖",
-              isBuy: false,
-              rawSignal: {
-                id: 999,
-                signalTime: "2026-08-26T14:45:00.000Z",
-                securityCode: "000001",
-                type: "first_sell",
-                price: 3850,
-                contextSnapshot: { zg: 3880, zd: 3820 },
-              },
-            })
-          }
-        >
-          Click BSP Pin
-        </button>
+      <div data-testid="mock-tv-chart">
+        <span>Mock TradingViewChart loaded with {props.k?.length || 0} bars</span>
       </div>
     );
   };
@@ -159,18 +122,13 @@ describe("BacktestWorkspace", () => {
       .mockResolvedValue(mockBacktestRunCompleted);
     (fetchStrategyBacktestSignals as jest.Mock).mockResolvedValue(mockBacktestSignals);
     (fetchK as jest.Mock).mockResolvedValue(mockK);
-    (fetchMergeK as jest.Mock).mockResolvedValue([]);
-    (fetchBi as jest.Mock).mockResolvedValue({ phaseA: [], phaseB: [] });
-    (fetchFenxing as jest.Mock).mockResolvedValue([]);
-    (fetchChannel as jest.Mock).mockResolvedValue({ phaseA: [], phaseB: [] });
-    (fetchDuan as jest.Mock).mockResolvedValue([]);
-    (fetchDuanChannel as jest.Mock).mockResolvedValue({ phaseA: [], phaseB: [] });
+    (fetchVisualCommands as jest.Mock).mockResolvedValue({ commands: [] });
   });
 
   it("renders backtest workspace layout and form elements", async () => {
     render(<BacktestWorkspace />);
 
-    expect(await screen.findByRole("heading", { name: "回测可视化工作台" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "回测工作台" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "发起回测任务" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "发起回测" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "K 线" })).toBeInTheDocument();
@@ -190,7 +148,7 @@ describe("BacktestWorkspace", () => {
     });
 
     // Wait for completed poll and chart load
-    expect(await screen.findByTestId("mock-k-panel")).toBeInTheDocument();
+    expect(await screen.findByTestId("mock-tv-chart")).toBeInTheDocument();
     expect(screen.getByText(/已加载 000001 的 1 根 K 线/)).toBeInTheDocument();
 
     // Verify signal table row
@@ -198,14 +156,14 @@ describe("BacktestWorkspace", () => {
     expect(screen.getByText("3850.50")).toBeInTheDocument();
   });
 
-  it("opens ChanDiagnosisDrawer when clicking a signal or chart BSP pin", async () => {
+  it("opens ChanDiagnosisDrawer when clicking a signal in table", async () => {
     render(<BacktestWorkspace />);
 
     await screen.findByRole("heading", { name: "发起回测任务" });
     await screen.findByText(/版本 v1/);
     fireEvent.click(screen.getByRole("button", { name: "发起回测" }));
 
-    await screen.findByTestId("mock-k-panel");
+    await screen.findByTestId("mock-tv-chart");
 
     // Click "诊断 & 定位" in signal table
     fireEvent.click(screen.getByRole("button", { name: "诊断 & 定位" }));
@@ -216,29 +174,5 @@ describe("BacktestWorkspace", () => {
     // Close drawer
     fireEvent.click(screen.getByRole("button", { name: "✕" }));
     expect(screen.queryByRole("dialog", { name: "缠论中枢与背驰诊断" })).not.toBeInTheDocument();
-
-    // Click BSP Pin inside mock chart
-    fireEvent.click(screen.getByTestId("mock-bsp-click"));
-    expect(await screen.findByRole("dialog", { name: "缠论中枢与背驰诊断" })).toBeInTheDocument();
-  });
-
-  it("toggles sub-chart between Volume and MACD momentum", async () => {
-    render(<BacktestWorkspace />);
-
-    await screen.findByRole("heading", { name: "发起回测任务" });
-    await screen.findByText(/版本 v1/);
-    fireEvent.click(screen.getByRole("button", { name: "发起回测" }));
-
-    await screen.findByTestId("mock-k-panel");
-
-    const macdBtn = screen.getByRole("button", { name: "MACD 力度" });
-    const volumeBtn = screen.getByRole("button", { name: "成交量" });
-
-    expect(volumeBtn).toHaveClass("active");
-    expect(macdBtn).not.toHaveClass("active");
-
-    fireEvent.click(macdBtn);
-    expect(macdBtn).toHaveClass("active");
-    expect(volumeBtn).not.toHaveClass("active");
   });
 });

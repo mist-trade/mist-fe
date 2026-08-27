@@ -4,13 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   createStrategyBacktest,
-  fetchBi,
-  fetchChannel,
-  fetchDuan,
-  fetchDuanChannel,
-  fetchFenxing,
   fetchK,
-  fetchMergeK,
+  fetchVisualCommands,
   fetchStrategyBacktestRun,
   fetchStrategyBacktestSignals,
   listStrategies,
@@ -20,22 +15,9 @@ import {
   type StrategyBacktestSignalResult,
   type StrategyDefinition,
   type StrategyVersion,
+  type VisualCommandVo,
 } from "@/app/api/client";
-import type {
-  IFenxing,
-  IFetchBi,
-  IFetchChannel,
-  IFetchDuan,
-  IFetchDuanChannel,
-  IFetchK,
-  IMergeK,
-} from "@/app/api/types";
-import type {
-  BspSignalMappedData,
-  BspSignalSourceData,
-  SubChartType,
-} from "@/app/components/k-panel/types";
-import KPanelSkeleton from "@/app/components/k-panel/skeleton";
+import type { IFetchK } from "@/app/api/types";
 import {
   BacktestConfigPanel,
   type BacktestConfigValues,
@@ -44,21 +26,22 @@ import { BacktestRunHistory } from "./components/BacktestRunHistory";
 import { BacktestSignalTable } from "./components/BacktestSignalTable";
 import { ChanDiagnosisDrawer } from "./components/ChanDiagnosisDrawer";
 
-// 懒加载 KPanel，防止在服务端渲染 SSR
-const KPanel = dynamic(() => import("@/app/components/k-panel"), {
-  ssr: false,
-  loading: () => <KPanelSkeleton />,
-});
+// 懒加载 TradingViewChart，防止在服务端渲染 SSR
+const TradingViewChart = dynamic(
+  () => import("@/app/components/tv-chart/TradingViewChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[520px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
+        加载 TradingView 回测图表...
+      </div>
+    ),
+  }
+);
 
 interface BacktestChartState {
   k: IFetchK[];
-  mergeK: Promise<IMergeK[]>;
-  bi: Promise<IFetchBi[]>;
-  fenxing: Promise<IFenxing[]>;
-  channel: Promise<IFetchChannel[]>;
-  duan: Promise<IFetchDuan[]>;
-  duanChannel: Promise<IFetchDuanChannel[]>;
-  signals: BspSignalSourceData[];
+  commands: VisualCommandVo[];
 }
 
 export function BacktestWorkspace() {
@@ -73,60 +56,64 @@ export function BacktestWorkspace() {
   const [selectedSymbol, setSelectedSymbol] = useState<string>("");
 
   const [isRunning, setIsRunning] = useState(false);
-  const [subChartType, setSubChartType] = useState<SubChartType>("volume");
   const [chart, setChart] = useState<BacktestChartState | null>(null);
-  const [focusedSignalTime, setFocusedSignalTime] = useState<string | null>(null);
 
   const [loadError, setLoadError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
 
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 初始化拉取策略定义列表
+  // 初始化拉取策略列表
   useEffect(() => {
     let active = true;
     listStrategies()
-      .then((items) => {
+      .then((defs) => {
         if (!active) return;
-        setStrategies(items);
-        if (items.length > 0) {
-          setSelectedStrategyId(items[0].id);
+        setStrategies(defs);
+        if (defs.length > 0) {
+          setSelectedStrategyId(defs[0].id);
         }
       })
       .catch((err) => {
         if (!active) return;
         setLoadError(err instanceof Error ? err.message : String(err));
       });
+
     return () => {
       active = false;
     };
   }, []);
 
-  // 联动拉取选定策略的版本
+  // 策略变更后加载版本列表
   useEffect(() => {
-    if (!selectedStrategyId) return;
+    if (!selectedStrategyId) {
+      setVersions([]);
+      return;
+    }
     let active = true;
     listStrategyVersions(selectedStrategyId)
-      .then((items) => {
+      .then((vers) => {
         if (!active) return;
-        setVersions(items);
+        setVersions(vers);
       })
       .catch((err) => {
         if (!active) return;
         setLoadError(err instanceof Error ? err.message : String(err));
       });
+
     return () => {
       active = false;
     };
   }, [selectedStrategyId]);
 
-  // 加载指定标的与运行区间的图表与缠论全图层数据
+  // 加载回测图表数据（K 线 + 视觉指令 + 回测信号）
   const loadChartForRun = useCallback(
     async (
       run: StrategyBacktestRun,
       targetCode: string,
       signalResults: StrategyBacktestSignalResult[]
     ) => {
+      setLoadError("");
       setChart(null);
       setStatusMessage("正在加载 K 线与全图层缠论结构…");
       try {
@@ -138,45 +125,52 @@ export function BacktestWorkspace() {
           endDate: run.endDate.split("T")[0],
         };
 
-        const k = await fetchK(query);
+        const [k, visualRes] = await Promise.all([
+          fetchK(query),
+          fetchVisualCommands({
+            code: targetCode,
+            period: run.period,
+            source: run.source as DataSourceValue,
+            startDate: query.startDate,
+            endDate: query.endDate,
+          }),
+        ]);
+
         if (k.length === 0) {
           setStatusMessage("该时间段无可用 K 线数据");
           return;
         }
 
-        const mergeKData = await fetchMergeK(query);
-        const biData = await fetchBi(query);
-        const fenxingData = await fetchFenxing(query);
-        const channelData = await fetchChannel(query);
-        const duanData = await fetchDuan(query);
-        const duanChannelData = await fetchDuanChannel(query);
-
-        // 过滤属于当前标的的信号
-        const matchedSignals: BspSignalSourceData[] = signalResults
+        // 过滤属于当前标的的信号并转换为 VisualCommand
+        const signalCommands: VisualCommandVo[] = signalResults
           .filter((s) => s.securityCode === targetCode)
-          .map((s) => ({
-            id: s.id,
-            securityCode: s.securityCode,
-            signalTime: s.signalTime,
-            price: (s.contextSnapshot?.price as number | undefined) ?? undefined,
-            type: (s.contextSnapshot?.type as string | undefined) ?? undefined,
-            contextSnapshot: s.contextSnapshot,
-            ruleSnapshot: s.ruleSnapshot,
-          }));
+          .map((s) => {
+            const rawType = String(s.contextSnapshot?.type || "");
+            const isSell =
+              rawType.includes("sell") ||
+              rawType.includes("exit") ||
+              rawType.includes("卖");
+            return {
+              id: `backtest_sig_${s.id}`,
+              type: "text" as const,
+              layer: "chan_bsp",
+              time: s.signalTime,
+              price: (s.contextSnapshot?.price as number | undefined) ?? undefined,
+              text: isSell ? "卖" : "买",
+              position: isSell ? ("above" as const) : ("below" as const),
+              color: isSell ? "#22C55E" : "#EF4444",
+            };
+          });
+
+        const mergedCommands = [...visualRes.commands, ...signalCommands];
 
         setChart({
           k,
-          mergeK: Promise.resolve(mergeKData),
-          bi: Promise.resolve(biData.phaseB),
-          fenxing: Promise.resolve(fenxingData),
-          channel: Promise.resolve(channelData.phaseB),
-          duan: Promise.resolve(duanData),
-          duanChannel: Promise.resolve(duanChannelData.phaseB),
-          signals: matchedSignals,
+          commands: mergedCommands,
         });
 
         setStatusMessage(
-          `已加载 ${targetCode} 的 ${k.length} 根 K 线，共触发 ${matchedSignals.length} 个买卖点`
+          `已加载 ${targetCode} 的 ${k.length} 根 K 线，共触发 ${signalCommands.length} 个买卖点`
         );
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : String(err));
@@ -282,9 +276,11 @@ export function BacktestWorkspace() {
         status: "pending",
         signalCount: 0,
         matchedSecurityCount: 0,
+        createdAt: new Date().toISOString(),
       };
 
-      setRuns((prev) => [placeholderRun, ...prev.filter((r) => r.id !== runId)]);
+
+      setRuns((prev) => [placeholderRun, ...prev]);
       setActiveRun(placeholderRun);
       pollRunUntilComplete(runId);
     } catch (err) {
@@ -293,57 +289,54 @@ export function BacktestWorkspace() {
     }
   };
 
-  // 切换历史任务
-  const handleSelectHistoryRun = async (run: StrategyBacktestRun) => {
+  // 选择历史回测记录
+  const handleSelectRun = async (run: StrategyBacktestRun) => {
     setActiveRun(run);
     setSelectedSignal(null);
-    setFocusedSignalTime(null);
-
-    if (run.status === "running" || run.status === "pending") {
-      pollRunUntilComplete(run.id);
-      return;
-    }
+    setLoadError("");
 
     if (run.status === "completed") {
-      const fetchedSignals = await fetchStrategyBacktestSignals(run.id);
-      setSignals(fetchedSignals);
-      const symbol = run.targetUniverse[0] || "";
-      setSelectedSymbol(symbol);
-      if (symbol) {
-        await loadChartForRun(run, symbol, fetchedSignals);
+      try {
+        const fetchedSignals = await fetchStrategyBacktestSignals(run.id);
+        setSignals(fetchedSignals);
+        const firstSymbol = run.targetUniverse[0] || "";
+        setSelectedSymbol(firstSymbol);
+        if (firstSymbol) {
+          await loadChartForRun(run, firstSymbol, fetchedSignals);
+        }
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : String(err));
       }
+    } else if (run.status === "running" || run.status === "pending") {
+      pollRunUntilComplete(run.id);
     }
   };
 
-  // 点击信号行：居中聚焦并打开诊断抽屉
-  const handleSelectSignal = (signal: StrategyBacktestSignalResult) => {
-    setSelectedSignal(signal);
-    setFocusedSignalTime(signal.signalTime);
+  // 切换标的查看图表
+  const handleSelectSymbol = async (symbol: string) => {
+    setSelectedSymbol(symbol);
+    if (activeRun && activeRun.status === "completed") {
+      await loadChartForRun(activeRun, symbol, signals);
+    }
   };
 
-  // 点击图表中的买卖点 Pin
-  const handleChartSignalClick = (bsp: BspSignalMappedData) => {
-    const matched = signals.find((s) => s.id === bsp.rawSignal.id);
-    if (matched) {
-      setSelectedSignal(matched);
-    } else {
-      setSelectedSignal({
-        id: bsp.bspId,
-        backtestRunId: activeRun?.id ?? 0,
-        securityCode: bsp.rawSignal.securityCode || selectedSymbol,
-        signalTime: bsp.time,
-        contextSnapshot: bsp.rawSignal.contextSnapshot || {},
-        ruleSnapshot: bsp.rawSignal.ruleSnapshot || {},
-      });
+  // 信号点击聚焦与打开诊断抽屉
+  const handleSelectSignal = (sig: StrategyBacktestSignalResult) => {
+    setSelectedSignal(sig);
+    if (sig.securityCode !== selectedSymbol && activeRun) {
+      void handleSelectSymbol(sig.securityCode);
     }
   };
 
   return (
-    <main className="backtest-page">
-      <header className="strategy-header">
+    <main className="backtest-workspace-page">
+      {/* 顶部标题区与主导航 */}
+      <header className="kline-header">
         <div>
-          <h1>回测可视化工作台</h1>
-          <p>多周期回测任务驱动、全图层缠论形态可视化与中枢背驰诊断。</p>
+          <h1>回测工作台</h1>
+          <p>
+            配置多标的与历史区间，执行缠论与策略回测，全图层可视化复盘买卖点。
+          </p>
         </div>
         <nav className="strategy-nav" aria-label="主导航">
           <a href="/k">K 线</a>
@@ -355,78 +348,52 @@ export function BacktestWorkspace() {
         </nav>
       </header>
 
-      {loadError ? <p className="strategy-error">{loadError}</p> : null}
-      {statusMessage ? <p className="strategy-muted">{statusMessage}</p> : null}
+      {/* 状态与错误提示 */}
+      {(loadError || statusMessage) && (
+        <section className="backtest-status-bar" aria-live="polite">
+          {statusMessage && <span className="status-msg">{statusMessage}</span>}
+          {loadError && <span className="error-msg">{loadError}</span>}
+        </section>
+      )}
 
-      <section className="backtest-shell">
-        {/* 左侧：回测配置表单 + 历史任务记录 */}
-        <aside className="backtest-sidebar-col">
+      {/* 主工作区双栏布局 */}
+      <section className="backtest-main-grid">
+        {/* 左侧：回测配置表单 + 历史记录 */}
+        <aside className="backtest-sidebar">
           <BacktestConfigPanel
             strategies={strategies}
-            versions={versions}
             selectedStrategyId={selectedStrategyId}
             onSelectStrategyId={setSelectedStrategyId}
-            isRunning={isRunning}
+            versions={versions}
             onSubmit={handleStartBacktest}
+            isRunning={isRunning}
           />
-
           <BacktestRunHistory
             runs={runs}
             activeRunId={activeRun?.id ?? null}
-            onSelectRun={handleSelectHistoryRun}
+            onSelectRun={handleSelectRun}
           />
         </aside>
 
-        {/* 右侧主工作区：运行指标栏 + K线缠论图表 + 信号结果明细 */}
-        <section className="backtest-main-col">
-          {/* 指标栏 */}
-          {activeRun ? (
-            <div className="backtest-metrics-bar">
-              <strong>任务 #{activeRun.id}</strong>
-              <span className={`status-badge status-${activeRun.status}`}>
-                {activeRun.status.toUpperCase()}
-              </span>
-              <span>周期: {activeRun.period}m</span>
-              <span>数据源: {activeRun.source}</span>
-              <span className="tnum">信号总数: {activeRun.signalCount}</span>
-              <span className="tnum">命中标的: {activeRun.matchedSecurityCount}</span>
-
-              {activeRun.targetUniverse.length > 1 && (
-                <label className="symbol-switcher">
-                  切换标的:
-                  <select
-                    value={selectedSymbol}
-                    onChange={(e) => {
-                      const code = e.target.value;
-                      setSelectedSymbol(code);
-                      void loadChartForRun(activeRun, code, signals);
-                    }}
-                  >
-                    {activeRun.targetUniverse.map((code) => (
-                      <option key={code} value={code}>
-                        {code}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-
-              <div className="subchart-toggle">
+        {/* 右侧：标的切换 Tabs + K 线图表 + 信号明细表格 */}
+        <section className="backtest-content-area">
+          {/* 多标的快速切换 Tabs */}
+          {activeRun && activeRun.targetUniverse?.length > 1 ? (
+            <div className="symbol-tabs-bar" role="tablist">
+              {activeRun.targetUniverse.map((symbol) => (
                 <button
+                  key={symbol}
                   type="button"
-                  className={subChartType === "volume" ? "active" : ""}
-                  onClick={() => setSubChartType("volume")}
+                  role="tab"
+                  aria-selected={selectedSymbol === symbol}
+                  className={`symbol-tab ${
+                    selectedSymbol === symbol ? "active" : ""
+                  }`}
+                  onClick={() => void handleSelectSymbol(symbol)}
                 >
-                  成交量
+                  {symbol}
                 </button>
-                <button
-                  type="button"
-                  className={subChartType === "macd" ? "active" : ""}
-                  onClick={() => setSubChartType("macd")}
-                >
-                  MACD 力度
-                </button>
-              </div>
+              ))}
             </div>
           ) : null}
 
@@ -439,18 +406,10 @@ export function BacktestWorkspace() {
                   : "请在左侧发起或选择一项回测任务以呈现图表。"}
               </div>
             ) : (
-              <KPanel
+              <TradingViewChart
                 k={chart.k}
-                mergeK={chart.mergeK}
-                bi={chart.bi}
-                fenxing={chart.fenxing}
-                channel={chart.channel}
-                duan={chart.duan}
-                duanChannel={chart.duanChannel}
-                signals={chart.signals}
-                subChartType={subChartType}
-                onSignalClick={handleChartSignalClick}
-                focusedSignalTime={focusedSignalTime}
+                commands={chart.commands}
+                height={520}
               />
             )}
           </div>
@@ -474,3 +433,6 @@ export function BacktestWorkspace() {
     </main>
   );
 }
+
+
+export default BacktestWorkspace;
