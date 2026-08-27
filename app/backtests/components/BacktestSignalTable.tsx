@@ -11,7 +11,20 @@ interface BacktestSignalTableProps {
 
 const formatDateTime = (value?: string | null) => {
   if (!value) return "-";
-  return value.replace("T", " ").replace(/\.\d+Z$/, "");
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return value;
+  return d
+    .toLocaleString("zh-CN", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    })
+    .replace(/\//g, "-");
 };
 
 const BSP_LABEL_MAP: Record<string, { label: string; isBuy: boolean }> = {
@@ -27,13 +40,15 @@ const BSP_LABEL_MAP: Record<string, { label: string; isBuy: boolean }> = {
 
 function parseSignalInfo(sig: StrategyBacktestSignalResult) {
   const ctx = (sig.contextSnapshot || {}) as Record<string, unknown>;
-  const rawType = String(ctx.type || ctx.signalKind || "signal");
+  const chanBsp = (ctx.chanBsp || {}) as Record<string, unknown>;
+  const rawType = String(chanBsp.type || ctx.type || ctx.signalKind || "signal");
   const parsed = BSP_LABEL_MAP[rawType] || {
     label: rawType.includes("buy") ? "买点" : rawType.includes("sell") ? "卖点" : rawType,
     isBuy: rawType.includes("buy") || rawType === "entry",
   };
 
-  const price = typeof ctx.price === "number" ? ctx.price : Number(ctx.price ?? 0);
+  const rawPrice = ctx.triggerPrice ?? ctx.price;
+  const price = typeof rawPrice === "number" ? rawPrice : Number(rawPrice ?? 0);
 
   return {
     rawType,
