@@ -46,6 +46,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
+      - name: Verify contract fixtures
+        run: |
+          for dir in __fixtures__/contracts/realtime-subscriptions; do
+            echo "Checking $dir"
+            (cd "$dir" && sha256sum -c *.sha256)
+          done
+
       - name: Lint
         run: pnpm lint
 
