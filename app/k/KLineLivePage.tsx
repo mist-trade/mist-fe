@@ -36,15 +36,24 @@ const DEFAULT_PERIOD = 1440;
 const SECURITY_SEARCH_LIMIT = 20;
 const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "qmt"]);
 
+const PRESET_STOCKS = [
+  { code: "600519", name: "贵州茅台" },
+  { code: "000001", name: "平安银行" },
+  { code: "300750", name: "宁德时代" },
+  { code: "002594", name: "比亚迪" },
+];
+
 function isDataSourceValue(value: string | null): value is DataSourceValue {
   return value !== null && DATA_SOURCE_VALUES.has(value as DataSourceValue);
 }
 
+function formatDateToIsoDay(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 function todayString() {
-  const date = new Date();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${date.getFullYear()}-${month}-${day}`;
+  return formatDateToIsoDay(new Date());
 }
 
 function defaultStartDate() {
@@ -97,6 +106,7 @@ export default function KLineLivePage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showVolume, setShowVolume] = useState(true);
   const [chartState, setChartState] = useState<VisualChartState | null>(null);
   const chartRequestIdRef = useRef(0);
 
@@ -124,6 +134,20 @@ export default function KLineLivePage() {
       return next;
     });
   }, []);
+
+  const handleQuickRange = (days: number | "ytd") => {
+    const end = new Date();
+    let start: Date;
+    if (days === "ytd") {
+      start = new Date(end.getFullYear(), 0, 1);
+    } else {
+      start = new Date(end.getTime() - days * 24 * 3600 * 1000);
+    }
+    setQueryAndUrl({
+      startDate: formatDateToIsoDay(start),
+      endDate: formatDateToIsoDay(end),
+    });
+  };
 
   const loadChart = useCallback(async (nextQuery: KLineQuery) => {
     const requestId = chartRequestIdRef.current + 1;
@@ -337,6 +361,43 @@ export default function KLineLivePage() {
         </button>
       </section>
 
+      {/* 快捷选择与成交量开关栏 */}
+      <section className="kline-quick-bar">
+        <div className="quick-presets-row">
+          <span className="preset-label">快捷标的:</span>
+          {PRESET_STOCKS.map((stock) => (
+            <button
+              key={stock.code}
+              type="button"
+              className={`quick-preset-btn ${query.code === stock.code ? "active" : ""}`}
+              onClick={() => setQueryAndUrl({ code: stock.code })}
+            >
+              {stock.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="quick-presets-row">
+          <span className="preset-label">快捷区间:</span>
+          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(7)}>近1周</button>
+          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(30)}>近1月</button>
+          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(90)}>近3月</button>
+          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(180)}>近半年</button>
+          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(365)}>近1年</button>
+          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange("ytd")}>今年以来</button>
+        </div>
+
+        <div className="subchart-toggle">
+          <button
+            type="button"
+            className={showVolume ? "active" : ""}
+            onClick={() => setShowVolume(!showVolume)}
+          >
+            {showVolume ? "📊 成交量 (显示中)" : "📊 成交量 (已隐藏)"}
+          </button>
+        </div>
+      </section>
+
       <section className="kline-summary" aria-live="polite">
         <strong>{query.code || "未选择股票"}</strong>
         {selectedSecurity && <span>{selectedSecurity.name}</span>}
@@ -359,6 +420,7 @@ export default function KLineLivePage() {
             k={chartState.k}
             commands={chartState.commands}
             height={550}
+            subChartType={showVolume ? "volume" : "none"}
           />
         )}
       </section>
