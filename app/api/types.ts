@@ -3,11 +3,14 @@ export interface IFetchK {
   symbol: string;
   time: Date | string;
   amount: number;
+  volume?: number;
+  vol?: number;
   open: number;
   close: number;
   high: number;
   low: number;
 }
+
 
 export enum TrendDirection {
   Up = "up",

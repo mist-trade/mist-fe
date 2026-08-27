@@ -6,6 +6,7 @@ import {
   type IChartApi,
   type ISeriesApi,
   type CandlestickData,
+  type HistogramData,
   type LineData,
   type SeriesMarker,
   type UTCTimestamp,
@@ -25,11 +26,14 @@ export function TradingViewChart({
   k,
   commands = [],
   height = 550,
+  subChartType = "volume",
   className = "",
+  focusedSignalTime = null,
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const strokeSeriesRef = useRef<Map<string, ISeriesApi<"Line">>>(new Map());
 
   const { resolvedTheme } = useTheme();
@@ -66,8 +70,8 @@ export function TradingViewChart({
       rightPriceScale: {
         borderColor: gridColor,
         scaleMargins: {
-          top: 0.1,
-          bottom: 0.1,
+          top: 0.08,
+          bottom: subChartType === "volume" ? 0.22 : 0.08,
         },
       },
     });
@@ -81,8 +85,24 @@ export function TradingViewChart({
       wickDownColor: "#22C55E",
     });
 
+    // Volume histogram series
+    let volumeSeries: ISeriesApi<"Histogram"> | null = null;
+    if (subChartType === "volume") {
+      volumeSeries = chart.addHistogramSeries({
+        priceFormat: { type: "volume" },
+        priceScaleId: "volume",
+      });
+      chart.priceScale("volume").applyOptions({
+        scaleMargins: {
+          top: 0.8,
+          bottom: 0,
+        },
+      });
+    }
+
     chartRef.current = chart;
     candleSeriesRef.current = candleSeries;
+    volumeSeriesRef.current = volumeSeries;
 
     const handleResize = () => {
       if (containerRef.current && chartRef.current) {
@@ -101,14 +121,16 @@ export function TradingViewChart({
       chart.remove();
       chartRef.current = null;
       candleSeriesRef.current = null;
+      volumeSeriesRef.current = null;
       strokeSeries.clear();
     };
-  }, [isDark, height]);
+  }, [isDark, height, subChartType]);
 
   // 2. Feed K-line Data & Visual Commands
   useEffect(() => {
     const chart = chartRef.current;
     const candleSeries = candleSeriesRef.current;
+    const volumeSeries = volumeSeriesRef.current;
     if (!chart || !candleSeries || !k || k.length === 0) return;
 
     // Deduplicate and sort K-lines by ascending timestamp
@@ -118,22 +140,39 @@ export function TradingViewChart({
 
     const seenTimes = new Set<number>();
     const candleData: CandlestickData[] = [];
+    const volumeData: HistogramData[] = [];
 
     for (const item of sortedK) {
       const t = toUTCTimestamp(item.time);
       if (seenTimes.has(t)) continue;
       seenTimes.add(t);
 
+      const open = Number(item.open);
+      const close = Number(item.close);
+      const isUp = close >= open;
+
       candleData.push({
         time: t,
-        open: Number(item.open),
+        open,
         high: Number(item.high),
         low: Number(item.low),
-        close: Number(item.close),
+        close,
       });
+
+      if (item.volume !== undefined) {
+        volumeData.push({
+          time: t,
+          value: Number(item.volume),
+          color: isUp ? "rgba(239, 68, 68, 0.4)" : "rgba(34, 197, 94, 0.4)",
+        });
+      }
     }
 
     candleSeries.setData(candleData);
+
+    if (volumeSeries && volumeData.length > 0) {
+      volumeSeries.setData(volumeData);
+    }
 
     // Clean up old stroke series
     strokeSeriesRef.current.forEach((series) => {
@@ -283,8 +322,23 @@ export function TradingViewChart({
       candleSeries.setMarkers(markers);
     }
 
+    // 3.5 Auto-Focus or FitContent
+    if (focusedSignalTime) {
+      const focusTimestamp = toUTCTimestamp(focusedSignalTime);
+      const matchIndex = candleData.findIndex((d) => d.time === focusTimestamp);
+      if (matchIndex >= 0) {
+        const fromIdx = Math.max(0, matchIndex - 30);
+        const toIdx = Math.min(candleData.length - 1, matchIndex + 30);
+        chart.timeScale().setVisibleLogicalRange({
+          from: fromIdx,
+          to: toIdx,
+        });
+        return;
+      }
+    }
+
     chart.timeScale().fitContent();
-  }, [k, commands]);
+  }, [k, commands, focusedSignalTime]);
 
   return (
     <div
