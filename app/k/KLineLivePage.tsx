@@ -107,6 +107,7 @@ export default function KLineLivePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showVolume, setShowVolume] = useState(true);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [chartState, setChartState] = useState<VisualChartState | null>(null);
   const chartRequestIdRef = useRef(0);
 
@@ -117,6 +118,7 @@ export default function KLineLivePage() {
 
   const filteredSecurities = useMemo(() => {
     const term = stockFilter.trim().toLowerCase();
+    if (!term && !isSearchFocused) return [];
     if (!term) return securities.slice(0, SECURITY_SEARCH_LIMIT);
     return securities
       .filter((item) => {
@@ -125,7 +127,8 @@ export default function KLineLivePage() {
         return code.includes(term) || name.includes(term);
       })
       .slice(0, SECURITY_SEARCH_LIMIT);
-  }, [securities, stockFilter]);
+  }, [securities, stockFilter, isSearchFocused]);
+
 
   const setQueryAndUrl = useCallback((updates: Partial<KLineQuery>) => {
     setQuery((current) => {
@@ -271,6 +274,8 @@ export default function KLineLivePage() {
             id="stock-filter"
             placeholder="搜索代码或名称"
             value={stockFilter}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
             onChange={(event) => setStockFilter(event.target.value)}
           />
           {stockError && <p className="field-error">{stockError}</p>}
@@ -282,6 +287,7 @@ export default function KLineLivePage() {
                   type="button"
                   onClick={() => {
                     setStockFilter("");
+                    setIsSearchFocused(false);
                     setQueryAndUrl({ code: security.code });
                   }}
                 >
@@ -291,6 +297,7 @@ export default function KLineLivePage() {
             </div>
           )}
         </div>
+
 
         <label className="field">
           代码
