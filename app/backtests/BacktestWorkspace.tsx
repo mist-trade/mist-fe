@@ -22,6 +22,7 @@ import { BacktestConfigPanel, type BacktestConfigValues } from "./components/Bac
 import { BacktestRunHistory } from "./components/BacktestRunHistory";
 import { BacktestSignalTable } from "./components/BacktestSignalTable";
 import { ChanDiagnosisDrawer } from "./components/ChanDiagnosisDrawer";
+import { formatShanghaiDate } from "@/app/lib/time";
 
 // 动态载入 TradingView Canvas 渲染容器（禁用 SSR 避免 Canvas node 错误）
 const TradingViewChart = dynamic(
@@ -411,7 +412,7 @@ export function BacktestWorkspace() {
                 <span className="info-pill">{activeRun.period} 分钟</span>
                 <span className="info-pill">{activeRun.source.toUpperCase()}</span>
                 <span className="info-pill tnum">
-                  {activeRun.startDate.substring(0, 10)} ~ {activeRun.endDate.substring(0, 10)}
+                  {formatShanghaiDate(activeRun.startDate)} ~ {formatShanghaiDate(activeRun.endDate)}
                 </span>
                 <span className="signal-count-badge">
                   🎯 命中信号: {signals.length} 个

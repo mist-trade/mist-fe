@@ -24,6 +24,8 @@ import {
   type StrategyVersion,
 } from "@/app/api/client";
 
+import { formatShanghaiDateTime } from "@/app/lib/time";
+
 type StrategyTab = "registry" | "signals" | "alerts" | "backtests";
 
 const STRATEGY_SIGNAL_KINDS: readonly StrategySignalKind[] = ["entry", "exit"];
@@ -53,8 +55,7 @@ const parseNumberCsv = (value: string) =>
     .filter((item) => Number.isFinite(item));
 
 const formatDateTime = (value?: string | null) => {
-  if (!value) return "-";
-  return value.replace("T", " ").replace(".000Z", "");
+  return formatShanghaiDateTime(value);
 };
 
 const statusLabel = (status?: string) => status || "-";

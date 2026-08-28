@@ -10,6 +10,8 @@ import {
 } from "lightweight-charts";
 import { useTheme } from "next-themes";
 
+import { formatShanghaiDateTime, formatShanghaiDate } from "@/app/lib/time";
+
 function toUTCTimestamp(time: string | Date | number): UTCTimestamp {
   const ms = new Date(time).getTime();
   return Math.floor(ms / 1000) as UTCTimestamp;
@@ -63,9 +65,18 @@ export function TradingViewLineChart({
       crosshair: {
         mode: CrosshairMode.Normal,
       },
+      localization: {
+        dateFormat: "yyyy-MM-dd",
+        timeFormatter: (timestamp: number) => {
+          return formatShanghaiDateTime(timestamp * 1000);
+        },
+      },
       timeScale: {
         borderColor: gridColor,
         timeVisible: false,
+        tickMarkFormatter: (timestamp: number) => {
+          return formatShanghaiDate(timestamp * 1000);
+        },
       },
       rightPriceScale: {
         borderColor: gridColor,

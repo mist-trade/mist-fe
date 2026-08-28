@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { StrategyBacktestSignalResult } from "@/app/api/client";
+import { formatShanghaiDateTime } from "@/app/lib/time";
 
 interface BacktestSignalTableProps {
   signals: StrategyBacktestSignalResult[];
@@ -10,21 +11,7 @@ interface BacktestSignalTableProps {
 }
 
 const formatDateTime = (value?: string | null) => {
-  if (!value) return "-";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return value;
-  return d
-    .toLocaleString("zh-CN", {
-      timeZone: "Asia/Shanghai",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    })
-    .replace(/\//g, "-");
+  return formatShanghaiDateTime(value);
 };
 
 const BSP_LABEL_MAP: Record<string, { label: string; isBuy: boolean }> = {

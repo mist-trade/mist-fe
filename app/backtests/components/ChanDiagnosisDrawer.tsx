@@ -1,6 +1,7 @@
 "use client";
 
 import type { StrategyBacktestSignalResult } from "@/app/api/client";
+import { formatShanghaiDateTime } from "@/app/lib/time";
 
 interface ChanDiagnosisDrawerProps {
   signal: StrategyBacktestSignalResult | null;
@@ -8,8 +9,7 @@ interface ChanDiagnosisDrawerProps {
 }
 
 const formatDateTime = (value?: string | null) => {
-  if (!value) return "-";
-  return value.replace("T", " ").replace(/\.\d+Z$/, "");
+  return formatShanghaiDateTime(value);
 };
 
 const BSP_TITLES: Record<string, { title: string; desc: string }> = {
@@ -43,17 +43,24 @@ export function ChanDiagnosisDrawer({ signal, onClose }: ChanDiagnosisDrawerProp
   if (!signal) return null;
 
   const ctx = (signal.contextSnapshot || {}) as Record<string, unknown>;
-  const rawType = String(ctx.type || ctx.signalKind || "signal");
+  const chanBsp = (ctx.chanBsp || {}) as Record<string, unknown>;
+  const rawType = String(chanBsp.type || ctx.type || ctx.signalKind || "signal");
   const bspMeta = BSP_TITLES[rawType] || {
     title: `策略信号 (${rawType})`,
     desc: "自定义规则或策略匹配触发的信号快照。",
   };
 
-  const zg = ctx.zg !== undefined ? Number(ctx.zg) : null;
-  const zd = ctx.zd !== undefined ? Number(ctx.zd) : null;
-  const gg = ctx.gg !== undefined ? Number(ctx.gg) : null;
-  const dd = ctx.dd !== undefined ? Number(ctx.dd) : null;
-  const price = ctx.price !== undefined ? Number(ctx.price) : null;
+  const rawZg = chanBsp.zg ?? ctx.zg;
+  const rawZd = chanBsp.zd ?? ctx.zd;
+  const rawGg = chanBsp.gg ?? ctx.gg;
+  const rawDd = chanBsp.dd ?? ctx.dd;
+  const rawPrice = ctx.triggerPrice ?? ctx.price;
+
+  const zg = rawZg !== undefined && rawZg !== null ? Number(rawZg) : null;
+  const zd = rawZd !== undefined && rawZd !== null ? Number(rawZd) : null;
+  const gg = rawGg !== undefined && rawGg !== null ? Number(rawGg) : null;
+  const dd = rawDd !== undefined && rawDd !== null ? Number(rawDd) : null;
+  const price = rawPrice !== undefined && rawPrice !== null ? Number(rawPrice) : null;
 
   return (
     <div className="chan-diagnosis-drawer-backdrop" onClick={onClose}>

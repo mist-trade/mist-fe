@@ -33,6 +33,8 @@ import {
  * a recovery button.
  */
 
+import { formatShanghaiDateTime } from "@/app/lib/time";
+
 const REALTIME_SOURCES: readonly RealtimeSource[] = ["tdx", "qmt"];
 /** Backend cursor default page size (contract: min 1, max 100, default 20). */
 const DEFAULT_LIMIT = 20;
@@ -53,8 +55,7 @@ const EVIDENCE_LABEL: Record<RealtimeActiveEvidence, string> = {
 };
 
 const formatDateTime = (value?: string | null) => {
-  if (!value) return "-";
-  return value.replace("T", " ").replace(/\.\d+Z$/, "");
+  return formatShanghaiDateTime(value);
 };
 
 const activeLabel = (active: boolean | null): string => {

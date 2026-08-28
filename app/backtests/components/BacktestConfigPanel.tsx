@@ -29,6 +29,12 @@ const DEFAULT_CODE = "000001";
 const DEFAULT_PERIOD = 5;
 const DEFAULT_SOURCE: DataSourceValue = "tdx";
 
+import {
+  formatShanghaiLocalDateTimeInput,
+  getShanghaiDateParts,
+  parseShanghaiDateTimeToIso,
+} from "@/app/lib/time";
+
 const PRESET_STOCKS = [
   { code: "600519", name: "贵州茅台" },
   { code: "000001", name: "平安银行" },
@@ -36,23 +42,12 @@ const PRESET_STOCKS = [
   { code: "002594", name: "比亚迪" },
 ];
 
-function formatLocalDateTime(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const year = d.getFullYear();
-  const month = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  const hours = pad(d.getHours());
-  const minutes = pad(d.getMinutes());
-  const seconds = pad(d.getSeconds());
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-}
-
 function getDefaultDates() {
   const now = new Date();
   const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 3600 * 1000);
   return {
-    start: formatLocalDateTime(threeMonthsAgo),
-    end: formatLocalDateTime(now),
+    start: formatShanghaiLocalDateTimeInput(threeMonthsAgo),
+    end: formatShanghaiLocalDateTimeInput(now),
   };
 }
 
@@ -78,19 +73,20 @@ export function BacktestConfigPanel({
     versions.find((v) => v.id === selectedVersionId) ?? versions[0];
   const activeVersionId = activeVersion?.id ?? null;
 
-  // 快捷设置时间范围
+  // 快捷设置时间范围（按北京时区自然日与开收盘时段）
   const handleQuickRange = (days: number | "ytd") => {
-    const end = new Date();
-    let start: Date;
+    const parts = getShanghaiDateParts(new Date());
+    let startDateStr: string;
     if (days === "ytd") {
-      start = new Date(end.getFullYear(), 0, 1, 9, 30, 0);
+      startDateStr = `${parts.year}-01-01T09:30:00`;
     } else {
-      start = new Date(end.getTime() - days * 24 * 3600 * 1000);
-      start.setHours(9, 30, 0, 0);
+      const past = new Date(Date.now() - days * 24 * 3600 * 1000);
+      const pastParts = getShanghaiDateParts(past);
+      startDateStr = `${pastParts.formattedDate}T09:30:00`;
     }
-    end.setHours(15, 0, 0, 0);
-    setStartDateTime(formatLocalDateTime(start));
-    setEndDateTime(formatLocalDateTime(end));
+    const endDateStr = `${parts.formattedDate}T15:00:00`;
+    setStartDateTime(startDateStr);
+    setEndDateTime(endDateStr);
   };
 
   const handleSelectPresetStock = (code: string) => {
@@ -120,7 +116,9 @@ export function BacktestConfigPanel({
       setFormError("请选择完整的开始与结束时间");
       return;
     }
-    if (new Date(startDateTime) > new Date(endDateTime)) {
+    const startIso = parseShanghaiDateTimeToIso(startDateTime);
+    const endIso = parseShanghaiDateTimeToIso(endDateTime);
+    if (new Date(startIso) > new Date(endIso)) {
       setFormError("开始时间不能晚于结束时间");
       return;
     }
@@ -129,9 +127,6 @@ export function BacktestConfigPanel({
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean);
-
-    const startIso = new Date(startDateTime).toISOString();
-    const endIso = new Date(endDateTime).toISOString();
 
     onSubmit({
       strategyVersionId: activeVersionId,
