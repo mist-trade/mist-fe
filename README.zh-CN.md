@@ -151,7 +151,7 @@ docker build -t ghcr.io/mist-trade/mist-fe:local .
 docker run --rm -p 3000:3000 ghcr.io/mist-trade/mist-fe:local
 ```
 
-生产网关由 Nginx 统一调度，前端与后端 API 保持同源访问（`http://www.mist.local`）。
+生产网关由 Nginx 统一调度，前端与后端 API 保持同源访问。
 
 ---
 
