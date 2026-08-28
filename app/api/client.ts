@@ -865,7 +865,7 @@ export const fetchStrategyBacktestSignals = async (
 };
 
 export const fetchK = (query: KLineQuery) =>
-  requestJson<IFetchK[]>(getAnalysisApiBase(), "/v1/indicators/k", {
+  requestJson<IFetchK[]>(getMistApiBase(), "/v1/indicators/k", {
     method: "POST",
     body: JSON.stringify(query),
   });
