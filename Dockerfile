@@ -11,7 +11,7 @@ RUN pnpm config set registry ${NPM_REGISTRY}
 
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile --registry=${NPM_REGISTRY} --config.dangerouslyAllowAllBuilds=true
+RUN pnpm install --frozen-lockfile --registry=${NPM_REGISTRY}
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
