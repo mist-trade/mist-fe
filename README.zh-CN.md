@@ -1,8 +1,8 @@
 <p align="right">
-  <a href="./README.zh-CN.md">中文</a> | <strong>English</strong>
+  <strong>中文</strong> | <a href="./README.md">English</a>
 </p>
 
-# Mist Frontend (mist-fe) — A-share Visual Trading Desk
+# Mist Frontend (mist-fe)
 
 <p align="left">
   <img src="https://img.shields.io/badge/Next.js-16.1-black.svg" alt="Next.js" />
@@ -12,11 +12,9 @@
   <img src="https://img.shields.io/badge/ECharts-6.0-red.svg" alt="ECharts" />
 </p>
 
-A-share visual trading desk built on Next.js 16 (App Router) & React 19. Renders Chan Theory geometry, multi-period K-lines, and strategy workbenches via high-performance financial charts.
-
-> 中文版见 [README.zh-CN.md](./README.zh-CN.md)。
-
 Mist Frontend 是面向 A 股市场的专业量化分析与缠论可视化前端工作台，基于 Next.js 16（App Router）与 React 19 构建。通过 Apache ECharts 实现毫秒级高性能金融交互图表，支持纯正缠论结构渲染、策略工作台及订阅运维管理。
+
+
 
 ---
 
