@@ -22,7 +22,7 @@ import { BacktestConfigPanel, type BacktestConfigValues } from "./components/Bac
 import { BacktestRunHistory } from "./components/BacktestRunHistory";
 import { BacktestSignalTable } from "./components/BacktestSignalTable";
 import { ChanDiagnosisDrawer } from "./components/ChanDiagnosisDrawer";
-import { formatShanghaiDate } from "@/app/lib/time";
+import { formatShanghaiDate, formatShanghaiDateTime } from "@/app/lib/time";
 
 // 动态载入 TradingView Canvas 渲染容器（禁用 SSR 避免 Canvas node 错误）
 const TradingViewChart = dynamic(
@@ -158,21 +158,25 @@ export function BacktestWorkspace() {
     try {
       const symbolSignals = runSignals.filter((s) => s.securityCode === symbol);
 
-      // 并发拉取 K 线数据与缠论视觉指令
+      // 并发拉取 K 线数据与缠论视觉指令（时分秒精度，修复 substring(0,10) 截断 Bug）
+      const toVisualQueryDate = (iso: string) =>
+        formatShanghaiDateTime(iso).replace(/\//g, '-');
+      const visualStart = toVisualQueryDate(run.startDate);
+      const visualEnd = toVisualQueryDate(run.endDate);
       const [kLines, visualPayload] = await Promise.all([
         fetchK({
           code: symbol,
           period: run.period,
           source: run.source,
-          startDate: run.startDate.substring(0, 10),
-          endDate: run.endDate.substring(0, 10),
+          startDate: visualStart,
+          endDate: visualEnd,
         }),
         fetchVisualCommands({
           code: symbol,
           period: run.period,
           source: run.source,
-          startDate: run.startDate.substring(0, 10),
-          endDate: run.endDate.substring(0, 10),
+          startDate: visualStart,
+          endDate: visualEnd,
         }).catch(() => ({ totalKlines: 0, commands: [] })),
       ]);
 
