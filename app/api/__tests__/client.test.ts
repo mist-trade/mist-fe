@@ -704,7 +704,7 @@ describe("Mist frontend API client", () => {
     expect(result[0]).not.toHaveProperty("lowest");
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "/api/chan/v1/indicators/k",
+      "/api/mist/v1/indicators/k",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
