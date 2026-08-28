@@ -16,6 +16,7 @@ import {
 import { useTheme } from "next-themes";
 import type { TradingViewChartProps } from "./types";
 import type { VisualCommandVo } from "@/app/api/client";
+import { formatShanghaiDateTime, formatShanghaiTime } from "@/app/lib/time";
 
 function toUTCTimestamp(time: string | Date | number): UTCTimestamp {
   const ms = new Date(time).getTime();
@@ -65,16 +66,7 @@ export function TradingViewChart({
       localization: {
         dateFormat: "yyyy-MM-dd",
         timeFormatter: (timestamp: number) => {
-          const d = new Date(timestamp * 1000);
-          return d.toLocaleString("zh-CN", {
-            timeZone: "Asia/Shanghai",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          });
+          return formatShanghaiDateTime(timestamp * 1000);
         },
       },
       timeScale: {
@@ -82,13 +74,7 @@ export function TradingViewChart({
         timeVisible: true,
         secondsVisible: false,
         tickMarkFormatter: (timestamp: number) => {
-          const d = new Date(timestamp * 1000);
-          return d.toLocaleTimeString("zh-CN", {
-            timeZone: "Asia/Shanghai",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          });
+          return formatShanghaiTime(timestamp * 1000);
         },
       },
       rightPriceScale: {

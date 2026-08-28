@@ -43,21 +43,23 @@ const PRESET_STOCKS = [
   { code: "002594", name: "比亚迪" },
 ];
 
+import { formatShanghaiDate, getShanghaiDateParts } from "@/app/lib/time";
+
 function isDataSourceValue(value: string | null): value is DataSourceValue {
   return value !== null && DATA_SOURCE_VALUES.has(value as DataSourceValue);
 }
 
 function formatDateToIsoDay(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return formatShanghaiDate(d);
 }
 
 function todayString() {
-  return formatDateToIsoDay(new Date());
+  return formatShanghaiDate(new Date());
 }
 
 function defaultStartDate() {
-  return `${new Date().getFullYear()}-01-01`;
+  const parts = getShanghaiDateParts(new Date());
+  return `${parts.year}-01-01`;
 }
 
 function getDefaultQuery(): KLineQuery {
@@ -140,15 +142,17 @@ export default function KLineLivePage() {
 
   const handleQuickRange = (days: number | "ytd") => {
     const end = new Date();
-    let start: Date;
+    const endParts = getShanghaiDateParts(end);
+    let startDate: string;
     if (days === "ytd") {
-      start = new Date(end.getFullYear(), 0, 1);
+      startDate = `${endParts.year}-01-01`;
     } else {
-      start = new Date(end.getTime() - days * 24 * 3600 * 1000);
+      const past = new Date(Date.now() - days * 24 * 3600 * 1000);
+      startDate = formatShanghaiDate(past);
     }
     setQueryAndUrl({
-      startDate: formatDateToIsoDay(start),
-      endDate: formatDateToIsoDay(end),
+      startDate,
+      endDate: endParts.formattedDate,
     });
   };
 

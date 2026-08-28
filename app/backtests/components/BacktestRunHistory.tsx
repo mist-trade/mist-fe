@@ -1,6 +1,7 @@
 "use client";
 
 import type { StrategyBacktestRun } from "@/app/api/client";
+import { formatShanghaiShort } from "@/app/lib/time";
 
 interface BacktestRunHistoryProps {
   runs: StrategyBacktestRun[];
@@ -9,8 +10,7 @@ interface BacktestRunHistoryProps {
 }
 
 const formatTimeShort = (value?: string | null) => {
-  if (!value) return "-";
-  return value.replace("T", " ").replace(/\.\d+Z$/, "").substring(5);
+  return formatShanghaiShort(value);
 };
 
 const getStatusBadgeClass = (status: string) => {
