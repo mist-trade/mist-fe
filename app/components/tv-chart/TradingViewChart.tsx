@@ -32,6 +32,7 @@ export function TradingViewChart({
   focusedSignalTime = null,
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
@@ -143,10 +144,9 @@ export function TradingViewChart({
     const volumeSeries = volumeSeriesRef.current;
     if (!chart || !candleSeries || !k || k.length === 0) return;
 
-    // Deduplicate and convert K-lines by ascending timestamp
     const sortedK = [...k]
       .map((item) => ({
-        time: item.time,
+        ...item,
         open: Number(item.open),
         high: Number(item.high),
         low: Number(item.low),
@@ -248,119 +248,179 @@ export function TradingViewChart({
     if (biLines.length > 0) {
       const biSeries = chart.addLineSeries({
         color: "#FACC15",
-        lineWidth: 1,
+        lineWidth: 1.2,
         title: "笔",
         crosshairMarkerVisible: false,
       });
 
       const biDataPoints: LineData[] = [];
-      const biSeen = new Set<number>();
+      const biSeen = new Map<number, number>();
       for (const line of biLines) {
         if (line.startTime && line.startPrice !== undefined) {
           const t1 = toUTCTimestamp(line.startTime);
           const p1 = Number(line.startPrice);
-          if (!biSeen.has(t1) && Number.isFinite(p1)) {
-            biSeen.add(t1);
-            biDataPoints.push({ time: t1, value: p1 });
+          if (Number.isFinite(p1)) {
+            biSeen.set(t1, p1);
           }
         }
         if (line.endTime && line.endPrice !== undefined) {
           const t2 = toUTCTimestamp(line.endTime);
           const p2 = Number(line.endPrice);
-          if (!biSeen.has(t2) && Number.isFinite(p2)) {
-            biSeen.add(t2);
-            biDataPoints.push({ time: t2, value: p2 });
+          if (Number.isFinite(p2)) {
+            biSeen.set(t2, p2);
           }
         }
       }
-      biDataPoints.sort((a, b) => (a.time as number) - (b.time as number));
+
+      Array.from(biSeen.entries())
+        .sort((a, b) => a[0] - b[0])
+        .forEach(([time, value]) => {
+          biDataPoints.push({ time: time as UTCTimestamp, value });
+        });
+
       if (biDataPoints.length > 0) {
         biSeries.setData(biDataPoints);
         strokeSeriesRef.current.set("chan_bi", biSeries);
       }
     }
 
-    // 3.2 Draw Duan Lines (Magenta, 2px)
+    // 3.2 Draw Duan Lines (Magenta, 2.5px)
     if (duanLines.length > 0) {
       const duanSeries = chart.addLineSeries({
         color: "#E879F9",
-        lineWidth: 2,
+        lineWidth: 2.5,
         title: "线段",
         crosshairMarkerVisible: false,
       });
 
       const duanDataPoints: LineData[] = [];
-      const duanSeen = new Set<number>();
+      const duanSeen = new Map<number, number>();
       for (const line of duanLines) {
         if (line.startTime && line.startPrice !== undefined) {
           const t1 = toUTCTimestamp(line.startTime);
           const p1 = Number(line.startPrice);
-          if (!duanSeen.has(t1) && Number.isFinite(p1)) {
-            duanSeen.add(t1);
-            duanDataPoints.push({ time: t1, value: p1 });
+          if (Number.isFinite(p1)) {
+            duanSeen.set(t1, p1);
           }
         }
         if (line.endTime && line.endPrice !== undefined) {
           const t2 = toUTCTimestamp(line.endTime);
           const p2 = Number(line.endPrice);
-          if (!duanSeen.has(t2) && Number.isFinite(p2)) {
-            duanSeen.add(t2);
-            duanDataPoints.push({ time: t2, value: p2 });
+          if (Number.isFinite(p2)) {
+            duanSeen.set(t2, p2);
           }
         }
       }
-      duanDataPoints.sort((a, b) => (a.time as number) - (b.time as number));
+
+      Array.from(duanSeen.entries())
+        .sort((a, b) => a[0] - b[0])
+        .forEach(([time, value]) => {
+          duanDataPoints.push({ time: time as UTCTimestamp, value });
+        });
+
       if (duanDataPoints.length > 0) {
         duanSeries.setData(duanDataPoints);
         strokeSeriesRef.current.set("chan_duan", duanSeries);
       }
     }
 
-    // 3.3 Draw Zhongshu Upper/Lower Boundaries
-    zsBands.forEach((band, idx) => {
-      if (band.fromTime && band.toTime && band.top !== undefined && band.bottom !== undefined) {
+    // 3.3 Overlay Canvas: Render Zhongshu (中枢) Boxes with 4 closed borders & translucent fill
+    const drawZhongshuOverlay = () => {
+      const canvas = overlayCanvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container || !chartRef.current || !candleSeriesRef.current) return;
+
+      const currentChart = chartRef.current;
+      const currentCandle = candleSeriesRef.current;
+      const width = container.clientWidth;
+      const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      for (const band of zsBands) {
+        if (
+          !band.fromTime ||
+          !band.toTime ||
+          band.top === undefined ||
+          band.bottom === undefined
+        ) {
+          continue;
+        }
+
         const t1 = toUTCTimestamp(band.fromTime);
         const t2 = toUTCTimestamp(band.toTime);
         const top = Number(band.top);
         const bottom = Number(band.bottom);
-        if (t2 > t1 && Number.isFinite(top) && Number.isFinite(bottom)) {
-          const color = band.color || "#38BDF8";
-          const zgSeries = chart.addLineSeries({
-            color,
-            lineWidth: 1,
-            lineStyle: 0, // Solid
-            crosshairMarkerVisible: false,
-            priceLineVisible: false,
-          });
-          const zdSeries = chart.addLineSeries({
-            color,
-            lineWidth: 1,
-            lineStyle: 0,
-            crosshairMarkerVisible: false,
-            priceLineVisible: false,
-          });
+        if (!Number.isFinite(top) || !Number.isFinite(bottom) || t2 <= t1) {
+          continue;
+        }
 
-          zgSeries.setData([
-            { time: t1, value: top },
-            { time: t2, value: top },
-          ]);
-          zdSeries.setData([
-            { time: t1, value: bottom },
-            { time: t2, value: bottom },
-          ]);
+        const x1 = currentChart.timeScale().timeToCoordinate(t1);
+        const x2 = currentChart.timeScale().timeToCoordinate(t2);
+        const yTop = currentCandle.priceToCoordinate(top);
+        const yBottom = currentCandle.priceToCoordinate(bottom);
 
-          strokeSeriesRef.current.set(`zs_zg_${idx}`, zgSeries);
-          strokeSeriesRef.current.set(`zs_zd_${idx}`, zdSeries);
+        if (x1 !== null && x2 !== null && yTop !== null && yBottom !== null) {
+          const xLeft = Math.min(x1, x2);
+          const xRight = Math.max(x1, x2);
+          const yUpper = Math.min(yTop, yBottom);
+          const yLower = Math.max(yTop, yBottom);
+          const boxW = Math.max(2, xRight - xLeft);
+          const boxH = Math.max(1, yLower - yUpper);
+
+          const isDuan = band.layer === "chan_zs_duan";
+          const strokeColor = isDuan ? "#818CF8" : "#38BDF8";
+          const fillColor = isDuan
+            ? "rgba(129, 140, 248, 0.15)"
+            : "rgba(56, 189, 248, 0.12)";
+
+          // 1. Fill background box
+          ctx.fillStyle = fillColor;
+          ctx.fillRect(xLeft, yUpper, boxW, boxH);
+
+          // 2. Stroke all 4 borders (Top ZG, Bottom ZD, Left vertical, Right vertical)
+          ctx.strokeStyle = strokeColor;
+          ctx.lineWidth = isDuan ? 2 : 1.5;
+          if (isDuan) {
+            ctx.setLineDash([]);
+          } else {
+            ctx.setLineDash([4, 2]);
+          }
+          ctx.strokeRect(xLeft, yUpper, boxW, boxH);
+
+          // 3. Label tag
+          ctx.setLineDash([]);
+          ctx.fillStyle = strokeColor;
+          ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          const label = isDuan ? "段中枢" : "笔中枢";
+          const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 12;
+          ctx.fillText(
+            `${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`,
+            xLeft + 4,
+            textY
+          );
         }
       }
-    });
+    };
+
+    // Initial draw & subscribe to time scale scroll/pan/zoom
+    requestAnimationFrame(drawZhongshuOverlay);
+    chart.timeScale().subscribeVisibleLogicalRangeChange(drawZhongshuOverlay);
+    chart.timeScale().subscribeVisibleTimeRangeChange(drawZhongshuOverlay);
 
     // 3.4 Set Markers (1买/2买/3买)
     if (markers.length > 0) {
       markers.sort((a, b) => (a.time as number) - (b.time as number));
       candleSeries.setMarkers(markers);
     }
-
 
     // 3.5 Auto-Focus or FitContent
     if (focusedSignalTime) {
@@ -373,19 +433,26 @@ export function TradingViewChart({
           from: fromIdx,
           to: toIdx,
         });
+        requestAnimationFrame(drawZhongshuOverlay);
         return;
       }
     }
 
     chart.timeScale().fitContent();
-  }, [k, commands, focusedSignalTime]);
+    requestAnimationFrame(drawZhongshuOverlay);
+  }, [k, commands, focusedSignalTime, height]);
 
   return (
     <div
       ref={containerRef}
       className={`w-full relative rounded-lg overflow-hidden ${className}`}
       style={{ height }}
-    />
+    >
+      <canvas
+        ref={overlayCanvasRef}
+        className="pointer-events-none absolute inset-0 z-10"
+      />
+    </div>
   );
 }
 
