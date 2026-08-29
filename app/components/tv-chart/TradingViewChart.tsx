@@ -248,7 +248,7 @@ export function TradingViewChart({
     if (biLines.length > 0) {
       const biSeries = chart.addLineSeries({
         color: "#FACC15",
-        lineWidth: 1.2,
+        lineWidth: 1,
         title: "笔",
         crosshairMarkerVisible: false,
       });
@@ -284,11 +284,11 @@ export function TradingViewChart({
       }
     }
 
-    // 3.2 Draw Duan Lines (Magenta, 2.5px)
+    // 3.2 Draw Duan Lines (Magenta, 2px)
     if (duanLines.length > 0) {
       const duanSeries = chart.addLineSeries({
         color: "#E879F9",
-        lineWidth: 2.5,
+        lineWidth: 2,
         title: "线段",
         crosshairMarkerVisible: false,
       });
