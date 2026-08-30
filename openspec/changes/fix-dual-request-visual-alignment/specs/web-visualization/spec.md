@@ -4,7 +4,8 @@
 
 ## ADDED Requirements
 
-### Requirement: 前端双请求同参并发且时分秒精度
+### Requirement: Web Visualization Dual-Request Shall Be Same-Params At Second Precision
+The system SHALL enforce dual-request same-params at second precision for web visualization.
 
 #### Scenario: 同参并发且精度保留
 - **WHEN** `KLineLivePage` 或 `BacktestWorkspace` 并发请求 `fetchK` 与 `fetchVisualCommands`

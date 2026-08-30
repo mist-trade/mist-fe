@@ -11,6 +11,7 @@ The backtest configuration form SHALL accept time ranges with second-level preci
 - **WHEN** the user configures a backtest run time range (e.g. `2026-08-26 13:00:00` to `2026-08-26 15:00:00`)
 - **THEN** the form MUST accept second-level precision
 - **AND** the submitted date-time MUST be ISO-8601 formatted
+- **AND** the frontend MUST NOT truncate to `substring(0,10)`; visual queries MUST use `formatShanghaiDateTime(...).replace(/\//g,'-')` via `app/lib/time.ts` (`Asia/Shanghai`) at second precision for `fetchK`+`fetchVisualCommands` dual-request parity with `MarketDataPipeline`
 
 #### Scenario: All Chan layers render with toggleable legend controls
 - **WHEN** the workspace loads a K-line chart for a backtest run
@@ -27,7 +28,7 @@ The frontend client SHALL support the Chan structure endpoints and the strategy 
 
 #### Scenario: Chan structure endpoints are called through the client
 - **WHEN** the workspace needs K, merge-K, fenxing, bi, channel, duan or duan-channel data
-- **THEN** `client.ts` MUST provide typed fetchers for `POST /v1/indicators/k`, `POST /v1/chan/merge-k`, `POST /v1/chan/fenxing`, `POST /v1/chan/bi`, `POST /v1/chan/channel`, `POST /v1/chan/duan` and `POST /v1/chan/duan-channel`
+- **THEN** `client.ts` MUST provide typed fetchers for the dual-request path `POST /v1/indicators/k` (`fetchK`) and `GET /v1/visual/commands` (`fetchVisualCommands`) sharing the same `{code, period, source, startDate, endDate}` query at second precision via `app/lib/time.ts` (`Asia/Shanghai`) and the unified `MarketDataPipeline` (co-consumed with `visual.controller`), and MUST treat legacy `POST /v1/chan/*` 7-request fetchers as debug-only
 
 #### Scenario: Backtest lifecycle endpoints are called through the client
 - **WHEN** the workspace creates, polls or queries signals of a backtest run
