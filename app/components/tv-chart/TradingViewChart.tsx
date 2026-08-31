@@ -106,7 +106,8 @@ function prepareK(k: TradingViewChartProps["k"]): PreparedK {
       high: item.high,
       low: item.low,
       close,
-      volume: item.rawVolume,
+      // V 与成交量柱同源：优先 volume/vol，缺失时用 amount 兜底，避免图有柱但图例 V 为 "-"
+      volume: volForHistogram,
       amount: item.rawAmount,
       isUp,
     };
