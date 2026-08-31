@@ -11,6 +11,18 @@ export interface ChartKLine {
   volume?: number;
 }
 
+export interface OhlcHoverVo {
+  time: string | number | Date;
+  timeLabel: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number;
+  amount?: number;
+  isUp: boolean;
+}
+
 export interface TradingViewChartProps {
   k: IFetchK[];
   commands?: VisualCommandVo[];
@@ -19,6 +31,10 @@ export interface TradingViewChartProps {
   className?: string;
   onSignalClick?: (signal: unknown) => void;
   focusedSignalTime?: string | null;
+  /** 是否在图表左上角展示随十字线联动的 OHLCVA 悬浮图例，默认开启 */
+  showOhlcLegend?: boolean;
+  /** 十字线悬浮的 OHLC 回调，供外层在图表外渲染固定信息条 */
+  onOhlcHover?: (data: OhlcHoverVo | null) => void;
 }
 
 export interface TradingViewLineChartProps {

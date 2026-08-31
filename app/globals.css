@@ -1320,6 +1320,55 @@ table,
   font-family: monospace;
 }
 
+/* TradingView 图内 OHLCVA 悬浮图例（跟随十字线，左上角常驻） */
+.tv-ohlc-legend {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  z-index: 12;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  max-width: calc(100% - 18px);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-card);
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.tv-ohlc-legend--empty {
+  color: var(--text-muted);
+}
+
+.tv-ohlc-time {
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.tv-ohlc-sep {
+  opacity: 0.45;
+}
+
+.tv-ohlc-item {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tv-ohlc-item b {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 @media (max-width: 1024px) {
   .backtest-shell {
     grid-template-columns: 1fr;
