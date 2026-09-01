@@ -17,12 +17,11 @@ import {
 import { useTheme } from "next-themes";
 import type { OhlcHoverVo, TradingViewChartProps } from "./types";
 import type { VisualCommandVo } from "@/app/api/client";
-import { formatShanghaiDateTime, formatShanghaiTime } from "@/app/lib/time";
-
-function toUTCTimestamp(time: string | Date | number): UTCTimestamp {
-  const ms = new Date(time).getTime();
-  return Math.floor(ms / 1000) as UTCTimestamp;
-}
+import {
+  formatShanghaiDateTime,
+  formatShanghaiTime,
+  toUTCTimestamp,
+} from "@/app/lib/time";
 
 function formatPrice(v: number): string {
   if (!Number.isFinite(v)) return "-";

@@ -10,6 +10,7 @@
  *  - 时间固定时区，杜绝 toLocaleString 跨端不一致
  */
 import type { KpiMetric } from "./types";
+import { formatShanghaiDateTime, ASIA_SHANGHAI_TIMEZONE } from "@/app/lib/time";
 
 /** 千分位 + 固定小数位。 */
 export function formatNumber(value: number, decimals = 2): string {
@@ -61,21 +62,28 @@ export function formatKpiValue(metric: KpiMetric): string {
  */
 export function formatDateTime(
   iso: string,
-  timezone: string,
-  opts: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  }
+  timezone: string = ASIA_SHANGHAI_TIMEZONE,
+  opts?: Intl.DateTimeFormatOptions
 ): string {
+  if (
+    (!timezone ||
+      timezone === ASIA_SHANGHAI_TIMEZONE ||
+      timezone === "Asia/Shanghai") &&
+    !opts
+  ) {
+    return formatShanghaiDateTime(iso);
+  }
   try {
     return new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
       ...opts,
-      timeZone: timezone,
+      timeZone: timezone || ASIA_SHANGHAI_TIMEZONE,
     }).format(new Date(iso));
   } catch {
     // 时区非法时回退到本地

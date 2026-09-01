@@ -10,12 +10,11 @@ import {
 } from "lightweight-charts";
 import { useTheme } from "next-themes";
 
-import { formatShanghaiDateTime, formatShanghaiDate } from "@/app/lib/time";
-
-function toUTCTimestamp(time: string | Date | number): UTCTimestamp {
-  const ms = new Date(time).getTime();
-  return Math.floor(ms / 1000) as UTCTimestamp;
-}
+import {
+  formatShanghaiDateTime,
+  formatShanghaiDate,
+  toUTCTimestamp,
+} from "@/app/lib/time";
 
 export interface MultiLineSeriesData {
   name: string;
