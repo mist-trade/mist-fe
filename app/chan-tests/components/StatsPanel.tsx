@@ -1,26 +1,10 @@
 "use client";
 
 import type { SnapshotMeta } from "../lib/load-snapshot";
+import { formatShanghaiDateTime } from "@/app/lib/time";
 
 interface StatsPanelProps {
   meta: SnapshotMeta | null;
-}
-
-/**
- * 固定时区格式化，杜绝 toLocaleString 跨端不一致（hydration 风险）。
- * 服务端/客户端渲染同一 ISO → 同一字符串。
- */
-function formatGeneratedAt(iso: string): string {
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Shanghai",
-  }).format(new Date(iso));
 }
 
 export function StatsPanel({ meta }: StatsPanelProps) {
@@ -54,7 +38,7 @@ export function StatsPanel({ meta }: StatsPanelProps) {
         <Stat label="分型" value={s.fenxingCount} />
       </div>
       <div style={{ marginTop: 8, fontSize: 12, color: "var(--text-muted)" }}>
-        快照时间：{formatGeneratedAt(meta.generatedAt)} · 数据源：{
+        快照时间：{formatShanghaiDateTime(meta.generatedAt)} · 数据源：{
           meta.testCase.source
         } · 周期：{meta.testCase.period}
       </div>

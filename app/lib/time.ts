@@ -7,6 +7,8 @@
  *  - 页面输入组件（datetime-local）与时间戳转换显式绑定 Asia/Shanghai 偏移。
  */
 
+import type { UTCTimestamp } from "lightweight-charts";
+
 export const ASIA_SHANGHAI_TIMEZONE = "Asia/Shanghai";
 
 const shanghaiDateTimeFormatter = new Intl.DateTimeFormat("zh-CN", {
@@ -134,3 +136,12 @@ export function parseShanghaiDateTimeToIso(value: string): string {
   }
   return d.toISOString();
 }
+
+/**
+ * 将时间转换为 lightweight-charts 所需的秒级 UTCTimestamp
+ */
+export function toUTCTimestamp(time: string | Date | number): UTCTimestamp {
+  const ms = new Date(time).getTime();
+  return Math.floor(ms / 1000) as UTCTimestamp;
+}
+
