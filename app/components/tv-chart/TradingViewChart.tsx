@@ -124,6 +124,8 @@ export function TradingViewChart({
   subChartType = "volume",
   className = "",
   focusedSignalTime = null,
+  biColor,
+  biWidth,
   showOhlcLegend = true,
   onOhlcHover,
 }: TradingViewChartProps) {
@@ -339,7 +341,14 @@ export function TradingViewChart({
     }
 
     if (biLines.length > 0) {
-      const biSeries = chart.addLineSeries({ color: "#FACC15", lineWidth: 1, title: "笔", crosshairMarkerVisible: false });
+      const strokeColor = biColor || biLines[0]?.color || "#FACC15";
+      const strokeWidth = (biWidth || biLines[0]?.width || 1) as 1 | 2 | 3 | 4;
+      const biSeries = chart.addLineSeries({
+        color: strokeColor,
+        lineWidth: strokeWidth,
+        title: "笔",
+        crosshairMarkerVisible: false,
+      });
       const biSeen = new Map<number, number>();
       for (const line of biLines) {
         if (line.startTime && line.startPrice !== undefined) {

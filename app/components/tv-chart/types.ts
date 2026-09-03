@@ -31,6 +31,10 @@ export interface TradingViewChartProps {
   className?: string;
   onSignalClick?: (signal: unknown) => void;
   focusedSignalTime?: string | null;
+  /** 笔折线自定义颜色（默认 #FACC15） */
+  biColor?: string;
+  /** 笔折线线宽（默认 1） */
+  biWidth?: number;
   /** 是否在图表左上角展示随十字线联动的 OHLCVA 悬浮图例，默认开启 */
   showOhlcLegend?: boolean;
   /** 十字线悬浮的 OHLC 回调，供外层在图表外渲染固定信息条 */

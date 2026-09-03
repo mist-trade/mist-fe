@@ -265,6 +265,7 @@ export default function KLineLivePage() {
           <a href="/k" aria-current="page">
             K 线
           </a>
+          <a href="/chan">多周期缠论</a>
           <a href="/strategies">策略</a>
           <a href="/backtests">回测</a>
           <a href="/settings/realtime-subscriptions">实时订阅</a>
