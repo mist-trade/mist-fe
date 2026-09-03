@@ -88,14 +88,6 @@ export default function DualTimeframeChanPage() {
     setErrorMsg("");
 
     try {
-      // 构造 30m 图层
-      const layers30m = ["chan_bi"];
-      // 构造 5m 图层
-      const layers5m: string[] = [];
-      if (show5mBi) layers5m.push("chan_bi");
-      if (show5mZs) layers5m.push("chan_zs_bi");
-      if (show5mDuan) layers5m.push("chan_duan");
-
       const [k30, visual30, k5, visual5] = await Promise.all([
         fetchK({ code, period: 30, source, startDate, endDate }),
         fetchVisualCommands({
@@ -104,7 +96,7 @@ export default function DualTimeframeChanPage() {
           source,
           startDate,
           endDate,
-          layers: layers30m.join(","),
+          layers: "chan",
         }),
         fetchK({ code, period: 5, source, startDate, endDate }),
         fetchVisualCommands({
@@ -113,7 +105,7 @@ export default function DualTimeframeChanPage() {
           source,
           startDate,
           endDate,
-          layers: layers5m.length > 0 ? layers5m.join(",") : "chan_bi",
+          layers: "chan",
         }),
       ]);
 
@@ -121,17 +113,12 @@ export default function DualTimeframeChanPage() {
 
       setData30m({
         k: k30,
-        commands: show30mBi ? visual30.commands : [],
+        commands: visual30.commands,
       });
 
       setData5m({
         k: k5,
-        commands: visual5.commands.filter((cmd) => {
-          if (cmd.layer === "chan_bi" && !show5mBi) return false;
-          if (cmd.layer === "chan_zs_bi" && !show5mZs) return false;
-          if (cmd.layer === "chan_duan" && !show5mDuan) return false;
-          return true;
-        }),
+        commands: visual5.commands,
       });
     } catch (err) {
       if (requestIdRef.current !== reqId) return;
@@ -141,11 +128,30 @@ export default function DualTimeframeChanPage() {
         setIsLoading(false);
       }
     }
-  }, [code, source, startDate, endDate, show30mBi, show5mBi, show5mZs, show5mDuan]);
+  }, [code, source, startDate, endDate]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // 动态过滤的指令集（开关切换零网络开销，瞬时响应）
+  const displayedCommands30m = useMemo(() => {
+    if (!data30m?.commands) return [];
+    return data30m.commands.filter((cmd) => {
+      if (cmd.layer === "chan_bi") return show30mBi;
+      return false;
+    });
+  }, [data30m?.commands, show30mBi]);
+
+  const displayedCommands5m = useMemo(() => {
+    if (!data5m?.commands) return [];
+    return data5m.commands.filter((cmd) => {
+      if (cmd.layer === "chan_bi") return show5mBi;
+      if (cmd.layer === "chan_zs_bi") return show5mZs;
+      if (cmd.layer === "chan_duan") return show5mDuan;
+      return false;
+    });
+  }, [data5m?.commands, show5mBi, show5mZs, show5mDuan]);
 
   // 预设区间
   const handleSetQuickRange = (type: "jan2026" | "1m" | "3m" | "ytd") => {
@@ -468,7 +474,7 @@ export default function DualTimeframeChanPage() {
           </div>
           <TradingViewChart
             k={data30m?.k ?? []}
-            commands={data30m?.commands ?? []}
+            commands={displayedCommands30m}
             height={280}
             biColor="#FB923C"
             biWidth={2}
@@ -516,7 +522,7 @@ export default function DualTimeframeChanPage() {
           </div>
           <TradingViewChart
             k={data5m?.k ?? []}
-            commands={data5m?.commands ?? []}
+            commands={displayedCommands5m}
             height={420}
             biColor="#FACC15"
             biWidth={1}

@@ -411,6 +411,7 @@ export function TradingViewChart({
       if (!ctx) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
+      const visibleRange = currentChart.timeScale().getVisibleRange();
       for (const band of zsBands) {
         if (!band.fromTime || !band.toTime || band.top === undefined || band.bottom === undefined) continue;
         const t1 = toUTCTimestamp(band.fromTime);
@@ -418,8 +419,22 @@ export function TradingViewChart({
         const top = Number(band.top);
         const bottom = Number(band.bottom);
         if (!Number.isFinite(top) || !Number.isFinite(bottom) || t2 <= t1) continue;
-        const x1 = currentChart.timeScale().timeToCoordinate(t1);
-        const x2 = currentChart.timeScale().timeToCoordinate(t2);
+
+        let x1 = currentChart.timeScale().timeToCoordinate(t1);
+        let x2 = currentChart.timeScale().timeToCoordinate(t2);
+
+        if (visibleRange) {
+          if ((t2 as number) < (visibleRange.from as number) || (t1 as number) > (visibleRange.to as number)) {
+            continue;
+          }
+          if (x1 === null && (t1 as number) <= (visibleRange.from as number)) {
+            x1 = 0 as unknown as import("lightweight-charts").Coordinate;
+          }
+          if (x2 === null && (t2 as number) >= (visibleRange.to as number)) {
+            x2 = width as unknown as import("lightweight-charts").Coordinate;
+          }
+        }
+
         const yTop = currentCandle.priceToCoordinate(top);
         const yBottom = currentCandle.priceToCoordinate(bottom);
         if (x1 !== null && x2 !== null && yTop !== null && yBottom !== null) {
@@ -427,11 +442,11 @@ export function TradingViewChart({
           const xRight = Math.max(x1, x2);
           const yUpper = Math.min(yTop, yBottom);
           const yLower = Math.max(yTop, yBottom);
-          const boxW = Math.max(2, xRight - xLeft);
-          const boxH = Math.max(1, yLower - yUpper);
+          const boxW = Math.max(4, xRight - xLeft);
+          const boxH = Math.max(2, yLower - yUpper);
           const isDuan = band.layer === "chan_zs_duan";
           const strokeColor = isDuan ? "#818CF8" : "#38BDF8";
-          const fillColor = isDuan ? "rgba(129, 140, 248, 0.15)" : "rgba(56, 189, 248, 0.12)";
+          const fillColor = isDuan ? "rgba(129, 140, 248, 0.20)" : "rgba(56, 189, 248, 0.20)";
           ctx.fillStyle = fillColor;
           ctx.fillRect(xLeft, yUpper, boxW, boxH);
           ctx.strokeStyle = strokeColor;
@@ -440,15 +455,18 @@ export function TradingViewChart({
           ctx.strokeRect(xLeft, yUpper, boxW, boxH);
           ctx.setLineDash([]);
           ctx.fillStyle = strokeColor;
-          ctx.font = "11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
           const label = isDuan ? "段中枢" : "笔中枢";
-          const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 12;
+          const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14;
           ctx.fillText(`${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`, xLeft + 4, textY);
         }
       }
     };
 
     requestAnimationFrame(drawZhongshuOverlay);
+    const overlayTimer1 = setTimeout(drawZhongshuOverlay, 50);
+    const overlayTimer2 = setTimeout(drawZhongshuOverlay, 200);
+
     chart.timeScale().subscribeVisibleLogicalRangeChange(drawZhongshuOverlay);
     chart.timeScale().subscribeVisibleTimeRangeChange(drawZhongshuOverlay);
 
@@ -464,11 +482,6 @@ export function TradingViewChart({
         const fromIdx = Math.max(0, matchIndex - 30);
         const toIdx = Math.min(prepared.candleData.length - 1, matchIndex + 30);
         chart.timeScale().setVisibleLogicalRange({ from: fromIdx, to: toIdx });
-        requestAnimationFrame(drawZhongshuOverlay);
-        return () => {
-          chart.unsubscribeCrosshairMove(handleCrosshair);
-          containerEl?.removeEventListener("mouseleave", handleMouseLeave);
-        };
       }
     }
 
@@ -476,6 +489,8 @@ export function TradingViewChart({
     requestAnimationFrame(drawZhongshuOverlay);
 
     return () => {
+      clearTimeout(overlayTimer1);
+      clearTimeout(overlayTimer2);
       chart.unsubscribeCrosshairMove(handleCrosshair);
       containerEl?.removeEventListener("mouseleave", handleMouseLeave);
     };
