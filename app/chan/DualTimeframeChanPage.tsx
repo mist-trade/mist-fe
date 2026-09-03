@@ -106,6 +106,7 @@ export default function DualTimeframeChanPage() {
           startDate,
           endDate,
           layers: "chan",
+          macroPeriod: 30,
         }),
       ]);
 

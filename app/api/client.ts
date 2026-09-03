@@ -1021,6 +1021,7 @@ export interface VisualCommandQuery {
   count?: number;
   startDate?: string;
   endDate?: string;
+  macroPeriod?: number;
 }
 
 export const fetchVisualCommands = (query: VisualCommandQuery) => {
@@ -1033,6 +1034,7 @@ export const fetchVisualCommands = (query: VisualCommandQuery) => {
   if (query.count) params.count = String(query.count);
   if (query.startDate) params.startDate = query.startDate;
   if (query.endDate) params.endDate = query.endDate;
+  if (query.macroPeriod) params.macroPeriod = String(query.macroPeriod);
 
   return requestJson<VisualCommandPayloadVo>(
     getMistApiBase(),
