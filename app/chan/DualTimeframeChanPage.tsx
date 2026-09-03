@@ -213,7 +213,7 @@ export default function DualTimeframeChanPage() {
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
             onChange={(e) => setStockFilter(e.target.value)}
           />
-          {filteredSecurities.length > 0 && (
+          {isSearchFocused && filteredSecurities.length > 0 && (
             <div className="stock-results" role="listbox">
               {filteredSecurities.map((s) => (
                 <button

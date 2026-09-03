@@ -479,7 +479,7 @@ export function TradingViewChart({
       chart.unsubscribeCrosshairMove(handleCrosshair);
       containerEl?.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [prepared, commands, focusedSignalTime, height, handleCrosshair]);
+  }, [prepared, commands, focusedSignalTime, height, handleCrosshair, biColor, biWidth]);
 
   const legendUpColor = displayed?.isUp ? "#EF4444" : "#22C55E";
 
