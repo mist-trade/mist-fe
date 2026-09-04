@@ -58,12 +58,36 @@ describe("DualTimeframeChanPage", () => {
     });
   });
 
-  it("renders dual-timeframe headers and charts successfully", async () => {
+  it("renders 30M dual-timeframe headers and charts by default", async () => {
     render(<DualTimeframeChanPage />);
 
     expect(screen.getByText("多周期缠论工作台")).toBeInTheDocument();
-    expect(screen.getByText("30 分钟 K 线走势 · 大级别大局观")).toBeInTheDocument();
-    expect(screen.getByText("5 分钟 K 线微观结构 · 次级别笔与笔中枢放大镜")).toBeInTheDocument();
+    expect(
+      screen.getByText("日线 K 线走势 · 大级别宏观大局观")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("30 分钟 K 线走势 · 次级别笔与 30m 笔中枢")
+    ).toBeInTheDocument();
+
+    await waitFor(() => {
+      const charts = screen.getAllByTestId("tv-chart");
+      expect(charts).toHaveLength(2);
+    });
+  });
+
+  it("switches to 5M mode upon tab click", async () => {
+    const { fireEvent } = await import("@testing-library/react");
+    render(<DualTimeframeChanPage />);
+
+    const tab5m = screen.getByRole("tab", { name: /5M 级别联动/i });
+    fireEvent.click(tab5m);
+
+    expect(
+      screen.getByText("30 分钟 K 线走势 · 大级别大局观")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("5 分钟 K 线微观结构 · 次级别笔与 5m 笔中枢放大镜")
+    ).toBeInTheDocument();
 
     await waitFor(() => {
       const charts = screen.getAllByTestId("tv-chart");
