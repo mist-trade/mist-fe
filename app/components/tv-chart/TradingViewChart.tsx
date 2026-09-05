@@ -166,8 +166,13 @@ export function TradingViewChart({
     const textColor = isDark ? "#A0A0A0" : "#434343";
     const gridColor = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)";
 
+    const initialWidth =
+      containerRef.current.clientWidth ||
+      containerRef.current.offsetWidth ||
+      800;
+
     const chart = createChart(containerRef.current, {
-      width: containerRef.current.clientWidth,
+      width: initialWidth,
       height,
       layout: {
         background: { type: ColorType.Solid, color: bgColor },
@@ -230,15 +235,23 @@ export function TradingViewChart({
 
     const handleResize = () => {
       if (containerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({ width: containerRef.current.clientWidth });
+        const w = containerRef.current.clientWidth;
+        if (w > 0) {
+          chartRef.current.applyOptions({ width: w });
+        }
       }
     };
 
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(containerRef.current);
 
+    const rafId = requestAnimationFrame(() => {
+      handleResize();
+    });
+
     const strokeSeries = strokeSeriesRef.current;
     return () => {
+      cancelAnimationFrame(rafId);
       resizeObserver.disconnect();
       chart.remove();
       chartRef.current = null;

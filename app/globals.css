@@ -551,9 +551,9 @@ table,
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  max-width: 1440px;
+  width: 100%;
   min-height: 36px;
-  margin: 0 auto 12px;
+  margin: 0 0 12px;
   color: var(--text-secondary);
   font-size: 13px;
 }
@@ -574,9 +574,9 @@ table,
 }
 
 .kline-chart-area {
-  max-width: 1440px;
+  width: 100%;
   min-height: 620px;
-  margin: 0 auto;
+  margin: 0;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: var(--surface-raised);
@@ -769,12 +769,11 @@ table,
 
 .backtest-page,
 .backtest-workspace-page {
-  max-width: 1720px;
-  margin: 0 auto;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  width: 100%;
+  min-height: calc(100vh - 52px);
+  margin: 0;
+  padding: 0;
+  background: var(--surface-base);
 }
 
 .backtest-shell,
@@ -2023,8 +2022,12 @@ table,
    ========================================================================== */
 
 .kline-page,
-.backtest-page {
+.backtest-page,
+.chan-page,
+.strategies-page {
+  width: 100%;
   min-height: calc(100vh - 52px);
+  margin: 0;
   padding: 0;
   background: var(--surface-base);
 }

@@ -59,9 +59,11 @@ function defaultStartDate() {
   return `${parts.year}-01-01`;
 }
 
+const DEFAULT_CODE = "600519";
+
 function getDefaultQuery(): KLineQuery {
   return {
-    code: "",
+    code: DEFAULT_CODE,
     source: DEFAULT_SOURCE,
     period: DEFAULT_PERIOD,
     startDate: defaultStartDate(),
@@ -73,8 +75,9 @@ function getQueryFromUrl(): KLineQuery {
   if (typeof window === "undefined") return getDefaultQuery();
   const params = new URLSearchParams(window.location.search);
   const source = params.get("source");
+  const urlCode = params.get("code");
   return {
-    code: params.get("code") || "",
+    code: urlCode !== null ? urlCode : DEFAULT_CODE,
     source: isDataSourceValue(source) ? source : DEFAULT_SOURCE,
     period: Number(params.get("period") || DEFAULT_PERIOD),
     startDate: params.get("startDate") || defaultStartDate(),
@@ -97,7 +100,7 @@ function updateUrl(query: KLineQuery) {
 }
 
 export default function KLineLivePage() {
-  const [query, setQuery] = useState<KLineQuery>(getDefaultQuery);
+  const [query, setQuery] = useState<KLineQuery>(getQueryFromUrl);
   const [securities, setSecurities] = useState<SecurityOption[]>([]);
   const [stockFilter, setStockFilter] = useState("");
   const [stockError, setStockError] = useState("");
@@ -179,6 +182,15 @@ export default function KLineLivePage() {
           source: nextQuery.source,
           startDate: nextQuery.startDate,
           endDate: nextQuery.endDate,
+        }).catch((err) => {
+          console.warn("fetchVisualCommands failed, rendering raw K-line only:", err);
+          return {
+            code: nextQuery.code,
+            period: nextQuery.period,
+            source: nextQuery.source,
+            totalKlines: 0,
+            commands: [],
+          };
         }),
       ]);
 
@@ -202,9 +214,6 @@ export default function KLineLivePage() {
     }
   }, []);
 
-  useEffect(() => {
-    setQuery(getQueryFromUrl());
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -256,7 +265,7 @@ export default function KLineLivePage() {
       <WorkspaceShell
         storageKey="mist_workspace_sidebar_k"
         sidebarTitle={<h1 className="workspace-sidebar-title">K 线工作台</h1>}
-        sidebarWidth={300}
+        sidebarWidth={320}
         sidebar={
           <>
             <section className="kline-toolbar" aria-label="K 线查询">

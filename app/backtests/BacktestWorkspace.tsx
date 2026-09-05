@@ -625,7 +625,7 @@ export function BacktestWorkspace() {
       <WorkspaceShell
         storageKey="mist_workspace_sidebar_backtests"
         sidebarTitle={<h1 className="workspace-sidebar-title">回测工作台</h1>}
-        sidebarWidth={380}
+        sidebarWidth={320}
         sidebar={
           <>
             <BacktestConfigPanel

@@ -65,12 +65,21 @@ describe("KLineLivePage", () => {
     process.env = originalEnv;
   });
 
-  it("renders with securities and keeps chart empty when no query", async () => {
+  it("renders with securities and loads default 600519 chart when no query", async () => {
     render(<KLineLivePage />);
 
     expect(screen.getByRole("heading", { name: "K 线工作台" })).toBeInTheDocument();
+    expect(await screen.findByTestId("tv-chart")).toHaveTextContent("K lines: 1");
+    expect(mockedFetchK).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "600519" })
+    );
+  });
+
+  it("keeps chart empty when code is empty in URL", async () => {
+    window.history.pushState(null, "", "/k?code=");
+    render(<KLineLivePage />);
+
     expect(await screen.findByText("选择股票后加载 K 线")).toBeInTheDocument();
-    expect(mockedFetchK).not.toHaveBeenCalled();
     expect(screen.queryByTestId("tv-chart")).not.toBeInTheDocument();
   });
 

@@ -250,7 +250,7 @@ export default function StrategiesWorkspace() {
       <WorkspaceShell
         storageKey="mist_workspace_sidebar_strategies"
         sidebarTitle={<h1 className="workspace-sidebar-title">策略工作台</h1>}
-        sidebarWidth={300}
+        sidebarWidth={320}
         sidebar={
           <div className="strategy-sidebar" style={{ width: "100%", padding: 0, border: "none" }}>
             <div className="strategy-section-title">
