@@ -3,6 +3,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ThemeProvider } from "@/app/styles/ThemeProvider";
 import { TimeBasedThemeScript } from "@/app/styles/TimeBasedThemeScript";
 import { SWRProvider } from "@/app/lib/swr/SWRProvider";
+import { AppHeader } from "@/app/components/layout/AppHeader";
 import "./globals.css";
 import "@/app/styles/themes.css";
 
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className="antialiased">
         <AntdRegistry>
           <ThemeProvider>
+            <AppHeader />
             <SWRProvider>{children}</SWRProvider>
           </ThemeProvider>
         </AntdRegistry>

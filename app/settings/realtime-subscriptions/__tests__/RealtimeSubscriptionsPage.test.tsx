@@ -372,12 +372,10 @@ describe("RealtimeSubscriptionsPage", () => {
 
   // --- visible navigation ----------------------------------------------------
 
-  it("provides a visible navigation link to the settings route", async () => {
+  it("renders page header with route description", async () => {
     mockList(jest.fn().mockResolvedValue(buildPage([])));
     render(<RealtimeSubscriptionsPage />);
-    const link = screen.getByRole("link", { name: "实时订阅" }) as HTMLAnchorElement;
-    expect(link.getAttribute("href")).toBe("/settings/realtime-subscriptions");
-    expect(link.getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("heading", { name: "实时订阅路由" })).toBeInTheDocument();
   });
 
   // --- no raw control / forbidden mutations ---------------------------------

@@ -341,23 +341,13 @@ export default function RealtimeSubscriptionsPage() {
 
   return (
     <main className="settings-realtime-subscriptions">
-      <header className="strategy-header">
-        <div>
-          <h1>实时订阅路由</h1>
-          <p className="strategy-muted">
-            初始化、分页查看并激活/停用生产实时订阅 assignment。所有操作经 /api/mist，
-            不暴露 datasource 或终端控制路径。
-          </p>
-        </div>
-        <nav className="strategy-nav" aria-label="主导航">
-          <a href="/k">K 线</a>
-          <a href="/strategies">策略</a>
-          <a href="/backtests">回测</a>
-          <a href="/settings/realtime-subscriptions" aria-current="page">
-            实时订阅
-          </a>
-        </nav>
-      </header>
+      <div className="page-header" style={{ marginBottom: "20px" }}>
+        <h1>实时订阅路由</h1>
+        <p className="strategy-muted">
+          初始化、分页查看并激活/停用生产实时订阅 assignment。所有操作经 /api/mist，
+          不暴露 datasource 或终端控制路径。
+        </p>
+      </div>
 
       {/* Capacity summary — pagination-independent, sourced from sourceCapacities. */}
       <section className="capacity-summary" aria-label="实时订阅容量">

@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 import {
   createChart,
   type IChartApi,
-  type UTCTimestamp,
   ColorType,
   CrosshairMode,
 } from "lightweight-charts";
