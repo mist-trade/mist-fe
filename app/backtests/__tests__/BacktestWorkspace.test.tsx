@@ -176,4 +176,30 @@ describe("BacktestWorkspace", () => {
     fireEvent.click(screen.getByRole("button", { name: "✕" }));
     expect(screen.queryByRole("dialog", { name: "缠论中枢与背驰诊断" })).not.toBeInTheDocument();
   });
+
+  it("supports single-step replay mode toggle and stepping", async () => {
+    render(<BacktestWorkspace />);
+
+    await screen.findByRole("heading", { name: "发起回测任务" });
+    await screen.findByText(/版本 v1/);
+    fireEvent.click(screen.getByRole("button", { name: "发起回测" }));
+
+    await screen.findByTestId("mock-tv-chart");
+
+    // Replay bar should be rendered
+    expect(screen.getByText("🌐 全景视角")).toBeInTheDocument();
+    expect(screen.getByText("⏮ 单步复盘模式")).toBeInTheDocument();
+
+    // Toggle to replay mode
+    fireEvent.click(screen.getByText("⏮ 单步复盘模式"));
+
+    // Step buttons should be visible
+    expect(screen.getByRole("button", { name: "◀ 步退" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "步进 ▶" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "▶ 播放" })).toBeInTheDocument();
+
+    // Clicking a signal in table enters replay mode and focuses on it
+    fireEvent.click(screen.getByRole("button", { name: "诊断 & 定位" }));
+    expect(await screen.findByRole("dialog", { name: "缠论中枢与背驰诊断" })).toBeInTheDocument();
+  });
 });
