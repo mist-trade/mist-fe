@@ -13,6 +13,7 @@ import {
 } from "@/app/api/client";
 import dynamic from "next/dynamic";
 import type { IFetchK } from "@/app/api/types";
+import { WorkspaceShell } from "@/app/components/layout/WorkspaceShell";
 
 const TradingViewChart = dynamic(
   () => import("@/app/components/tv-chart/TradingViewChart"),
@@ -47,10 +48,6 @@ import { formatShanghaiDate, getShanghaiDateParts } from "@/app/lib/time";
 
 function isDataSourceValue(value: string | null): value is DataSourceValue {
   return value !== null && DATA_SOURCE_VALUES.has(value as DataSourceValue);
-}
-
-function formatDateToIsoDay(d: Date): string {
-  return formatShanghaiDate(d);
 }
 
 function todayString() {
@@ -255,187 +252,184 @@ export default function KLineLivePage() {
   };
 
   return (
-    <main className="kline-page">
-      <header className="kline-header">
-        <div>
-          <h1>K 线工作台</h1>
-          <p>基于 TradingView Lightweight Charts 的专业金融看盘与缠论分析工作台。</p>
-        </div>
-        <nav className="strategy-nav" aria-label="主导航">
-          <a href="/k" aria-current="page">
-            K 线
-          </a>
-          <a href="/chan">多周期缠论</a>
-          <a href="/strategies">策略</a>
-          <a href="/backtests">回测</a>
-          <a href="/settings/realtime-subscriptions">实时订阅</a>
-        </nav>
-      </header>
+    <div className="kline-page">
+      <WorkspaceShell
+        storageKey="mist_workspace_sidebar_k"
+        sidebarTitle={<h1 className="workspace-sidebar-title">K 线工作台</h1>}
+        sidebarWidth={300}
+        sidebar={
+          <>
+            <section className="kline-toolbar" aria-label="K 线查询">
+              <div className="field stock-search">
+                <label htmlFor="stock-filter">股票</label>
+                <input
+                  id="stock-filter"
+                  placeholder="搜索代码或名称"
+                  value={stockFilter}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                  onChange={(event) => setStockFilter(event.target.value)}
+                />
+                {stockError && <p className="field-error">{stockError}</p>}
+                {filteredSecurities.length > 0 && (
+                  <div className="stock-results" role="listbox">
+                    {filteredSecurities.map((security) => (
+                      <button
+                        key={security.code}
+                        type="button"
+                        onClick={() => {
+                          setStockFilter("");
+                          setIsSearchFocused(false);
+                          setQueryAndUrl({ code: security.code });
+                        }}
+                      >
+                        {security.code} {security.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-      <section className="kline-toolbar" aria-label="K 线查询">
-        <div className="field stock-search">
-          <label htmlFor="stock-filter">股票</label>
-          <input
-            id="stock-filter"
-            placeholder="搜索代码或名称"
-            value={stockFilter}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            onChange={(event) => setStockFilter(event.target.value)}
-          />
-          {stockError && <p className="field-error">{stockError}</p>}
-          {filteredSecurities.length > 0 && (
-            <div className="stock-results" role="listbox">
-              {filteredSecurities.map((security) => (
-                <button
-                  key={security.code}
-                  type="button"
-                  onClick={() => {
-                    setStockFilter("");
-                    setIsSearchFocused(false);
-                    setQueryAndUrl({ code: security.code });
-                  }}
+              <label className="field">
+                代码
+                <input
+                  value={query.code}
+                  onChange={(event) => setQueryAndUrl({ code: event.target.value.trim() })}
+                />
+              </label>
+
+              <label className="field">
+                数据源
+                <select
+                  value={query.source}
+                  onChange={(event) =>
+                    setQueryAndUrl({
+                      source: isDataSourceValue(event.target.value)
+                        ? event.target.value
+                        : DEFAULT_SOURCE,
+                    })
+                  }
                 >
-                  {security.code} {security.name}
-                </button>
-              ))}
+                  <option value="tdx">TDX</option>
+                  <option value="ef">东方财富</option>
+                  <option value="qmt">QMT</option>
+                </select>
+              </label>
+
+              <label className="field">
+                周期
+                <select
+                  value={query.period}
+                  onChange={(event) => setQueryAndUrl({ period: Number(event.target.value) })}
+                >
+                  <option value={1}>1 分钟</option>
+                  <option value={5}>5 分钟</option>
+                  <option value={15}>15 分钟</option>
+                  <option value={30}>30 分钟</option>
+                  <option value={60}>60 分钟</option>
+                  <option value={1440}>日线</option>
+                </select>
+              </label>
+
+              <label className="field">
+                开始
+                <input
+                  type="date"
+                  value={query.startDate}
+                  onChange={(event) => setQueryAndUrl({ startDate: event.target.value })}
+                />
+              </label>
+
+              <label className="field">
+                结束
+                <input
+                  type="date"
+                  value={query.endDate}
+                  onChange={(event) => setQueryAndUrl({ endDate: event.target.value })}
+                />
+              </label>
+
+              <button
+                type="button"
+                className="primary-action"
+                onClick={() => void refreshKLines()}
+                disabled={isRefreshing}
+              >
+                刷新 K 线
+              </button>
+            </section>
+
+            <div className="kline-sidebar-section">
+              <span className="kline-sidebar-section-title">快捷标的</span>
+              <div className="quick-presets-chips">
+                {PRESET_STOCKS.map((stock) => (
+                  <button
+                    key={stock.code}
+                    type="button"
+                    className={`quick-preset-btn ${query.code === stock.code ? "active" : ""}`}
+                    onClick={() => setQueryAndUrl({ code: stock.code })}
+                  >
+                    {stock.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="kline-sidebar-section">
+              <span className="kline-sidebar-section-title">快捷区间</span>
+              <div className="quick-presets-chips">
+                <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(7)}>近1周</button>
+                <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(30)}>近1月</button>
+                <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(90)}>近3月</button>
+                <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(180)}>近半年</button>
+                <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(365)}>近1年</button>
+                <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange("ytd")}>今年以来</button>
+              </div>
+            </div>
+          </>
+        }
+      >
+        {/* 右侧主面板顶部摘要与成交量开关 */}
+        <section className="kline-summary-bar">
+          <div className="kline-summary" aria-live="polite">
+            <strong>{query.code || "未选择股票"}</strong>
+            {selectedSecurity && <span>{selectedSecurity.name}</span>}
+            {statusMessage && <span>{statusMessage}</span>}
+            {chartError && <span className="field-error">{chartError}</span>}
+          </div>
+
+          <div className="subchart-toggle">
+            <button
+              type="button"
+              className={showVolume ? "active" : ""}
+              onClick={() => setShowVolume(!showVolume)}
+            >
+              {showVolume ? "📊 成交量 (显示中)" : "📊 成交量 (已隐藏)"}
+            </button>
+          </div>
+        </section>
+
+        {/* K 线图表大画布 */}
+        <section className="kline-chart-area" aria-label="K 线图表">
+          {!query.code && <div className="empty-state">选择股票后加载 K 线</div>}
+          {query.code && isLoading && (
+            <div className="w-full h-[620px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
+              加载数据与绘制指令中...
             </div>
           )}
-        </div>
-
-
-        <label className="field">
-          代码
-          <input
-            value={query.code}
-            onChange={(event) => setQueryAndUrl({ code: event.target.value.trim() })}
-          />
-        </label>
-
-        <label className="field">
-          数据源
-          <select
-            value={query.source}
-            onChange={(event) =>
-              setQueryAndUrl({
-                source: isDataSourceValue(event.target.value)
-                  ? event.target.value
-                  : DEFAULT_SOURCE,
-              })
-            }
-          >
-            <option value="tdx">TDX</option>
-            <option value="ef">东方财富</option>
-            <option value="qmt">QMT</option>
-          </select>
-        </label>
-
-        <label className="field">
-          周期
-          <select
-            value={query.period}
-            onChange={(event) => setQueryAndUrl({ period: Number(event.target.value) })}
-          >
-            <option value={1}>1 分钟</option>
-            <option value={5}>5 分钟</option>
-            <option value={15}>15 分钟</option>
-            <option value={30}>30 分钟</option>
-            <option value={60}>60 分钟</option>
-            <option value={1440}>日线</option>
-          </select>
-        </label>
-
-        <label className="field">
-          开始
-          <input
-            type="date"
-            value={query.startDate}
-            onChange={(event) => setQueryAndUrl({ startDate: event.target.value })}
-          />
-        </label>
-
-        <label className="field">
-          结束
-          <input
-            type="date"
-            value={query.endDate}
-            onChange={(event) => setQueryAndUrl({ endDate: event.target.value })}
-          />
-        </label>
-
-        <button
-          type="button"
-          className="primary-action"
-          onClick={() => void refreshKLines()}
-          disabled={isRefreshing}
-        >
-          刷新 K 线
-        </button>
-      </section>
-
-      {/* 快捷选择与成交量开关栏 */}
-      <section className="kline-quick-bar">
-        <div className="quick-presets-row">
-          <span className="preset-label">快捷标的:</span>
-          {PRESET_STOCKS.map((stock) => (
-            <button
-              key={stock.code}
-              type="button"
-              className={`quick-preset-btn ${query.code === stock.code ? "active" : ""}`}
-              onClick={() => setQueryAndUrl({ code: stock.code })}
-            >
-              {stock.name}
-            </button>
-          ))}
-        </div>
-
-        <div className="quick-presets-row">
-          <span className="preset-label">快捷区间:</span>
-          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(7)}>近1周</button>
-          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(30)}>近1月</button>
-          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(90)}>近3月</button>
-          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(180)}>近半年</button>
-          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange(365)}>近1年</button>
-          <button type="button" className="quick-preset-btn" onClick={() => handleQuickRange("ytd")}>今年以来</button>
-        </div>
-
-        <div className="subchart-toggle">
-          <button
-            type="button"
-            className={showVolume ? "active" : ""}
-            onClick={() => setShowVolume(!showVolume)}
-          >
-            {showVolume ? "📊 成交量 (显示中)" : "📊 成交量 (已隐藏)"}
-          </button>
-        </div>
-      </section>
-
-      <section className="kline-summary" aria-live="polite">
-        <strong>{query.code || "未选择股票"}</strong>
-        {selectedSecurity && <span>{selectedSecurity.name}</span>}
-        {statusMessage && <span>{statusMessage}</span>}
-        {chartError && <span className="field-error">{chartError}</span>}
-      </section>
-
-      <section className="kline-chart-area" aria-label="K 线图表">
-        {!query.code && <div className="empty-state">选择股票后加载 K 线</div>}
-        {query.code && isLoading && (
-          <div className="w-full h-[550px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
-            加载数据与绘制指令中...
-          </div>
-        )}
-        {query.code && !isLoading && !chartState && !chartError && statusMessage && (
-          <div className="empty-state">{statusMessage}</div>
-        )}
-        {chartState && (
-          <TradingViewChart
-            k={chartState.k}
-            commands={chartState.commands}
-            height={550}
-            subChartType={showVolume ? "volume" : "none"}
-          />
-        )}
-      </section>
-    </main>
+          {query.code && !isLoading && !chartState && !chartError && statusMessage && (
+            <div className="empty-state">{statusMessage}</div>
+          )}
+          {chartState && (
+            <TradingViewChart
+              k={chartState.k}
+              commands={chartState.commands}
+              height={620}
+              subChartType={showVolume ? "volume" : "none"}
+            />
+          )}
+        </section>
+      </WorkspaceShell>
+    </div>
   );
 }

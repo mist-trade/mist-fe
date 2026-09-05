@@ -131,8 +131,7 @@ describe("BacktestWorkspace", () => {
     expect(await screen.findByRole("heading", { name: "回测工作台" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "发起回测任务" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "发起回测" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "K 线" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "回测" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: "收起侧栏" })).toBeInTheDocument();
   });
 
   it("submits a backtest task, polls for completion, and renders chart and signals", async () => {

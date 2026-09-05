@@ -25,6 +25,7 @@ import {
 } from "@/app/api/client";
 
 import { formatShanghaiDateTime } from "@/app/lib/time";
+import { WorkspaceShell } from "@/app/components/layout/WorkspaceShell";
 
 type StrategyTab = "registry" | "signals" | "alerts" | "backtests";
 
@@ -245,46 +246,36 @@ export default function StrategiesWorkspace() {
   };
 
   return (
-    <main className="strategy-page">
-      <header className="strategy-header">
-        <div>
-          <h1>策略工作台</h1>
-          <p>管理策略定义、信号、告警和 signal-level 回测。</p>
-        </div>
-        <nav className="strategy-nav" aria-label="主导航">
-          <a href="/k">K 线</a>
-          <a href="/strategies" aria-current="page">
-            策略
-          </a>
-          <a href="/backtests">回测</a>
-          <a href="/settings/realtime-subscriptions">实时订阅</a>
-        </nav>
-      </header>
-
-      {loadError ? <p className="strategy-error">{loadError}</p> : null}
-      {isLoading ? <p className="strategy-muted">正在加载策略平台数据...</p> : null}
-
-      <section className="strategy-shell">
-        <aside className="strategy-sidebar">
-          <div className="strategy-section-title">
-            <h2>策略库</h2>
-            <span>{strategies.length} 个策略</span>
+    <div className="strategy-page" style={{ padding: 0, minHeight: "calc(100vh - 52px)" }}>
+      <WorkspaceShell
+        storageKey="mist_workspace_sidebar_strategies"
+        sidebarTitle={<h1 className="workspace-sidebar-title">策略工作台</h1>}
+        sidebarWidth={300}
+        sidebar={
+          <div className="strategy-sidebar" style={{ width: "100%", padding: 0, border: "none" }}>
+            <div className="strategy-section-title">
+              <h2>策略库</h2>
+              <span>{strategies.length} 个策略</span>
+            </div>
+            <div className="strategy-list">
+              {strategies.map((item) => (
+                <button
+                  className={item.id === selectedId ? "selected" : ""}
+                  key={item.id}
+                  onClick={() => setSelectedId(item.id)}
+                  type="button"
+                >
+                  <strong>{item.name}</strong>
+                  <span>{item.status}</span>
+                  <small>当前版本 #{item.currentVersionId ?? "-"}</small>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="strategy-list">
-            {strategies.map((item) => (
-              <button
-                className={item.id === selectedId ? "selected" : ""}
-                key={item.id}
-                onClick={() => setSelectedId(item.id)}
-                type="button"
-              >
-                <strong>{item.name}</strong>
-                <span>{item.status}</span>
-                <small>当前版本 #{item.currentVersionId ?? "-"}</small>
-              </button>
-            ))}
-          </div>
-        </aside>
+        }
+      >
+        {loadError ? <p className="strategy-error">{loadError}</p> : null}
+        {isLoading ? <p className="strategy-muted">正在加载策略平台数据...</p> : null}
 
         <section className="strategy-main-panel">
           <div className="strategy-tabs" role="tablist" aria-label="策略工作区">
@@ -614,7 +605,7 @@ export default function StrategiesWorkspace() {
             </section>
           ) : null}
         </section>
-      </section>
-    </main>
+      </WorkspaceShell>
+    </div>
   );
 }

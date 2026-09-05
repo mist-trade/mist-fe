@@ -23,6 +23,7 @@ import { BacktestRunHistory } from "./components/BacktestRunHistory";
 import { BacktestSignalTable } from "./components/BacktestSignalTable";
 import { ChanDiagnosisDrawer } from "./components/ChanDiagnosisDrawer";
 import { BacktestReplayBar } from "./components/BacktestReplayBar";
+import { WorkspaceShell } from "@/app/components/layout/WorkspaceShell";
 import { formatShanghaiDate, formatShanghaiDateTime } from "@/app/lib/time";
 
 // 动态载入 TradingView Canvas 渲染容器（禁用 SSR 避免 Canvas node 错误）
@@ -620,53 +621,38 @@ export function BacktestWorkspace() {
   }, {});
 
   return (
-    <main className="backtest-page">
-      {/* 顶部标题区与主导航 */}
-      <header className="kline-header">
-        <div>
-          <h1>回测工作台</h1>
-          <p>
-            基于 TradingView 硬件加速画布，执行多标的与历史区间策略回测，全图层毫秒级复盘缠论与买卖点。
-          </p>
-        </div>
-        <nav className="strategy-nav" aria-label="主导航">
-          <a href="/k">K 线</a>
-          <a href="/strategies">策略</a>
-          <a href="/backtests" aria-current="page">
-            回测
-          </a>
-          <a href="/settings/realtime-subscriptions">实时订阅</a>
-        </nav>
-      </header>
+    <div className="backtest-page">
+      <WorkspaceShell
+        storageKey="mist_workspace_sidebar_backtests"
+        sidebarTitle={<h1 className="workspace-sidebar-title">回测工作台</h1>}
+        sidebarWidth={380}
+        sidebar={
+          <>
+            <BacktestConfigPanel
+              strategies={strategies}
+              selectedStrategyId={selectedStrategyId}
+              onSelectStrategyId={handleSelectStrategyId}
+              versions={versions}
+              onSubmit={handleStartBacktest}
+              isRunning={isRunning}
+            />
+            <BacktestRunHistory
+              runs={runs}
+              activeRunId={activeRun?.id ?? null}
+              onSelectRun={handleSelectRun}
+            />
+          </>
+        }
+      >
+        {/* 状态与错误提示 */}
+        {(loadError || statusMessage) && (
+          <section className="backtest-status-bar" aria-live="polite">
+            {statusMessage && <span className="status-msg">{statusMessage}</span>}
+            {loadError && <span className="error-msg">{loadError}</span>}
+          </section>
+        )}
 
-      {/* 状态与错误提示 */}
-      {(loadError || statusMessage) && (
-        <section className="backtest-status-bar" aria-live="polite">
-          {statusMessage && <span className="status-msg">{statusMessage}</span>}
-          {loadError && <span className="error-msg">{loadError}</span>}
-        </section>
-      )}
-
-      {/* 主工作区双栏布局 */}
-      <section className="backtest-shell">
-        {/* 左侧：回测配置表单 + 历史记录 */}
-        <aside className="backtest-sidebar-col">
-          <BacktestConfigPanel
-            strategies={strategies}
-            selectedStrategyId={selectedStrategyId}
-            onSelectStrategyId={handleSelectStrategyId}
-            versions={versions}
-            onSubmit={handleStartBacktest}
-            isRunning={isRunning}
-          />
-          <BacktestRunHistory
-            runs={runs}
-            activeRunId={activeRun?.id ?? null}
-            onSelectRun={handleSelectRun}
-          />
-        </aside>
-
-        {/* 右侧：指标参数条 + 标的切换 Tabs + K 线图表 + 信号明细表格 */}
+        {/* 指标参数条 + 标的切换 Tabs + K 线图表 + 信号明细表格 */}
         <section className="backtest-main-col">
           {activeRun && (
             <div className="backtest-metrics-bar">
@@ -780,14 +766,14 @@ export function BacktestWorkspace() {
             />
           )}
         </section>
-      </section>
+      </WorkspaceShell>
 
       {/* 缠论中枢与背驰下钻诊断抽屉 */}
       <ChanDiagnosisDrawer
         signal={selectedSignal}
         onClose={() => setSelectedSignal(null)}
       />
-    </main>
+    </div>
   );
 }
 

@@ -12,6 +12,7 @@ import {
 import dynamic from "next/dynamic";
 import type { IFetchK } from "@/app/api/types";
 import { formatShanghaiDate, getShanghaiDateParts } from "@/app/lib/time";
+import { WorkspaceShell } from "@/app/components/layout/WorkspaceShell";
 
 const TradingViewChart = dynamic(
   () => import("@/app/components/tv-chart/TradingViewChart"),
@@ -345,400 +346,317 @@ export default function DualTimeframeChanPage() {
     dataMicro?.commands.filter((c) => c.layer === "chan_zs_bi").length ?? 0;
 
   return (
-    <main className="kline-page">
-      <header className="kline-header">
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <h1 style={{ margin: 0 }}>多周期缠论工作台</h1>
-            <span
-              style={{
-                fontSize: "12px",
-                fontWeight: 600,
-                background: "rgba(59, 130, 246, 0.15)",
-                color: "var(--accent-primary, #3B82F6)",
-                padding: "2px 8px",
-                borderRadius: "4px",
-                border: "1px solid rgba(59, 130, 246, 0.3)",
-              }}
-            >
-              双周期联动 · {currentConfig.tagline}
-            </span>
-          </div>
-          <p style={{ marginTop: "4px", color: "var(--text-secondary)" }}>
-            大级别宏观大局观（大笔锁定走势） + 次级别微观结构中枢放大镜（严格嵌套切分）。
-          </p>
-        </div>
-        <nav className="strategy-nav" aria-label="主导航">
-          <a href="/k">K 线</a>
-          <a href="/chan" aria-current="page">
-            多周期缠论
-          </a>
-          <a href="/strategies">策略</a>
-          <a href="/backtests">回测</a>
-          <a href="/settings/realtime-subscriptions">实时订阅</a>
-        </nav>
-      </header>
+    <div className="chan-page" style={{ minHeight: "calc(100vh - 52px)", background: "var(--surface-base)" }}>
+      <WorkspaceShell
+        storageKey="mist_workspace_sidebar_chan"
+        sidebarTitle={<h1 className="workspace-sidebar-title">多周期缠论工作台</h1>}
+        sidebarWidth={300}
+        sidebar={
+          <>
+            {/* 控制工具栏 */}
+            <section className="kline-toolbar" aria-label="查询与控制">
+              <div className="field stock-search">
+                <label htmlFor="stock-filter">股票搜索</label>
+                <input
+                  id="stock-filter"
+                  placeholder="输入代码或名称搜索"
+                  value={stockFilter}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                  onChange={(e) => setStockFilter(e.target.value)}
+                />
+                {isSearchFocused && filteredSecurities.length > 0 && (
+                  <div className="stock-results" role="listbox">
+                    {filteredSecurities.map((s) => (
+                      <button
+                        key={s.code}
+                        type="button"
+                        onClick={() => {
+                          setCode(s.code);
+                          setStockFilter("");
+                          setIsSearchFocused(false);
+                        }}
+                      >
+                        {s.code} {s.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-      {/* 联动模式切换胶囊栏 */}
-      <section
-        style={{
-          maxWidth: "1440px",
-          margin: "0 auto 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          flexWrap: "wrap",
-        }}
-      >
-        <div
-          style={{
-            display: "inline-flex",
-            background: "var(--surface-sunken, #1F2937)",
-            padding: "3px",
-            borderRadius: "8px",
-            border: "1px solid var(--border-subtle, #374151)",
-          }}
-          role="tablist"
-          aria-label="联动级别选择"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "30m"}
-            onClick={() => handleModeChange("30m")}
-            style={{
-              padding: "6px 14px",
-              fontSize: "13px",
-              fontWeight: mode === "30m" ? 700 : 500,
-              borderRadius: "6px",
-              border: "none",
-              background:
-                mode === "30m"
-                  ? "var(--accent-primary, #3B82F6)"
-                  : "transparent",
-              color: mode === "30m" ? "#fff" : "var(--text-secondary)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>🎯</span>
-            <span>30M 级别联动</span>
-            <span
-              style={{
-                fontSize: "10px",
-                background:
-                  mode === "30m"
-                    ? "rgba(255, 255, 255, 0.25)"
-                    : "rgba(59, 130, 246, 0.15)",
-                color: mode === "30m" ? "#fff" : "#60A5FA",
-                padding: "1px 5px",
-                borderRadius: "3px",
-              }}
-            >
-              主做 · 日线+30m中枢
-            </span>
-          </button>
+              <label className="field">
+                股票代码
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.trim())}
+                  placeholder="代码 (如 000001)"
+                />
+              </label>
 
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mode === "5m"}
-            onClick={() => handleModeChange("5m")}
-            style={{
-              padding: "6px 14px",
-              fontSize: "13px",
-              fontWeight: mode === "5m" ? 700 : 500,
-              borderRadius: "6px",
-              border: "none",
-              background:
-                mode === "5m"
-                  ? "var(--accent-primary, #3B82F6)"
-                  : "transparent",
-              color: mode === "5m" ? "#fff" : "var(--text-secondary)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <span>⚡</span>
-            <span>5M 级别联动</span>
-            <span
-              style={{
-                fontSize: "10px",
-                background:
-                  mode === "5m"
-                    ? "rgba(255, 255, 255, 0.25)"
-                    : "rgba(59, 130, 246, 0.15)",
-                color: mode === "5m" ? "#fff" : "#60A5FA",
-                padding: "1px 5px",
-                borderRadius: "3px",
-              }}
-            >
-              日内 · 30m+5m中枢
-            </span>
-          </button>
-        </div>
-
-        <span style={{ fontSize: "12px", color: "var(--text-muted, #9CA3AF)" }}>
-          {mode === "30m"
-            ? "当前正观测：上图日线大笔 + 下图 30 分钟笔及日线约束下的 30m 笔中枢"
-            : "当前正观测：上图 30 分钟大笔 + 下图 5 分钟笔及 30m 约束下的 5m 笔中枢"}
-        </span>
-      </section>
-
-      {/* 控制工具栏 */}
-      <section className="kline-toolbar" aria-label="查询与控制">
-        <div className="field stock-search">
-          <label htmlFor="stock-filter">股票搜索</label>
-          <input
-            id="stock-filter"
-            placeholder="输入代码或名称搜索"
-            value={stockFilter}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-            onChange={(e) => setStockFilter(e.target.value)}
-          />
-          {isSearchFocused && filteredSecurities.length > 0 && (
-            <div className="stock-results" role="listbox">
-              {filteredSecurities.map((s) => (
-                <button
-                  key={s.code}
-                  type="button"
-                  onClick={() => {
-                    setCode(s.code);
-                    setStockFilter("");
-                    setIsSearchFocused(false);
-                  }}
+              <label className="field">
+                数据源
+                <select
+                  value={source}
+                  onChange={(e) => setSource(e.target.value as DataSourceValue)}
                 >
-                  {s.code} {s.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+                  <option value="qmt">QMT (实盘/高精度)</option>
+                  <option value="tdx">TDX</option>
+                  <option value="ef">东方财富</option>
+                </select>
+              </label>
 
-        <label className="field">
-          股票代码
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value.trim())}
-            placeholder="代码 (如 000001)"
-          />
-        </label>
+              <label className="field">
+                开始日期
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </label>
 
-        <label className="field">
-          数据源
-          <select
-            value={source}
-            onChange={(e) => setSource(e.target.value as DataSourceValue)}
-          >
-            <option value="qmt">QMT (实盘/高精度)</option>
-            <option value="tdx">TDX</option>
-            <option value="ef">东方财富</option>
-          </select>
-        </label>
+              <label className="field">
+                结束日期
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </label>
 
-        <label className="field">
-          开始日期
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </label>
-
-        <label className="field">
-          结束日期
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </label>
-
-        <div className="field" style={{ justifyContent: "flex-end" }}>
-          <button
-            type="button"
-            className="action-button"
-            onClick={loadData}
-            disabled={isLoading}
-            style={{
-              padding: "8px 16px",
-              background: "var(--accent-primary, #3B82F6)",
-              color: "#fff",
-              borderRadius: "6px",
-              fontWeight: 600,
-              cursor: isLoading ? "not-allowed" : "pointer",
-            }}
-          >
-            {isLoading ? "加载中..." : "刷新数据"}
-          </button>
-        </div>
-      </section>
-
-      {/* 快捷选择与图层开关条 */}
-      <section className="kline-quick-bar">
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <span className="preset-label">快捷标的:</span>
-          {PRESET_STOCKS.map((s) => (
-            <button
-              key={s.code}
-              type="button"
-              className={`preset-button ${code === s.code ? "active" : ""}`}
-              onClick={() => setCode(s.code)}
-              style={{
-                padding: "4px 10px",
-                fontSize: "12px",
-                borderRadius: "4px",
-                border: "1px solid var(--border-subtle)",
-                background:
-                  code === s.code
-                    ? "var(--accent-primary, #3B82F6)"
-                    : "var(--surface-raised)",
-                color: code === s.code ? "#fff" : "var(--text-primary)",
-                cursor: "pointer",
-              }}
-            >
-              {s.name} ({s.code})
-            </button>
-          ))}
-
-          <span className="preset-label" style={{ marginLeft: "12px" }}>
-            快捷时间:
-          </span>
-          {currentConfig.quickRanges.map((r) => {
-            const range = r.getRange();
-            const isActive =
-              startDate === range.start && endDate === range.end;
-            return (
               <button
-                key={r.id}
                 type="button"
-                onClick={() => handleSelectQuickRange(range)}
+                className="action-button primary-action"
+                onClick={loadData}
+                disabled={isLoading}
                 style={{
-                  padding: "4px 8px",
-                  fontSize: "12px",
-                  borderRadius: "4px",
-                  border: "1px solid var(--border-subtle)",
-                  background: isActive
-                    ? "var(--accent-primary, #3B82F6)"
-                    : "transparent",
-                  color: isActive ? "#fff" : "var(--text-secondary)",
-                  cursor: "pointer",
-                  fontWeight: r.isPrimary ? 600 : 400,
+                  padding: "8px 16px",
+                  background: "var(--brand, #3B82F6)",
+                  color: "#fff",
+                  borderRadius: "6px",
+                  fontWeight: 600,
+                  cursor: isLoading ? "not-allowed" : "pointer",
                 }}
               >
-                {r.label}
+                {isLoading ? "加载中..." : "刷新数据"}
               </button>
-            );
-          })}
-        </div>
+            </section>
 
-        {/* 图层复选开关（动态自适应当前模式级别） */}
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={showMacroBi}
-              onChange={(e) => setShowMacroBi(e.target.checked)}
-            />
-            <span style={{ color: "#FB923C", fontWeight: 600 }}>
-              ● {currentConfig.macroLabel} 笔 (亮橙)
-            </span>
-          </label>
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={showMicroBi}
-              onChange={(e) => setShowMicroBi(e.target.checked)}
-            />
-            <span style={{ color: "#FACC15", fontWeight: 600 }}>
-              ● {currentConfig.microLabel} 笔 (金黄)
-            </span>
-          </label>
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={showMicroZs}
-              onChange={(e) => setShowMicroZs(e.target.checked)}
-            />
-            <span style={{ color: "#38BDF8", fontWeight: 600 }}>
-              ■ {currentConfig.microLabel} 笔中枢 (天蓝)
-            </span>
-          </label>
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={showMicroDuan}
-              onChange={(e) => setShowMicroDuan(e.target.checked)}
-            />
-            <span style={{ color: "#E879F9" }}>
-              {currentConfig.microLabel} 线段
-            </span>
-          </label>
-        </div>
-      </section>
+            {/* 快捷标的 */}
+            <div className="kline-sidebar-section">
+              <span className="kline-sidebar-section-title">快捷标的</span>
+              <div className="quick-presets-chips">
+                {PRESET_STOCKS.map((s) => (
+                  <button
+                    key={s.code}
+                    type="button"
+                    className={`preset-button quick-preset-btn ${code === s.code ? "active" : ""}`}
+                    onClick={() => setCode(s.code)}
+                  >
+                    {s.name} ({s.code})
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      {errorMsg && (
-        <div
+            {/* 快捷时间 */}
+            <div className="kline-sidebar-section">
+              <span className="kline-sidebar-section-title">快捷时间</span>
+              <div className="quick-presets-chips">
+                {currentConfig.quickRanges.map((r) => {
+                  const range = r.getRange();
+                  const isActive = startDate === range.start && endDate === range.end;
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      className={`quick-preset-btn ${isActive ? "active" : ""}`}
+                      onClick={() => handleSelectQuickRange(range)}
+                      style={{ fontWeight: r.isPrimary ? 600 : 400 }}
+                    >
+                      {r.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 缠论图层开关 */}
+            <div className="kline-sidebar-section">
+              <span className="kline-sidebar-section-title">缠论图层显示</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={showMacroBi}
+                    onChange={(e) => setShowMacroBi(e.target.checked)}
+                  />
+                  <span style={{ color: "#FB923C", fontWeight: 600 }}>
+                    ● {currentConfig.macroLabel} 笔 (亮橙)
+                  </span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={showMicroBi}
+                    onChange={(e) => setShowMicroBi(e.target.checked)}
+                  />
+                  <span style={{ color: "#FACC15", fontWeight: 600 }}>
+                    ● {currentConfig.microLabel} 笔 (金黄)
+                  </span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={showMicroZs}
+                    onChange={(e) => setShowMicroZs(e.target.checked)}
+                  />
+                  <span style={{ color: "#38BDF8", fontWeight: 600 }}>
+                    ■ {currentConfig.microLabel} 笔中枢 (天蓝)
+                  </span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={showMicroDuan}
+                    onChange={(e) => setShowMicroDuan(e.target.checked)}
+                  />
+                  <span style={{ color: "#E879F9" }}>
+                    {currentConfig.microLabel} 线段
+                  </span>
+                </label>
+              </div>
+            </div>
+          </>
+        }
+      >
+        {/* 联动模式切换胶囊栏 */}
+        <section
           style={{
-            maxWidth: "1440px",
-            margin: "0 auto 12px",
-            padding: "10px 14px",
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            color: "#EF4444",
-            borderRadius: "6px",
-            fontSize: "13px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            flexWrap: "wrap",
+            padding: "8px 12px",
+            background: "var(--surface-raised)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "8px",
           }}
         >
-          {errorMsg}
-        </div>
-      )}
+          <div
+            style={{
+              display: "inline-flex",
+              background: "var(--surface-sunken, #1F2937)",
+              padding: "3px",
+              borderRadius: "8px",
+              border: "1px solid var(--border-subtle, #374151)",
+            }}
+            role="tablist"
+            aria-label="联动级别选择"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "30m"}
+              onClick={() => handleModeChange("30m")}
+              style={{
+                padding: "6px 14px",
+                fontSize: "13px",
+                fontWeight: mode === "30m" ? 700 : 500,
+                borderRadius: "6px",
+                border: "none",
+                background:
+                  mode === "30m"
+                    ? "var(--brand, #3B82F6)"
+                    : "transparent",
+                color: mode === "30m" ? "#fff" : "var(--text-secondary)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span>🎯</span>
+              <span>30M 级别联动</span>
+              <span
+                style={{
+                  fontSize: "10px",
+                  background:
+                    mode === "30m"
+                      ? "rgba(255, 255, 255, 0.25)"
+                      : "rgba(59, 130, 246, 0.15)",
+                  color: mode === "30m" ? "#fff" : "#60A5FA",
+                  padding: "1px 5px",
+                  borderRadius: "3px",
+                }}
+              >
+                主做 · 日线+30m中枢
+              </span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "5m"}
+              onClick={() => handleModeChange("5m")}
+              style={{
+                padding: "6px 14px",
+                fontSize: "13px",
+                fontWeight: mode === "5m" ? 700 : 500,
+                borderRadius: "6px",
+                border: "none",
+                background:
+                  mode === "5m"
+                    ? "var(--brand, #3B82F6)"
+                    : "transparent",
+                color: mode === "5m" ? "#fff" : "var(--text-secondary)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span>⚡</span>
+              <span>5M 级别联动</span>
+              <span
+                style={{
+                  fontSize: "10px",
+                  background:
+                    mode === "5m"
+                      ? "rgba(255, 255, 255, 0.25)"
+                      : "rgba(59, 130, 246, 0.15)",
+                  color: mode === "5m" ? "#fff" : "#60A5FA",
+                  padding: "1px 5px",
+                  borderRadius: "3px",
+                }}
+              >
+                日内 · 30m+5m中枢
+              </span>
+            </button>
+          </div>
+
+          <span style={{ fontSize: "12px", color: "var(--text-muted, #9CA3AF)" }}>
+            {mode === "30m"
+              ? "当前正观测：上图日线大笔 + 下图 30 分钟笔及日线约束下的 30m 笔中枢"
+              : "当前正观测：上图 30 分钟大笔 + 下图 5 分钟笔及 30m 约束下的 5m 笔中枢"}
+          </span>
+        </section>
+
+        {errorMsg && (
+          <div
+            style={{
+              padding: "10px 14px",
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+              color: "#EF4444",
+              borderRadius: "6px",
+              fontSize: "13px",
+            }}
+          >
+            {errorMsg}
+          </div>
+        )}
 
       {/* 双周期分屏展示区 */}
       <div
@@ -916,6 +834,7 @@ export default function DualTimeframeChanPage() {
           )}
         </section>
       </div>
-    </main>
+      </WorkspaceShell>
+    </div>
   );
 }
