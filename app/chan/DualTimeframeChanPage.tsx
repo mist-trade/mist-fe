@@ -350,7 +350,7 @@ export default function DualTimeframeChanPage() {
       <WorkspaceShell
         storageKey="mist_workspace_sidebar_chan"
         sidebarTitle={<h1 className="workspace-sidebar-title">多周期缠论工作台</h1>}
-        sidebarWidth={300}
+        sidebarWidth={320}
         sidebar={
           <>
             {/* 控制工具栏 */}
@@ -661,8 +661,7 @@ export default function DualTimeframeChanPage() {
       {/* 双周期分屏展示区 */}
       <div
         style={{
-          maxWidth: "1440px",
-          margin: "0 auto",
+          width: "100%",
           display: "flex",
           flexDirection: "column",
           gap: "16px",
@@ -711,7 +710,7 @@ export default function DualTimeframeChanPage() {
           <TradingViewChart
             k={dataMacro?.k ?? []}
             commands={displayedCommandsMacro}
-            height={280}
+            height={360}
             biColor="#FB923C"
             biWidth={2}
           />
@@ -761,7 +760,7 @@ export default function DualTimeframeChanPage() {
           <TradingViewChart
             k={dataMicro?.k ?? []}
             commands={displayedCommandsMicro}
-            height={420}
+            height={520}
             biColor="#FACC15"
             biWidth={1}
           />

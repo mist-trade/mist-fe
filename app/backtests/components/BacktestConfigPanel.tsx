@@ -240,27 +240,25 @@ export function BacktestConfigPanel({
           </div>
         </div>
 
-        <div className="field-row-2">
-          <label className="field">
-            开始时间
-            <input
-              type="datetime-local"
-              step="1"
-              value={startDateTime}
-              onChange={(e) => setStartDateTime(e.target.value)}
-            />
-          </label>
+        <label className="field">
+          开始时间
+          <input
+            type="datetime-local"
+            step="1"
+            value={startDateTime}
+            onChange={(e) => setStartDateTime(e.target.value)}
+          />
+        </label>
 
-          <label className="field">
-            结束时间
-            <input
-              type="datetime-local"
-              step="1"
-              value={endDateTime}
-              onChange={(e) => setEndDateTime(e.target.value)}
-            />
-          </label>
-        </div>
+        <label className="field">
+          结束时间
+          <input
+            type="datetime-local"
+            step="1"
+            value={endDateTime}
+            onChange={(e) => setEndDateTime(e.target.value)}
+          />
+        </label>
       </div>
 
       {formError ? <p className="strategy-error">{formError}</p> : null}
