@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import {
   listStrategies,
@@ -22,6 +22,7 @@ import { BacktestConfigPanel, type BacktestConfigValues } from "./components/Bac
 import { BacktestRunHistory } from "./components/BacktestRunHistory";
 import { BacktestSignalTable } from "./components/BacktestSignalTable";
 import { ChanDiagnosisDrawer } from "./components/ChanDiagnosisDrawer";
+import { BacktestReplayBar } from "./components/BacktestReplayBar";
 import { formatShanghaiDate, formatShanghaiDateTime } from "@/app/lib/time";
 
 // 动态载入 TradingView Canvas 渲染容器（禁用 SSR 避免 Canvas node 错误）
@@ -47,6 +48,20 @@ export function BacktestWorkspace() {
   const [signals, setSignals] = useState<StrategyBacktestSignalResult[]>([]);
   const [selectedSignal, setSelectedSignal] = useState<StrategyBacktestSignalResult | null>(null);
   const [showVolume, setShowVolume] = useState(true);
+
+  // 全量原始走势与全局指令
+  const [rawK, setRawK] = useState<IFetchK[]>([]);
+  const [fullCommands, setFullCommands] = useState<VisualCommandVo[]>([]);
+  const [allSignalCommands, setAllSignalCommands] = useState<VisualCommandVo[]>([]);
+
+  // 单步推演复盘控制状态
+  const [isReplayMode, setIsReplayMode] = useState<boolean>(false);
+  const [cursorIndex, setCursorIndex] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [playSpeed, setPlaySpeed] = useState<number>(500);
+  const [replayCommands, setReplayCommands] = useState<VisualCommandVo[]>([]);
+  const replayCommandsCache = useRef<Map<string, VisualCommandVo[]>>(new Map());
+  const activeReplayReqId = useRef<number>(0);
 
   const [chart, setChart] = useState<ChartWorkspaceState | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -207,6 +222,35 @@ export function BacktestWorkspace() {
 
       const mergedCommands = [...(visualPayload.commands || []), ...signalCommands];
 
+      setRawK(kLines);
+      setFullCommands(visualPayload.commands || []);
+      setAllSignalCommands(signalCommands);
+      setCursorIndex(Math.max(0, kLines.length - 1));
+      setReplayCommands(visualPayload.commands || []);
+      setIsPlaying(false);
+
+      // Seed cache for the completed end date
+      const visualEndKey = toVisualQueryDate(run.endDate);
+      replayCommandsCache.current.set(visualEndKey, visualPayload.commands || []);
+
+      // 预热该标的的所有信号关键帧，确保单步跳转零网络延迟秒切
+      for (const sig of symbolSignals) {
+        const timeKey = toVisualQueryDate(sig.signalTime);
+        if (!replayCommandsCache.current.has(timeKey)) {
+          void fetchVisualCommands({
+            code: symbol,
+            period: run.period,
+            source: run.source,
+            startDate: visualStart,
+            endDate: timeKey,
+          })
+            .then((res) => {
+              replayCommandsCache.current.set(timeKey, res.commands || []);
+            })
+            .catch(() => {});
+        }
+      }
+
       setChart({
         symbol,
         k: kLines,
@@ -346,13 +390,229 @@ export function BacktestWorkspace() {
     }
   };
 
-  // 信号点击聚焦并打开诊断抽屉
+  // 当前选中标的专属的信号列表
+  const symbolSignals = useMemo(() => {
+    return signals.filter((s) => s.securityCode === selectedSymbol);
+  }, [signals, selectedSymbol]);
+
+  // 标的买卖点信号与 K 线数组的下标对齐索引
+  const signalIndices = useMemo(() => {
+    if (!rawK || rawK.length === 0 || !symbolSignals || symbolSignals.length === 0) return [];
+    return symbolSignals
+      .map((sig) => {
+        const sigTime = new Date(sig.signalTime).getTime();
+        let idx = rawK.findIndex((item) => new Date(item.time).getTime() === sigTime);
+        if (idx < 0) {
+          idx = rawK.findIndex((item) => new Date(item.time).getTime() >= sigTime);
+        }
+        return { signal: sig, index: idx };
+      })
+      .filter((item) => item.index >= 0)
+      .sort((a, b) => a.index - b.index);
+  }, [rawK, symbolSignals]);
+
+  // 信号点击聚焦并打开诊断抽屉，同时在回测模式下瞬移游标切入单步复盘
   const handleSelectSignal = (sig: StrategyBacktestSignalResult) => {
     setSelectedSignal(sig);
     if (sig.securityCode !== selectedSymbol && activeRun) {
       void handleSelectSymbol(sig.securityCode);
     }
+    if (rawK.length > 0) {
+      const sigTime = new Date(sig.signalTime).getTime();
+      let targetIdx = rawK.findIndex((k) => new Date(k.time).getTime() === sigTime);
+      if (targetIdx < 0) {
+        targetIdx = rawK.findIndex((k) => new Date(k.time).getTime() >= sigTime);
+      }
+      if (targetIdx >= 0) {
+        setCursorIndex(targetIdx);
+        setIsReplayMode(true);
+      }
+    }
   };
+
+  // 单步推演交互操作集
+  const handleToggleReplayMode = (active: boolean) => {
+    setIsReplayMode(active);
+    setIsPlaying(false);
+    if (active && cursorIndex === 0 && rawK.length > 0) {
+      setCursorIndex(rawK.length - 1);
+    }
+  };
+
+  const handleStepPrev = useCallback(() => {
+    setCursorIndex((prev) => Math.max(0, prev - 1));
+  }, []);
+
+  const handleStepNext = useCallback(() => {
+    setCursorIndex((prev) => Math.min(rawK.length - 1, prev + 1));
+  }, [rawK.length]);
+
+  const handleJumpFirst = useCallback(() => {
+    setCursorIndex(0);
+  }, []);
+
+  const handleJumpLast = useCallback(() => {
+    setCursorIndex(Math.max(0, rawK.length - 1));
+  }, [rawK.length]);
+
+  const handleJumpPrevSignal = useCallback(() => {
+    const prev = [...signalIndices].reverse().find((s) => s.index < cursorIndex);
+    if (prev) {
+      setCursorIndex(prev.index);
+      setSelectedSignal(prev.signal);
+    }
+  }, [signalIndices, cursorIndex]);
+
+  const handleJumpNextSignal = useCallback(() => {
+    const next = signalIndices.find((s) => s.index > cursorIndex);
+    if (next) {
+      setCursorIndex(next.index);
+      setSelectedSignal(next.signal);
+    }
+  }, [signalIndices, cursorIndex]);
+
+  const handleSeek = useCallback(
+    (index: number) => {
+      const clamped = Math.max(0, Math.min(rawK.length - 1, index));
+      setCursorIndex(clamped);
+      const matched = signalIndices.find((s) => s.index === clamped);
+      if (matched) {
+        setSelectedSignal(matched.signal);
+      }
+    },
+    [rawK.length, signalIndices]
+  );
+
+  const handleTogglePlay = useCallback(() => {
+    if (!isPlaying && cursorIndex >= rawK.length - 1) {
+      setCursorIndex(0);
+    }
+    setIsPlaying((prev) => !prev);
+  }, [isPlaying, cursorIndex, rawK.length]);
+
+  // 游标推进时拉取或从缓存获取截至当期时刻的缠论几何图形
+  useEffect(() => {
+    if (!isReplayMode || !activeRun || !selectedSymbol || rawK.length === 0) {
+      return;
+    }
+    const currentBar = rawK[cursorIndex];
+    if (!currentBar) return;
+
+    const toVisualQueryDate = (iso: string | Date | number) =>
+      formatShanghaiDateTime(iso).replace(/\//g, "-");
+    const timeKey = toVisualQueryDate(currentBar.time);
+
+    if (replayCommandsCache.current.has(timeKey)) {
+      setReplayCommands(replayCommandsCache.current.get(timeKey)!);
+      return;
+    }
+
+    const reqId = ++activeReplayReqId.current;
+    const visualStart = toVisualQueryDate(activeRun.startDate);
+
+    fetchVisualCommands({
+      code: selectedSymbol,
+      period: activeRun.period,
+      source: activeRun.source,
+      startDate: visualStart,
+      endDate: timeKey,
+    })
+      .then((res) => {
+        const cmds = res.commands || [];
+        replayCommandsCache.current.set(timeKey, cmds);
+        if (activeReplayReqId.current === reqId) {
+          setReplayCommands(cmds);
+        }
+      })
+      .catch(() => {});
+  }, [isReplayMode, cursorIndex, activeRun, selectedSymbol, rawK]);
+
+  // 自动播放定时推演
+  useEffect(() => {
+    if (!isPlaying || !isReplayMode) return;
+    const timer = setInterval(() => {
+      setCursorIndex((prev) => {
+        if (prev >= rawK.length - 1) {
+          setIsPlaying(false);
+          return prev;
+        }
+        const nextIdx = prev + 1;
+        const matched = signalIndices.find((s) => s.index === nextIdx);
+        if (matched) {
+          setSelectedSignal(matched.signal);
+        }
+        return nextIdx;
+      });
+    }, playSpeed);
+    return () => clearInterval(timer);
+  }, [isPlaying, isReplayMode, rawK.length, playSpeed, signalIndices]);
+
+  // 全局键盘快捷键：[ 或 ← 步退，] 或 → 步进，Space 播放暂停，PageUp/PageDown 切买卖点
+  useEffect(() => {
+    if (!isReplayMode || rawK.length === 0) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+
+      if (e.key === "[" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        setCursorIndex((prev) => Math.max(0, prev - 1));
+      } else if (e.key === "]" || e.key === "ArrowRight") {
+        e.preventDefault();
+        setCursorIndex((prev) => Math.min(rawK.length - 1, prev + 1));
+      } else if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        handleTogglePlay();
+      } else if (e.key === "PageUp") {
+        e.preventDefault();
+        handleJumpPrevSignal();
+      } else if (e.key === "PageDown") {
+        e.preventDefault();
+        handleJumpNextSignal();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setCursorIndex(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        setCursorIndex(rawK.length - 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isReplayMode, rawK.length, handleTogglePlay, handleJumpPrevSignal, handleJumpNextSignal]);
+
+  // 根据当前复盘模式构建最终展示的图表数据与几何指令
+  const displayedChart = useMemo(() => {
+    if (!rawK || rawK.length === 0) return chart;
+    if (!isReplayMode) {
+      return {
+        symbol: selectedSymbol,
+        k: rawK,
+        commands: [...fullCommands, ...allSignalCommands],
+      };
+    }
+    const currentBar = rawK[cursorIndex];
+    const currentBarTimeMs = currentBar ? new Date(currentBar.time).getTime() : 0;
+    const visibleSignalCommands = allSignalCommands.filter((cmd) => {
+      return cmd.time ? new Date(cmd.time).getTime() <= currentBarTimeMs : true;
+    });
+    return {
+      symbol: selectedSymbol,
+      k: rawK.slice(0, cursorIndex + 1),
+      commands: [...replayCommands, ...visibleSignalCommands],
+    };
+  }, [
+    chart,
+    isReplayMode,
+    selectedSymbol,
+    rawK,
+    cursorIndex,
+    fullCommands,
+    allSignalCommands,
+    replayCommands,
+  ]);
 
   const symbolSignalCounts = (signals || []).reduce<Record<string, number>>((acc, s) => {
     acc[s.securityCode] = (acc[s.securityCode] || 0) + 1;
@@ -459,9 +719,36 @@ export function BacktestWorkspace() {
             </div>
           ) : null}
 
+          {/* 回测单步推演复盘控制栏 */}
+          {activeRun && activeRun.status === "completed" && rawK.length > 0 && (
+            <BacktestReplayBar
+              isReplayMode={isReplayMode}
+              onToggleReplayMode={handleToggleReplayMode}
+              cursorIndex={cursorIndex}
+              totalBars={rawK.length}
+              currentBar={rawK[cursorIndex] || null}
+              signalIndices={signalIndices}
+              onStepPrev={handleStepPrev}
+              onStepNext={handleStepNext}
+              onJumpFirst={handleJumpFirst}
+              onJumpLast={handleJumpLast}
+              onJumpPrevSignal={handleJumpPrevSignal}
+              onJumpNextSignal={handleJumpNextSignal}
+              onSeek={handleSeek}
+              isPlaying={isPlaying}
+              onTogglePlay={handleTogglePlay}
+              playSpeed={playSpeed}
+              onChangeSpeed={setPlaySpeed}
+              onOpenDiagnosis={() => {
+                const activeSig = signalIndices.find((s) => s.index === cursorIndex)?.signal;
+                if (activeSig) setSelectedSignal(activeSig);
+              }}
+            />
+          )}
+
           {/* 图表展示区 */}
           <div className="backtest-chart-box">
-            {!chart ? (
+            {!displayedChart ? (
               <div className="empty-state">
                 {isRunning
                   ? "回测计算中，完成后将自动呈现 K 线与买卖点标记…"
@@ -469,11 +756,17 @@ export function BacktestWorkspace() {
               </div>
             ) : (
               <TradingViewChart
-                k={chart.k}
-                commands={chart.commands}
+                k={displayedChart.k}
+                commands={displayedChart.commands}
                 height={520}
                 subChartType={showVolume ? "volume" : "none"}
-                focusedSignalTime={selectedSignal?.signalTime ?? null}
+                focusedSignalTime={
+                  isReplayMode
+                    ? signalIndices.some((s) => s.index === cursorIndex)
+                      ? selectedSignal?.signalTime ?? null
+                      : null
+                    : selectedSignal?.signalTime ?? null
+                }
               />
             )}
           </div>
