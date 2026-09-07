@@ -51,10 +51,10 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "pnpm lint"
+      "npm run lint"
     ],
     "*.{js,mjs,cjs}": [
-      "pnpm lint"
+      "npm run lint"
     ]
   }
 }

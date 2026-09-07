@@ -8,40 +8,46 @@ interface BacktestSignalTableProps {
   signals: StrategyBacktestSignalResult[];
   selectedSignalId: number | null;
   onSelectSignal: (signal: StrategyBacktestSignalResult) => void;
+  onOpenLiveKLine?: (securityCode: string, timestamp: string) => void;
 }
 
 const formatDateTime = (value?: string | null) => {
   return formatShanghaiDateTime(value);
 };
 
-const BSP_LABEL_MAP: Record<string, { label: string; isBuy: boolean }> = {
-  first_buy: { label: "1买", isBuy: true },
-  first_sell: { label: "1卖", isBuy: false },
-  second_buy: { label: "2买", isBuy: true },
-  second_sell: { label: "2卖", isBuy: false },
-  third_buy: { label: "3买", isBuy: true },
-  third_sell: { label: "3卖", isBuy: false },
-  entry: { label: "买入", isBuy: true },
-  exit: { label: "卖出", isBuy: false },
+const CHAN_LABEL_MAP: Record<string, string> = {
+  first_buy: "1买",
+  first_sell: "1卖",
+  second_buy: "2买",
+  second_sell: "2卖",
+  third_buy: "3买",
+  third_sell: "3卖",
 };
 
 function parseSignalInfo(sig: StrategyBacktestSignalResult) {
   const ctx = (sig.contextSnapshot || {}) as Record<string, unknown>;
   const chanBsp = (ctx.chanBsp || {}) as Record<string, unknown>;
   const rawType = String(chanBsp.type || ctx.type || ctx.signalKind || "signal");
-  const parsed = BSP_LABEL_MAP[rawType] || {
-    label: rawType.includes("buy") ? "买点" : rawType.includes("sell") ? "卖点" : rawType,
-    isBuy: rawType.includes("buy") || rawType === "entry",
-  };
+
+  const isBuy = rawType.includes("buy") || rawType === "entry";
+  let label = CHAN_LABEL_MAP[rawType];
+  if (!label) {
+    label = (ctx.signalTag as string) || (isBuy ? "买入" : "卖出");
+  }
 
   const rawPrice = ctx.triggerPrice ?? ctx.price;
   const price = typeof rawPrice === "number" ? rawPrice : Number(rawPrice ?? 0);
 
+  const confidence = sig.confidence ?? 85.0;
+  const confidenceLevel = sig.confidenceLevel ?? (confidence >= 80 ? "HIGH" : confidence >= 65 ? "MEDIUM" : "LOW");
+
   return {
     rawType,
-    label: parsed.label,
-    isBuy: parsed.isBuy,
+    label,
+    isBuy,
     price: price > 0 ? price.toFixed(2) : "-",
+    confidence: Number(confidence).toFixed(1),
+    confidenceLevel,
   };
 }
 
@@ -49,8 +55,9 @@ export function BacktestSignalTable({
   signals,
   selectedSignalId,
   onSelectSignal,
+  onOpenLiveKLine,
 }: BacktestSignalTableProps) {
-  const [filterType, setFilterType] = useState<"all" | "buy" | "sell" | "1bsp" | "2bsp" | "3bsp">("all");
+  const [filterType, setFilterType] = useState<"all" | "buy" | "sell" | "high_conf">("all");
   const [keyword, setKeyword] = useState("");
 
   const parsedSignals = useMemo(() => {
@@ -67,9 +74,7 @@ export function BacktestSignalTable({
       }
       if (filterType === "buy" && !parsed.isBuy) return false;
       if (filterType === "sell" && parsed.isBuy) return false;
-      if (filterType === "1bsp" && !parsed.label.includes("1")) return false;
-      if (filterType === "2bsp" && !parsed.label.includes("2")) return false;
-      if (filterType === "3bsp" && !parsed.label.includes("3")) return false;
+      if (filterType === "high_conf" && parsed.confidenceLevel !== "HIGH") return false;
       return true;
     });
   }, [parsedSignals, filterType, keyword]);
@@ -91,7 +96,7 @@ export function BacktestSignalTable({
         <div>
           <h2>命中信号列表</h2>
           <span className="strategy-muted">
-            共 {signals.length} 条信号（买点 {buyCount} / 卖点 {sellCount}）· 点击信号可在图表自动定位并查看缠论中枢几何
+            共 {signals.length} 条信号（买点 {buyCount} / 卖点 {sellCount}）· 点击信号查看白盒归因与图表定位
           </span>
         </div>
 
@@ -116,35 +121,21 @@ export function BacktestSignalTable({
               className={`filter-pill ${filterType === "buy" ? "active" : ""}`}
               onClick={() => setFilterType("buy")}
             >
-              🟢 买点 ({buyCount})
+              买点 ({buyCount})
             </button>
             <button
               type="button"
               className={`filter-pill ${filterType === "sell" ? "active" : ""}`}
               onClick={() => setFilterType("sell")}
             >
-              🔴 卖点 ({sellCount})
+              卖点 ({sellCount})
             </button>
             <button
               type="button"
-              className={`filter-pill ${filterType === "1bsp" ? "active" : ""}`}
-              onClick={() => setFilterType("1bsp")}
+              className={`filter-pill ${filterType === "high_conf" ? "active" : ""}`}
+              onClick={() => setFilterType("high_conf")}
             >
-              1买/1卖
-            </button>
-            <button
-              type="button"
-              className={`filter-pill ${filterType === "2bsp" ? "active" : ""}`}
-              onClick={() => setFilterType("2bsp")}
-            >
-              2买/2卖
-            </button>
-            <button
-              type="button"
-              className={`filter-pill ${filterType === "3bsp" ? "active" : ""}`}
-              onClick={() => setFilterType("3bsp")}
-            >
-              3买/3卖
+              高置信度 (HIGH)
             </button>
           </div>
         </div>
@@ -157,15 +148,16 @@ export function BacktestSignalTable({
               <th style={{ width: "45px" }}>#</th>
               <th>标的代码</th>
               <th>信号类型</th>
+              <th>置信度</th>
               <th>触发价格</th>
               <th>信号时间</th>
-              <th style={{ width: "100px" }}>操作</th>
+              <th style={{ width: "160px" }}>操作</th>
             </tr>
           </thead>
           <tbody>
             {filteredSignals.map(({ rawSignal, parsed }, idx) => {
               const isSelected = rawSignal.id === selectedSignalId;
-              const { label, isBuy, price } = parsed;
+              const { label, isBuy, price, confidence, confidenceLevel } = parsed;
 
               return (
                 <tr
@@ -186,19 +178,59 @@ export function BacktestSignalTable({
                       {label}
                     </span>
                   </td>
+                  <td>
+                    <span
+                      className="tnum"
+                      style={{
+                        padding: "2px 6px",
+                        borderRadius: 4,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        background:
+                          confidenceLevel === "HIGH"
+                            ? "rgba(74, 222, 128, 0.12)"
+                            : confidenceLevel === "MEDIUM"
+                              ? "rgba(251, 191, 36, 0.12)"
+                              : "rgba(248, 113, 113, 0.12)",
+                        color:
+                          confidenceLevel === "HIGH"
+                            ? "var(--sem-success)"
+                            : confidenceLevel === "MEDIUM"
+                              ? "var(--sem-warn)"
+                              : "var(--sem-danger)",
+                      }}
+                    >
+                      {confidenceLevel} {confidence}%
+                    </span>
+                  </td>
                   <td className="tnum">{price}</td>
                   <td className="tnum">{formatDateTime(rawSignal.signalTime)}</td>
                   <td>
-                    <button
-                      type="button"
-                      className="action-link-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectSignal(rawSignal);
-                      }}
-                    >
-                      诊断 & 定位
-                    </button>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        className="action-link-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectSignal(rawSignal);
+                        }}
+                      >
+                        诊断 & 定位
+                      </button>
+                      {onOpenLiveKLine ? (
+                        <button
+                          type="button"
+                          className="action-link-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenLiveKLine(rawSignal.securityCode, rawSignal.signalTime);
+                          }}
+                          style={{ color: "var(--brand)" }}
+                        >
+                          看盘 ↗
+                        </button>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               );

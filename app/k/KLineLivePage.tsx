@@ -71,17 +71,46 @@ function getDefaultQuery(): KLineQuery {
   };
 }
 
+function getFocusTimeFromUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("focusTime");
+}
+
 function getQueryFromUrl(): KLineQuery {
   if (typeof window === "undefined") return getDefaultQuery();
   const params = new URLSearchParams(window.location.search);
   const source = params.get("source");
   const urlCode = params.get("code");
+  const focusTime = params.get("focusTime");
+
+  let startDate = params.get("startDate") || defaultStartDate();
+  let endDate = params.get("endDate") || todayString();
+
+  if (focusTime) {
+    try {
+      const focusDate = new Date(focusTime);
+      if (!isNaN(focusDate.getTime())) {
+        const focusDateStr = formatShanghaiDate(focusDate);
+        if (!params.get("startDate") && focusDateStr < startDate) {
+          const adjustedStart = new Date(focusDate.getTime() - 60 * 24 * 3600 * 1000);
+          startDate = formatShanghaiDate(adjustedStart);
+        }
+        if (!params.get("endDate") && focusDateStr > endDate) {
+          const adjustedEnd = new Date(focusDate.getTime() + 30 * 24 * 3600 * 1000);
+          endDate = formatShanghaiDate(adjustedEnd);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   return {
     code: urlCode !== null ? urlCode : DEFAULT_CODE,
     source: isDataSourceValue(source) ? source : DEFAULT_SOURCE,
     period: Number(params.get("period") || DEFAULT_PERIOD),
-    startDate: params.get("startDate") || defaultStartDate(),
-    endDate: params.get("endDate") || todayString(),
+    startDate,
+    endDate,
   };
 }
 
@@ -89,18 +118,20 @@ function hasCompleteQuery(query: KLineQuery) {
   return Boolean(query.code && query.period && query.startDate && query.endDate);
 }
 
-function updateUrl(query: KLineQuery) {
+function updateUrl(query: KLineQuery, focusTime?: string | null) {
   const params = new URLSearchParams();
   if (query.code) params.set("code", query.code);
   if (query.source) params.set("source", query.source);
   if (query.period) params.set("period", String(query.period));
   if (query.startDate) params.set("startDate", query.startDate);
   if (query.endDate) params.set("endDate", query.endDate);
+  if (focusTime) params.set("focusTime", focusTime);
   window.history.pushState(null, "", `/k?${params.toString()}`);
 }
 
 export default function KLineLivePage() {
   const [query, setQuery] = useState<KLineQuery>(getQueryFromUrl);
+  const [focusTime] = useState<string | null>(getFocusTimeFromUrl);
   const [securities, setSecurities] = useState<SecurityOption[]>([]);
   const [stockFilter, setStockFilter] = useState("");
   const [stockError, setStockError] = useState("");
@@ -135,10 +166,10 @@ export default function KLineLivePage() {
   const setQueryAndUrl = useCallback((updates: Partial<KLineQuery>) => {
     setQuery((current) => {
       const next = { ...current, ...updates };
-      updateUrl(next);
+      updateUrl(next, focusTime);
       return next;
     });
-  }, []);
+  }, [focusTime]);
 
   const handleQuickRange = (days: number | "ytd") => {
     const end = new Date();
@@ -435,6 +466,7 @@ export default function KLineLivePage() {
               commands={chartState.commands}
               height={620}
               subChartType={showVolume ? "volume" : "none"}
+              focusedSignalTime={focusTime}
             />
           )}
         </section>

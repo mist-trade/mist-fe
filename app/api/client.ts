@@ -108,11 +108,19 @@ export interface StrategySignal {
   strategyDefinitionId: number;
   strategyVersionId: number;
   securityId: number;
+  security?: {
+    id: number;
+    code: string;
+    name: string;
+  };
   period: number;
   source: DataSourceValue;
   signalTime: string;
   signalSource: StrategySignalSource;
   signalKind: StrategySignalKind;
+  confidence?: number | null;
+  confidenceLevel?: 'HIGH' | 'MEDIUM' | 'LOW' | null;
+  decisionTrace?: Record<string, unknown> | null;
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
   createdAt?: string;
@@ -178,9 +186,21 @@ export interface StrategyBacktestSignalResult {
   backtestRunId: number;
   securityCode: string;
   signalTime: string;
+  confidence?: number | null;
+  confidenceLevel?: 'HIGH' | 'MEDIUM' | 'LOW' | null;
+  decisionTrace?: Record<string, unknown> | null;
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
   createdAt?: string;
+}
+
+export interface FactorPluginVo {
+  readonly id: string;
+  readonly name: string;
+  readonly category: string;
+  readonly version: string;
+  readonly description: string;
+  readonly paramSchema?: Record<string, unknown>;
 }
 
 // ---------------------------------------------------------------------------
@@ -753,6 +773,15 @@ export const collectKLines = (query: KLineQuery) =>
     method: "POST",
     body: JSON.stringify(query),
   });
+
+export const fetchFactorPlugins = (category?: string) => {
+  const query = category ? `?category=${encodeURIComponent(category)}` : "";
+  return requestJson<FactorPluginVo[]>(
+    getMistApiBase(),
+    `/v1/factors/plugins${query}`,
+    { method: "GET" }
+  );
+};
 
 export const listStrategies = () =>
   requestJson<StrategyDefinition[]>(getMistApiBase(), "/v1/strategies", {

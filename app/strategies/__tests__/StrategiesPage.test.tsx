@@ -3,13 +3,11 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import StrategiesPage from "../page";
 import {
   acknowledgeStrategyAlertEvent,
-  createStrategyBacktest,
   createStrategyDefinition,
   disableStrategyDefinition,
   enableStrategyDefinition,
+  fetchFactorPlugins,
   fetchStrategyAlertEvents,
-  fetchStrategyBacktestRun,
-  fetchStrategyBacktestSignals,
   fetchStrategySignals,
   listStrategies,
   listStrategyVersions,
@@ -18,13 +16,11 @@ import {
 
 jest.mock("@/app/api/client", () => ({
   acknowledgeStrategyAlertEvent: jest.fn(),
-  createStrategyBacktest: jest.fn(),
   createStrategyDefinition: jest.fn(),
   disableStrategyDefinition: jest.fn(),
   enableStrategyDefinition: jest.fn(),
+  fetchFactorPlugins: jest.fn(),
   fetchStrategyAlertEvents: jest.fn(),
-  fetchStrategyBacktestRun: jest.fn(),
-  fetchStrategyBacktestSignals: jest.fn(),
   fetchStrategySignals: jest.fn(),
   listStrategies: jest.fn(),
   listStrategyVersions: jest.fn(),
@@ -38,9 +34,7 @@ const mockedListStrategyVersions = listStrategyVersions as jest.Mock;
 const mockedFetchStrategySignals = fetchStrategySignals as jest.Mock;
 const mockedFetchStrategyAlertEvents = fetchStrategyAlertEvents as jest.Mock;
 const mockedAcknowledgeStrategyAlertEvent = acknowledgeStrategyAlertEvent as jest.Mock;
-const mockedCreateStrategyBacktest = createStrategyBacktest as jest.Mock;
-const mockedFetchStrategyBacktestRun = fetchStrategyBacktestRun as jest.Mock;
-const mockedFetchStrategyBacktestSignals = fetchStrategyBacktestSignals as jest.Mock;
+const mockedFetchFactorPlugins = fetchFactorPlugins as jest.Mock;
 
 const strategy = {
   id: 3,
@@ -59,7 +53,11 @@ const version = {
   strategyDefinitionId: 3,
   versionNumber: 2,
   ruleSchemaVersion: "v1",
-  rule: { field: "k.volume", operator: "gt", value: "100" },
+  rule: {
+    id: "guard_safety",
+    type: "GUARD",
+    name: "财务安全防线",
+  },
   signalKind: "entry" as const,
   validationSummary: { valid: true },
   createdAt: "2026-07-07T09:00:00.000Z",
@@ -70,11 +68,28 @@ const signal = {
   strategyDefinitionId: 3,
   strategyVersionId: 5,
   securityId: 17,
+  security: { id: 17, code: "600519", name: "贵州茅台" },
   period: 1440,
   source: "tdx",
   signalTime: "2026-07-07T09:30:00.000Z",
   signalSource: "live",
   signalKind: "entry",
+  confidence: 88.5,
+  confidenceLevel: "HIGH",
+  decisionTrace: {
+    totalScore: 88.5,
+    summary: "放量突破且外资加仓综合达标",
+    trace: [
+      {
+        nodeId: "consensus_factors",
+        name: "多因子加权共识打分",
+        type: "CONSENSUS",
+        score: 88.5,
+        action: "BUY",
+        reason: "放量突破20日高点",
+      },
+    ],
+  },
   ruleSnapshot: version.rule,
   contextSnapshot: { k: { close: 120 } },
 };
@@ -87,30 +102,24 @@ const alert = {
   createdAt: "2026-07-07T09:31:00.000Z",
 };
 
-const backtestRun = {
-  id: 11,
-  strategyDefinitionId: 3,
-  strategyVersionId: 5,
-  targetUniverse: ["600519"],
-  period: 1440,
-  source: "tdx",
-  startDate: "2026-01-01",
-  endDate: "2026-06-30",
-  status: "completed",
-  signalCount: 2,
-  matchedSecurityCount: 1,
-  startedAt: "2026-07-07T10:10:00.000Z",
-  completedAt: "2026-07-07T10:10:01.000Z",
-};
-
-const backtestSignal = {
-  id: 12,
-  backtestRunId: 11,
-  securityCode: "600519",
-  signalTime: "2026-03-01T00:00:00.000Z",
-  ruleSnapshot: version.rule,
-  contextSnapshot: { k: { close: 121 } },
-};
+const mockPlugins = [
+  {
+    id: "plugin.chan.bsp",
+    name: "缠论买卖点因子",
+    category: "chan_core",
+    description: "基于宽笔/特征序列线段/笔中枢的一二三类买卖点",
+    version: "1.0.0",
+    supportedActions: ["BUY", "SELL"],
+  },
+  {
+    id: "plugin.technical.volume-breakout",
+    name: "放量突破因子",
+    category: "momentum",
+    description: "K线收盘价突破近期高点且成交量放大",
+    version: "1.0.0",
+    supportedActions: ["BUY", "SELL"],
+  },
+];
 
 function setupMocks() {
   mockedListStrategies.mockResolvedValue([strategy]);
@@ -121,31 +130,24 @@ function setupMocks() {
   mockedCreateStrategyDefinition.mockResolvedValue(strategy);
   mockedEnableStrategyDefinition.mockResolvedValue({ ...strategy, status: "enabled" });
   mockedDisableStrategyDefinition.mockResolvedValue({ ...strategy, status: "disabled" });
-  mockedCreateStrategyBacktest.mockResolvedValue({
-    runId: 11,
-    initialStatus: "PENDING",
-  });
-  mockedFetchStrategyBacktestRun.mockResolvedValue(backtestRun);
-  mockedFetchStrategyBacktestSignals.mockResolvedValue([backtestSignal]);
+  mockedFetchFactorPlugins.mockResolvedValue(mockPlugins);
 }
 
 /**
- * Fill the creation form with the supplied fields and submit it. The rule JSON
- * textarea is updated last so the caller controls the exact serialized shape.
+ * Fill the creation form with the supplied fields and submit it.
  */
 async function submitCreateForm(fields: {
   name?: string;
   targetUniverse?: string;
-  ruleJson?: string;
   signalKind?: "entry" | "exit";
 }) {
   if (fields.name !== undefined) {
-    fireEvent.change(await screen.findByLabelText("策略名称"), {
+    fireEvent.change(await screen.findByPlaceholderText("如：双因子共识动量突破策略"), {
       target: { value: fields.name },
     });
   }
   if (fields.targetUniverse !== undefined) {
-    fireEvent.change(screen.getByLabelText("目标证券"), {
+    fireEvent.change(screen.getByPlaceholderText("逗号分隔，如 600519, 000001"), {
       target: { value: fields.targetUniverse },
     });
   }
@@ -154,24 +156,12 @@ async function submitCreateForm(fields: {
       target: { value: fields.signalKind },
     });
   }
-  if (fields.ruleJson !== undefined) {
-    fireEvent.change(screen.getByLabelText("规则 JSON"), {
-      target: { value: fields.ruleJson },
-    });
-  }
   fireEvent.click(screen.getByRole("button", { name: "创建策略" }));
 }
 
-/**
- * Wait for the create-save cycle to fully settle: the create call resolves,
- * the registry is refreshed and the saving flag clears. Prevents pending async
- * state updates from leaking across tests.
- */
 function awaitCreateSettled() {
   return waitFor(() => {
     expect(mockedCreateStrategyDefinition).toHaveBeenCalledTimes(1);
-    // refreshStrategies runs after a successful create, so listStrategies is
-    // invoked a second time once the save cycle is complete.
     expect(mockedListStrategies.mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 }
@@ -187,9 +177,11 @@ describe("StrategiesPage", () => {
 
     expect(await screen.findByRole("heading", { name: "策略工作台" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "策略库" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "信号历史" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "策略详情" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "因子插件货架" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "实时信号历史" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "告警事件" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "信号回测" })).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "信号回测" })).not.toBeInTheDocument();
     expect(screen.queryByText(/hero|landing/i)).not.toBeInTheDocument();
   });
 
@@ -200,19 +192,16 @@ describe("StrategiesPage", () => {
     expect(screen.getAllByText("enabled").length).toBeGreaterThan(0);
     expect(screen.getAllByText("当前版本 #5").length).toBeGreaterThan(0);
     expect(screen.getByText("600519, 000001")).toBeInTheDocument();
-    expect(await screen.findByText("版本 2")).toBeInTheDocument();
   });
 
   it("shows the current version signal kind as read-only metadata", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
-    // Signal kind is read from the real StrategyVersion contract, surfaced as a
-    // read-only detail next to the selected strategy.
-    expect(screen.getAllByText("entry").length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("entry")).length).toBeGreaterThan(0);
   });
 
-  it("submits the create payload with a required signal kind", async () => {
+  it("submits the create payload with a decision flow tree AST", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
@@ -220,11 +209,6 @@ describe("StrategiesPage", () => {
       name: "新策略",
       targetUniverse: "600519",
       signalKind: "entry",
-      ruleJson: JSON.stringify({
-        field: "k.volume",
-        operator: "gt",
-        value: "100",
-      }),
     });
 
     await waitFor(() => expect(mockedCreateStrategyDefinition).toHaveBeenCalledTimes(1));
@@ -233,7 +217,11 @@ describe("StrategiesPage", () => {
     expect(payload.signalKind).toBe("entry");
     expect(payload.name).toBe("新策略");
     expect(payload.targetUniverse).toEqual(["600519"]);
-    // The registry is refreshed after a successful creation.
+    expect(payload.rule).toBeDefined();
+
+    const rule = payload.rule as Record<string, unknown>;
+    expect(rule.kind).toBe("decision_flow");
+    expect((rule.rootNode as Record<string, unknown>).type).toBe("GUARD");
     expect(mockedListStrategies).toHaveBeenCalled();
   });
 
@@ -245,11 +233,6 @@ describe("StrategiesPage", () => {
       name: "退出策略",
       targetUniverse: "600519",
       signalKind: "exit",
-      ruleJson: JSON.stringify({
-        field: "k.close",
-        operator: "lt",
-        value: 10,
-      }),
     });
 
     await waitFor(() => expect(mockedCreateStrategyDefinition).toHaveBeenCalledTimes(1));
@@ -259,44 +242,33 @@ describe("StrategiesPage", () => {
     ).toBe("exit");
   });
 
-  it("preserves a decimal-string threshold verbatim instead of coercing to a number", async () => {
+  it("supports switching decision flow preset to Chan BSP", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
-    const decimalThreshold = "100.00000001";
+    fireEvent.click(screen.getByRole("button", { name: "缠论买卖点树" }));
+
     await submitCreateForm({
-      name: "量额策略",
+      name: "缠论买卖点策略",
       targetUniverse: "600519",
       signalKind: "entry",
-      ruleJson: JSON.stringify({
-        field: "k.volume",
-        operator: "gt",
-        value: decimalThreshold,
-      }),
     });
 
     await waitFor(() => expect(mockedCreateStrategyDefinition).toHaveBeenCalledTimes(1));
     await awaitCreateSettled();
     const payload = mockedCreateStrategyDefinition.mock.calls[0][0] as StrategyDefinitionPayload;
-    // The threshold is forwarded as the exact canonical decimal string, not a
-    // number and not a String(number) coercion.
-    const rule = payload.rule as { value: unknown };
-    expect(rule.value).toBe(decimalThreshold);
-    expect(typeof rule.value).toBe("string");
+    const rule = payload.rule as Record<string, unknown>;
+    const rootNode = rule.rootNode as Record<string, unknown>;
+    expect(rootNode.id).toBe("guard_chan_bsp");
+    expect(rootNode.pluginId).toBe("plugin.chan.bsp");
   });
 
-  it("blocks invalid rule JSON and shows the parse error without calling the API", async () => {
+  it("disables create button when strategy name is empty", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
-    await submitCreateForm({
-      name: "新策略",
-      targetUniverse: "600519",
-      ruleJson: "{ bad",
-    });
-
-    expect(await screen.findByText("规则 JSON 格式错误")).toBeInTheDocument();
-    expect(mockedCreateStrategyDefinition).not.toHaveBeenCalled();
+    const createBtn = screen.getByRole("button", { name: "创建策略" });
+    expect(createBtn).toBeDisabled();
   });
 
   it("shows the backend create error near the creation editor", async () => {
@@ -304,20 +276,16 @@ describe("StrategiesPage", () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
-    // Fill the form fields first, then submit inside an async act so the
-    // rejected create promise's catch/finally state updates are captured.
-    fireEvent.change(screen.getByLabelText("策略名称"), { target: { value: "新策略" } });
-    fireEvent.change(screen.getByLabelText("目标证券"), { target: { value: "600519" } });
-    fireEvent.change(screen.getByLabelText("信号类型"), { target: { value: "entry" } });
-    fireEvent.change(screen.getByLabelText("规则 JSON"), {
-      target: {
-        value: JSON.stringify({ field: "k.close", operator: "bogus", value: 100 }),
-      },
+    fireEvent.change(await screen.findByPlaceholderText("如：双因子共识动量突破策略"), {
+      target: { value: "新策略" },
     });
+    fireEvent.change(screen.getByPlaceholderText("逗号分隔，如 600519, 000001"), {
+      target: { value: "600519" },
+    });
+    fireEvent.change(screen.getByLabelText("信号类型"), { target: { value: "entry" } });
+
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "创建策略" }));
-      // Let the rejected create promise settle so the catch/finally state
-      // updates run inside this act scope.
       await Promise.resolve();
       await Promise.resolve();
     });
@@ -332,17 +300,8 @@ describe("StrategiesPage", () => {
 
     const page = screen.getByRole("main");
     expect(within(page).queryByRole("button", { name: "更新当前策略" })).not.toBeInTheDocument();
-    // The only strategy submit action is the create button.
     expect(screen.queryByRole("button", { name: "保存策略" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "创建策略" })).toBeInTheDocument();
-    // Creating never reaches the (removed) update consumer.
-    await submitCreateForm({
-      name: "新策略",
-      targetUniverse: "600519",
-      signalKind: "entry",
-      ruleJson: JSON.stringify({ field: "k.close", operator: "gt", value: 100 }),
-    });
-    await awaitCreateSettled();
   });
 
   it("runs strategy lifecycle and alert acknowledgement actions", async () => {
@@ -360,39 +319,33 @@ describe("StrategiesPage", () => {
     await waitFor(() => expect(mockedAcknowledgeStrategyAlertEvent).toHaveBeenCalledWith(9));
   });
 
-  it("renders canonical live signal identity and signal kind", async () => {
+  it("renders canonical live signal identity, confidence badge, and opens white-box drawer", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
-    fireEvent.click(screen.getByRole("tab", { name: "信号历史" }));
+    fireEvent.click(screen.getByRole("tab", { name: "实时信号历史" }));
 
-    expect(await screen.findByText("17")).toBeInTheDocument();
-    expect(screen.getByText("entry")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /扫描/ })).not.toBeInTheDocument();
+    expect(await screen.findByText("600519")).toBeInTheDocument();
+    expect(screen.getByText("贵州茅台")).toBeInTheDocument();
+    expect(screen.getByText("HIGH 88.5%")).toBeInTheDocument();
+    expect(screen.getByText("买入 (BUY)")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "白盒归因" }));
+
+    expect(await screen.findByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).toBeInTheDocument();
+    expect(screen.getByText("放量突破且外资加仓综合达标")).toBeInTheDocument();
+    expect(screen.getByText("放量突破20日高点")).toBeInTheDocument();
   });
 
-  it("creates signal-level backtests and renders aggregate signal rows", async () => {
+  it("browses factor plugin catalog in the catalog tab", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
-    fireEvent.click(screen.getByRole("tab", { name: "信号回测" }));
-    fireEvent.change(screen.getByLabelText("回测版本 ID"), { target: { value: "5" } });
-    fireEvent.change(screen.getByLabelText("回测证券"), { target: { value: "600519" } });
-    fireEvent.change(screen.getByLabelText("开始日期"), { target: { value: "2026-01-01" } });
-    fireEvent.change(screen.getByLabelText("结束日期"), { target: { value: "2026-06-30" } });
-    fireEvent.click(screen.getByRole("button", { name: "运行回测" }));
+    fireEvent.click(screen.getByRole("tab", { name: "因子插件货架" }));
 
-    expect(await screen.findByText("命中信号 2")).toBeInTheDocument();
-    expect(screen.getByText("命中证券 1")).toBeInTheDocument();
-    expect(screen.getByText("600519")).toBeInTheDocument();
-    expect(mockedCreateStrategyBacktest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        strategyVersionId: 5,
-        targetUniverse: ["600519"],
-        period: 1440,
-        source: "tdx",
-      })
-    );
+    expect(await screen.findByText("缠论买卖点因子")).toBeInTheDocument();
+    expect(screen.getByText("放量突破因子")).toBeInTheDocument();
+    expect(screen.getByText("基于宽笔/特征序列线段/笔中枢的一二三类买卖点")).toBeInTheDocument();
   });
 
   it("does not render portfolio simulation fields", async () => {

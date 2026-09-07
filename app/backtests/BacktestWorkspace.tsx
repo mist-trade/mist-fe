@@ -21,7 +21,7 @@ import type { IFetchK } from "@/app/api/types";
 import { BacktestConfigPanel, type BacktestConfigValues } from "./components/BacktestConfigPanel";
 import { BacktestRunHistory } from "./components/BacktestRunHistory";
 import { BacktestSignalTable } from "./components/BacktestSignalTable";
-import { ChanDiagnosisDrawer } from "./components/ChanDiagnosisDrawer";
+import { DecisionTraceDrawer } from "@/app/components/DecisionTraceDrawer";
 import { BacktestReplayBar } from "./components/BacktestReplayBar";
 import { WorkspaceShell } from "@/app/components/layout/WorkspaceShell";
 import { formatShanghaiDate, formatShanghaiDateTime } from "@/app/lib/time";
@@ -763,15 +763,21 @@ export function BacktestWorkspace() {
               signals={signals}
               selectedSignalId={selectedSignal?.id ?? null}
               onSelectSignal={handleSelectSignal}
+              onOpenLiveKLine={(code, time) => {
+                window.open(`/k?code=${code}&focusTime=${encodeURIComponent(time)}`, '_blank');
+              }}
             />
           )}
         </section>
       </WorkspaceShell>
 
-      {/* 缠论中枢与背驰下钻诊断抽屉 */}
-      <ChanDiagnosisDrawer
+      {/* 白盒决策归因与轨迹诊断抽屉 */}
+      <DecisionTraceDrawer
         signal={selectedSignal}
         onClose={() => setSelectedSignal(null)}
+        onOpenLiveKLine={(code, time) => {
+          window.open(`/k?code=${code}&focusTime=${encodeURIComponent(time)}`, '_blank');
+        }}
       />
     </div>
   );

@@ -488,6 +488,7 @@ export function TradingViewChart({
       candleSeries.setMarkers(markers);
     }
 
+    let didFocus = false;
     if (focusedSignalTime) {
       const focusTimestamp = toUTCTimestamp(focusedSignalTime);
       const matchIndex = prepared.candleData.findIndex((d) => d.time === focusTimestamp);
@@ -495,10 +496,13 @@ export function TradingViewChart({
         const fromIdx = Math.max(0, matchIndex - 30);
         const toIdx = Math.min(prepared.candleData.length - 1, matchIndex + 30);
         chart.timeScale().setVisibleLogicalRange({ from: fromIdx, to: toIdx });
+        didFocus = true;
       }
     }
 
-    chart.timeScale().fitContent();
+    if (!didFocus) {
+      chart.timeScale().fitContent();
+    }
     requestAnimationFrame(drawZhongshuOverlay);
 
     return () => {

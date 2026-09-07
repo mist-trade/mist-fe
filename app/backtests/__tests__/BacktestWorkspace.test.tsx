@@ -156,7 +156,7 @@ describe("BacktestWorkspace", () => {
   });
 
 
-  it("opens ChanDiagnosisDrawer when clicking a signal in table", async () => {
+  it("opens DecisionTraceDrawer when clicking a signal in table", async () => {
     render(<BacktestWorkspace />);
 
     await screen.findByRole("heading", { name: "发起回测任务" });
@@ -168,12 +168,13 @@ describe("BacktestWorkspace", () => {
     // Click "诊断 & 定位" in signal table
     fireEvent.click(screen.getByRole("button", { name: "诊断 & 定位" }));
 
-    expect(await screen.findByRole("dialog", { name: "缠论中枢与背驰诊断" })).toBeInTheDocument();
-    expect(screen.getByText("第一类卖点 (1卖)")).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).toBeInTheDocument();
 
     // Close drawer
     fireEvent.click(screen.getByRole("button", { name: "✕" }));
-    expect(screen.queryByRole("dialog", { name: "缠论中枢与背驰诊断" })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).not.toBeInTheDocument();
+    });
   });
 
   it("supports single-step replay mode toggle and stepping", async () => {
@@ -199,6 +200,6 @@ describe("BacktestWorkspace", () => {
 
     // Clicking a signal in table enters replay mode and focuses on it
     fireEvent.click(screen.getByRole("button", { name: "诊断 & 定位" }));
-    expect(await screen.findByRole("dialog", { name: "缠论中枢与背驰诊断" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).toBeInTheDocument();
   });
 });
