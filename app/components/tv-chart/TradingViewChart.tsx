@@ -19,7 +19,9 @@ import type { OhlcHoverVo, TradingViewChartProps } from "./types";
 import type { VisualCommandVo } from "@/app/api/client";
 import {
   formatShanghaiDateTime,
+  formatShanghaiSmartTime,
   formatShanghaiTime,
+  getShanghaiDateParts,
   toUTCTimestamp,
 } from "@/app/lib/time";
 
@@ -140,7 +142,7 @@ function prepareK(k: TradingViewChartProps["k"]): PreparedK {
     const open = item.open;
     const close = item.close;
     const isUp = close >= open;
-    const timeLabel = formatShanghaiDateTime(item.time as string | number | Date);
+    const timeLabel = formatShanghaiSmartTime(item.time as string | number | Date);
     candleData.push({ time: t, open, high: item.high, low: item.low, close });
     const volForHistogram =
       item.rawVolume !== undefined && Number.isFinite(item.rawVolume)
@@ -246,7 +248,7 @@ export function TradingViewChart({
       localization: {
         dateFormat: "yyyy-MM-dd",
         timeFormatter: (timestamp: number) => {
-          return formatShanghaiDateTime(timestamp * 1000);
+          return formatShanghaiSmartTime(timestamp * 1000);
         },
       },
       timeScale: {
@@ -254,6 +256,11 @@ export function TradingViewChart({
         timeVisible: true,
         secondsVisible: false,
         tickMarkFormatter: (timestamp: number) => {
+          const d = new Date(timestamp * 1000);
+          const parts = getShanghaiDateParts(d);
+          if (parts.hour === 0 && parts.minute === 0 && parts.second === 0) {
+            return `${parts.month}/${parts.day}`;
+          }
           return formatShanghaiTime(timestamp * 1000);
         },
       },

@@ -64,6 +64,21 @@ export function formatShanghaiDateTime(value?: string | Date | number | null): s
 }
 
 /**
+ * 智能格式化北京时间：
+ * 若时间为日线/周线零点（00:00:00），返回纯日期 YYYY-MM-DD，避免日线图表显示多余的 "00:00:00"；
+ * 若时间包含时分秒（如分时级别的 10:00:00），返回完整日期时间 YYYY-MM-DD HH:mm:ss。
+ */
+export function formatShanghaiSmartTime(value?: string | Date | number | null): string {
+  const d = toDate(value);
+  if (!d) return "-";
+  const parts = getShanghaiDateParts(d);
+  if (parts.hour === 0 && parts.minute === 0 && parts.second === 0) {
+    return parts.formattedDate;
+  }
+  return shanghaiDateTimeFormatter.format(d).replace(/\//g, "-");
+}
+
+/**
  * 格式化为北京时间日期：YYYY-MM-DD
  */
 export function formatShanghaiDate(value?: string | Date | number | null): string {

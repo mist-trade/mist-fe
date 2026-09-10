@@ -1,5 +1,6 @@
 import {
   formatShanghaiDateTime,
+  formatShanghaiSmartTime,
   formatShanghaiDate,
   formatShanghaiTime,
   formatShanghaiShort,
@@ -10,11 +11,18 @@ import {
 
 describe("time utility (Asia/Shanghai)", () => {
   const utcSample = "2026-06-18T02:20:00.000Z"; // 10:20:00 CST
+  const dailyMidnightSample = "2026-01-13T16:00:00.000Z"; // 2026-01-14 00:00:00 CST
 
   it("formats full date-time in Asia/Shanghai", () => {
     expect(formatShanghaiDateTime(utcSample)).toBe("2026-06-18 10:20:00");
     expect(formatShanghaiDateTime(null)).toBe("-");
     expect(formatShanghaiDateTime("")).toBe("-");
+  });
+
+  it("formats smart date-time (date for midnight, full for intraday)", () => {
+    expect(formatShanghaiSmartTime(dailyMidnightSample)).toBe("2026-01-14");
+    expect(formatShanghaiSmartTime(utcSample)).toBe("2026-06-18 10:20:00");
+    expect(formatShanghaiSmartTime(null)).toBe("-");
   });
 
   it("formats date in Asia/Shanghai", () => {
