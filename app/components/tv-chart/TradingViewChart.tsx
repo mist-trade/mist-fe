@@ -333,9 +333,16 @@ export function TradingViewChart({
     const biLines: VisualCommandVo[] = [];
     const duanLines: VisualCommandVo[] = [];
     const zsBands: VisualCommandVo[] = [];
+    const fibBands: VisualCommandVo[] = [];
+    const fibLines: VisualCommandVo[] = [];
+    const fibTexts: VisualCommandVo[] = [];
 
     for (const cmd of commands) {
-      if (cmd.type === "line") {
+      if (cmd.layer === "fibonacci") {
+        if (cmd.type === "band") fibBands.push(cmd);
+        else if (cmd.type === "line") fibLines.push(cmd);
+        else if (cmd.type === "text") fibTexts.push(cmd);
+      } else if (cmd.type === "line") {
         if (cmd.layer === "chan_duan") duanLines.push(cmd);
         else biLines.push(cmd);
       } else if (cmd.type === "band") {
@@ -425,6 +432,35 @@ export function TradingViewChart({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
       const visibleRange = currentChart.timeScale().getVisibleRange();
+
+      // 1. Render TradingView Fibonacci Translucent Bands
+      for (const band of fibBands) {
+        if (!band.fromTime || !band.toTime || band.top === undefined || band.bottom === undefined) continue;
+        const t1 = toUTCTimestamp(band.fromTime);
+        const t2 = toUTCTimestamp(band.toTime);
+        const top = Number(band.top);
+        const bottom = Number(band.bottom);
+        if (!Number.isFinite(top) || !Number.isFinite(bottom)) continue;
+
+        let x1 = currentChart.timeScale().timeToCoordinate(t1);
+        let x2 = currentChart.timeScale().timeToCoordinate(t2);
+        if (visibleRange) {
+          if (x1 === null) x1 = 0 as unknown as import("lightweight-charts").Coordinate;
+          if (x2 === null) x2 = width as unknown as import("lightweight-charts").Coordinate;
+        }
+        const yTop = currentCandle.priceToCoordinate(top);
+        const yBottom = currentCandle.priceToCoordinate(bottom);
+        if (x1 !== null && x2 !== null && yTop !== null && yBottom !== null) {
+          const xLeft = Math.min(x1, x2);
+          const xRight = Math.max(x1, x2);
+          const yUpper = Math.min(yTop, yBottom);
+          const yLower = Math.max(yTop, yBottom);
+          ctx.fillStyle = band.color || "rgba(8, 153, 129, 0.10)";
+          ctx.fillRect(xLeft, yUpper, Math.max(2, xRight - xLeft), Math.max(1, yLower - yUpper));
+        }
+      }
+
+      // 2. Render Chan Zhongshu Boxes
       for (const band of zsBands) {
         if (!band.fromTime || !band.toTime || band.top === undefined || band.bottom === undefined) continue;
         const t1 = toUTCTimestamp(band.fromTime);
@@ -472,6 +508,52 @@ export function TradingViewChart({
           const label = isDuan ? "段中枢" : "笔中枢";
           const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14;
           ctx.fillText(`${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`, xLeft + 4, textY);
+        }
+      }
+
+      // 3. Render TradingView Fibonacci Horizontal Level Lines
+      for (const line of fibLines) {
+        if (!line.startTime || !line.endTime || line.startPrice === undefined) continue;
+        const t1 = toUTCTimestamp(line.startTime);
+        const t2 = toUTCTimestamp(line.endTime);
+        const price = Number(line.startPrice);
+        if (!Number.isFinite(price)) continue;
+
+        let x1 = currentChart.timeScale().timeToCoordinate(t1);
+        let x2 = currentChart.timeScale().timeToCoordinate(t2);
+        if (visibleRange) {
+          if (x1 === null) x1 = 0 as unknown as import("lightweight-charts").Coordinate;
+          if (x2 === null) x2 = width as unknown as import("lightweight-charts").Coordinate;
+        }
+        const y = currentCandle.priceToCoordinate(price);
+        if (x1 !== null && x2 !== null && y !== null) {
+          ctx.beginPath();
+          ctx.strokeStyle = line.color || "#787B86";
+          ctx.lineWidth = line.width || 1;
+          ctx.setLineDash(line.style === "dashed" ? [4, 4] : []);
+          ctx.moveTo(Math.min(x1, x2), y);
+          ctx.lineTo(Math.max(x1, x2), y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      // 4. Render TradingView Fibonacci Right-Aligned Text Labels
+      for (const txt of fibTexts) {
+        if (!txt.time || txt.price === undefined || !txt.text) continue;
+        const price = Number(txt.price);
+        const t = toUTCTimestamp(txt.time);
+        let x = currentChart.timeScale().timeToCoordinate(t);
+        if (visibleRange && x === null) {
+          x = width as unknown as import("lightweight-charts").Coordinate;
+        }
+        const y = currentCandle.priceToCoordinate(price);
+        if (x !== null && y !== null) {
+          ctx.fillStyle = txt.color || (isDark ? "#A0A0A0" : "#434343");
+          ctx.font = "10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+          ctx.textAlign = "right";
+          ctx.fillText(txt.text, Number(x) - 6, y - 3);
+          ctx.textAlign = "left";
         }
       }
     };
