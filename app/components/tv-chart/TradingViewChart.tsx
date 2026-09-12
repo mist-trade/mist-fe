@@ -851,18 +851,20 @@ export function TradingViewChart({
           const boxW = Math.max(4, xRight - xLeft);
           const boxH = Math.max(2, yLower - yUpper);
           const isDuan = band.layer === "chan_zs_duan";
+          const isUncomplete = band.status === "uncomplete" || band.style === "dashed";
           const strokeColor = isDuan ? "#818CF8" : "#38BDF8";
           const fillColor = isDuan ? "rgba(129, 140, 248, 0.20)" : "rgba(56, 189, 248, 0.20)";
           ctx.fillStyle = fillColor;
           ctx.fillRect(xLeft, yUpper, boxW, boxH);
           ctx.strokeStyle = strokeColor;
           ctx.lineWidth = isDuan ? 2 : 1.5;
-          ctx.setLineDash(isDuan ? [] : [4, 2]);
+          ctx.setLineDash(isUncomplete ? [6, 3] : (isDuan ? [] : [4, 2]));
           ctx.strokeRect(xLeft, yUpper, boxW, boxH);
           ctx.setLineDash([]);
           ctx.fillStyle = strokeColor;
           ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-          const label = isDuan ? "段中枢" : "笔中枢";
+          const baseLabel = isDuan ? "段中枢" : "笔中枢";
+          const label = isUncomplete ? `${baseLabel}(进行中)` : baseLabel;
           const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14;
           ctx.fillText(`${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`, xLeft + 4, textY);
         }

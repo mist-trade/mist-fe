@@ -1030,6 +1030,7 @@ export interface VisualCommandVo {
   color?: string;
   width?: number;
   style?: "solid" | "dashed" | "dotted";
+  status?: "complete" | "uncomplete";
   fill?: boolean;
   position?: "above" | "below" | "center";
 }
