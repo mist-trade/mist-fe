@@ -50,6 +50,30 @@ export function BacktestWorkspace() {
   const [selectedSignal, setSelectedSignal] = useState<StrategyBacktestSignalResult | null>(null);
   const [showVolume, setShowVolume] = useState(true);
 
+  // 缠论图层与买卖点显示控制（默认只展示笔折线、笔中枢与回测买卖点；默认隐藏段中枢与原生买卖点）
+  const [showBi, setShowBi] = useState<boolean>(true);
+  const [showBiZs, setShowBiZs] = useState<boolean>(true);
+  const [showDuan, setShowDuan] = useState<boolean>(false);
+  const [showDuanZs, setShowDuanZs] = useState<boolean>(false);
+  const [showBacktestSignals, setShowBacktestSignals] = useState<boolean>(true);
+  const [showChanBsp, setShowChanBsp] = useState<boolean>(false);
+
+  // 按用户选中的图层开关过滤绘图指令集合
+  const filterCommandsByLayers = useCallback(
+    (cmds: VisualCommandVo[]) => {
+      return cmds.filter((cmd) => {
+        if (cmd.layer === "chan_bi") return showBi;
+        if (cmd.layer === "chan_zs_bi") return showBiZs;
+        if (cmd.layer === "chan_duan") return showDuan;
+        if (cmd.layer === "chan_zs_duan") return showDuanZs;
+        if (cmd.layer === "chan_bsp") return showChanBsp;
+        if (cmd.layer === "backtest_signals") return showBacktestSignals;
+        return true;
+      });
+    },
+    [showBi, showBiZs, showDuan, showDuanZs, showChanBsp, showBacktestSignals]
+  );
+
   // 全量原始走势与全局指令
   const [rawK, setRawK] = useState<IFetchK[]>([]);
   const [fullCommands, setFullCommands] = useState<VisualCommandVo[]>([]);
@@ -584,14 +608,15 @@ export function BacktestWorkspace() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isReplayMode, rawK.length, handleTogglePlay, handleJumpPrevSignal, handleJumpNextSignal]);
 
-  // 根据当前复盘模式构建最终展示的图表数据与几何指令
+  // 根据当前复盘模式与图层开关构建最终展示的图表数据与几何指令
   const displayedChart = useMemo(() => {
     if (!rawK || rawK.length === 0) return chart;
     if (!isReplayMode) {
+      const all = [...fullCommands, ...allSignalCommands];
       return {
         symbol: selectedSymbol,
         k: rawK,
-        commands: [...fullCommands, ...allSignalCommands],
+        commands: filterCommandsByLayers(all),
       };
     }
     const currentBar = rawK[cursorIndex];
@@ -599,10 +624,11 @@ export function BacktestWorkspace() {
     const visibleSignalCommands = allSignalCommands.filter((cmd) => {
       return cmd.time ? new Date(cmd.time).getTime() <= currentBarTimeMs : true;
     });
+    const all = [...replayCommands, ...visibleSignalCommands];
     return {
       symbol: selectedSymbol,
       k: rawK.slice(0, cursorIndex + 1),
-      commands: [...replayCommands, ...visibleSignalCommands],
+      commands: filterCommandsByLayers(all),
     };
   }, [
     chart,
@@ -613,6 +639,7 @@ export function BacktestWorkspace() {
     fullCommands,
     allSignalCommands,
     replayCommands,
+    filterCommandsByLayers,
   ]);
 
   const symbolSignalCounts = (signals || []).reduce<Record<string, number>>((acc, s) => {
@@ -704,6 +731,82 @@ export function BacktestWorkspace() {
               })}
             </div>
           ) : null}
+
+          {/* 图层展示控制栏 */}
+          {activeRun && rawK.length > 0 && (
+            <div className="backtest-layer-controls" role="toolbar" aria-label="图层显示控制">
+              <div className="layer-controls-left">
+                <span className="layer-controls-title">📐 图层展示:</span>
+                <div className="layer-toggles-group">
+                  <button
+                    type="button"
+                    className={`layer-toggle-chip ${showBi ? "active" : ""}`}
+                    onClick={() => setShowBi(!showBi)}
+                    title="笔折线 (Chan Bi)"
+                  >
+                    <span className="dot" style={{ background: "#FACC15" }} />
+                    笔折线
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`layer-toggle-chip ${showBiZs ? "active" : ""}`}
+                    onClick={() => setShowBiZs(!showBiZs)}
+                    title="笔中枢 (Bi Central)"
+                  >
+                    <span
+                      className="box-icon"
+                      style={{ borderColor: "#38BDF8", background: "rgba(56, 189, 248, 0.25)" }}
+                    />
+                    笔中枢
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`layer-toggle-chip ${showDuan ? "active" : ""}`}
+                    onClick={() => setShowDuan(!showDuan)}
+                    title="线段 (Chan Duan)"
+                  >
+                    <span className="dot" style={{ background: "#818CF8" }} />
+                    线段
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`layer-toggle-chip ${showDuanZs ? "active" : ""}`}
+                    onClick={() => setShowDuanZs(!showDuanZs)}
+                    title="段中枢 (Duan Central)"
+                  >
+                    <span
+                      className="box-icon"
+                      style={{ borderColor: "#818CF8", background: "rgba(129, 140, 248, 0.25)" }}
+                    />
+                    段中枢
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`layer-toggle-chip ${showBacktestSignals ? "active" : ""}`}
+                    onClick={() => setShowBacktestSignals(!showBacktestSignals)}
+                    title="回测策略买卖点标记 (Backtest Signals)"
+                  >
+                    <span>🎯</span>
+                    回测买卖点
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`layer-toggle-chip ${showChanBsp ? "active" : ""}`}
+                    onClick={() => setShowChanBsp(!showChanBsp)}
+                    title="缠论指标原生买卖点 (Raw Chan BSP)"
+                  >
+                    <span>⚡</span>
+                    原生买卖点
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 回测单步推演复盘控制栏 */}
           {activeRun && activeRun.status === "completed" && rawK.length > 0 && (

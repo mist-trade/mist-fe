@@ -202,4 +202,47 @@ describe("BacktestWorkspace", () => {
     fireEvent.click(screen.getByRole("button", { name: "诊断 & 定位" }));
     expect(await screen.findByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).toBeInTheDocument();
   });
+
+  it("renders layer toggle controls and filters commands accordingly", async () => {
+    (fetchVisualCommands as jest.Mock).mockResolvedValue({
+      commands: [
+        { id: "bi_1", type: "line", layer: "chan_bi" },
+        { id: "zs_bi_1", type: "band", layer: "chan_zs_bi" },
+        { id: "duan_1", type: "line", layer: "chan_duan" },
+        { id: "zs_duan_1", type: "band", layer: "chan_zs_duan" },
+        { id: "bsp_1", type: "text", layer: "chan_bsp", text: "1买" },
+      ],
+    });
+
+    render(<BacktestWorkspace />);
+
+    await screen.findByRole("heading", { name: "发起回测任务" });
+    await screen.findByText(/版本 v1/);
+    fireEvent.click(screen.getByRole("button", { name: "发起回测" }));
+
+    await screen.findByTestId("mock-tv-chart");
+
+    // Check layer toggle buttons are present
+    const biBtn = screen.getByRole("button", { name: /笔折线/ });
+    const biZsBtn = screen.getByRole("button", { name: /笔中枢/ });
+    const duanBtn = screen.getByRole("button", { name: /线段/ });
+    const duanZsBtn = screen.getByRole("button", { name: /段中枢/ });
+    const backtestSignalsBtn = screen.getByRole("button", { name: /回测买卖点/ });
+    const chanBspBtn = screen.getByRole("button", { name: /原生买卖点/ });
+
+    expect(biBtn).toHaveClass("active");
+    expect(biZsBtn).toHaveClass("active");
+    expect(duanBtn).not.toHaveClass("active");
+    expect(duanZsBtn).not.toHaveClass("active");
+    expect(backtestSignalsBtn).toHaveClass("active");
+    expect(chanBspBtn).not.toHaveClass("active");
+
+    // Toggle Duan ZS on
+    fireEvent.click(duanZsBtn);
+    expect(duanZsBtn).toHaveClass("active");
+
+    // Toggle Bi ZS off
+    fireEvent.click(biZsBtn);
+    expect(biZsBtn).not.toHaveClass("active");
+  });
 });
