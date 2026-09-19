@@ -853,6 +853,7 @@ export function TradingViewChart({
           const isDuan = band.layer === "chan_zs_duan";
           const isUncomplete = band.status === "uncomplete" || band.style === "dashed";
           const isExpanded = Boolean(band.expanded);
+          const isExtended = Boolean(band.extended);
           const strokeColor = isDuan ? "#818CF8" : (isExpanded ? "#F59E0B" : "#38BDF8");
           const fillColor = isDuan
             ? "rgba(129, 140, 248, 0.20)"
@@ -866,7 +867,14 @@ export function TradingViewChart({
           ctx.setLineDash([]);
           ctx.fillStyle = strokeColor;
           ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-          const baseLabel = isDuan ? "段中枢" : (isExpanded ? "笔中枢(扩展)" : "笔中枢");
+          let baseLabel = isDuan ? "段中枢" : "笔中枢";
+          if (!isDuan) {
+            if (isExpanded) {
+              baseLabel = "笔中枢(扩展)";
+            } else if (isExtended) {
+              baseLabel = "笔中枢(延伸)";
+            }
+          }
           const label = isUncomplete ? `${baseLabel}(进行中)` : baseLabel;
           const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14;
           ctx.fillText(`${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`, xLeft + 4, textY);

@@ -170,6 +170,7 @@ export function snapshotToVisualCommands(
         dd: c.dd,
         color: c.expanded ? "#F59E0B" : "#38BDF8",
         fill: true,
+        extended: c.extended,
         expanded: c.expanded,
       });
     }
