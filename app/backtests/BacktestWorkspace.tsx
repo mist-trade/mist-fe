@@ -223,22 +223,47 @@ export function BacktestWorkspace() {
       // 将回测信号转化为视觉 Marker 指令
       const signalCommands: VisualCommandVo[] = symbolSignals.map((sig) => {
         const ctx = (sig.contextSnapshot || {}) as Record<string, unknown>;
-        const rawType = String(ctx.type || ctx.signalKind || "signal");
-        const isSell = rawType.includes("sell") || rawType === "exit";
+        const chanBsp = (ctx.chanBsp || {}) as Record<string, unknown>;
+        const trace = (sig.decisionTrace || {}) as Record<string, unknown>;
 
-        let label = "买点";
+        const rawType = String(
+          chanBsp.type ||
+          trace.eventType ||
+          ctx.type ||
+          ctx.signalTag ||
+          ctx.signalKind ||
+          trace.signalTag ||
+          trace.signalKind ||
+          "signal"
+        );
+        const isSell =
+          rawType.includes("sell") ||
+          rawType === "exit" ||
+          ctx.action === "SELL" ||
+          trace.action === "SELL";
+
+        let label = isSell ? "卖点" : "买点";
         if (rawType === "first_buy") label = "1买";
         else if (rawType === "first_sell") label = "1卖";
         else if (rawType === "second_buy") label = "2买";
         else if (rawType === "second_sell") label = "2卖";
         else if (rawType === "third_buy") label = "3买";
         else if (rawType === "third_sell") label = "3卖";
+        else if (ctx.signalTag && typeof ctx.signalTag === "string") label = ctx.signalTag;
+        else if (trace.signalTag && typeof trace.signalTag === "string") label = trace.signalTag;
+
+        const rawPrice = ctx.triggerPrice ?? trace.price ?? ctx.price;
+        const price =
+          typeof rawPrice === "number" && Number.isFinite(rawPrice)
+            ? rawPrice
+            : undefined;
 
         return {
           id: `backtest_sig_${sig.id}`,
           type: "text",
           layer: "backtest_signals",
           time: sig.signalTime,
+          price,
           text: label,
           position: isSell ? "above" : "below",
           color: isSell ? "#22C55E" : "#EF4444",
