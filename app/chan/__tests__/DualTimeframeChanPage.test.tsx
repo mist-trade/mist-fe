@@ -73,6 +73,13 @@ describe("DualTimeframeChanPage", () => {
       const charts = screen.getAllByTestId("tv-chart");
       expect(charts).toHaveLength(2);
     });
+
+    expect(mockedFetchVisualCommands).toHaveBeenCalledWith(
+      expect.objectContaining({
+        period: 30,
+        macroPeriod: 1440,
+      })
+    );
   });
 
   it("switches to 5M mode upon tab click", async () => {
