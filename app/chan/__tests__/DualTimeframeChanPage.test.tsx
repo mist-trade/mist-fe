@@ -77,7 +77,6 @@ describe("DualTimeframeChanPage", () => {
     expect(mockedFetchVisualCommands).toHaveBeenCalledWith(
       expect.objectContaining({
         period: 30,
-        macroPeriod: 1440,
       })
     );
   });
