@@ -1031,6 +1031,7 @@ export interface VisualCommandVo {
   width?: number;
   style?: "solid" | "dashed" | "dotted";
   status?: "complete" | "uncomplete";
+  expanded?: boolean;
   fill?: boolean;
   position?: "above" | "below" | "center";
 }

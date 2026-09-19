@@ -168,8 +168,9 @@ export function snapshotToVisualCommands(
         bottom: c.zd,
         gg: c.gg,
         dd: c.dd,
-        color: "#38BDF8",
+        color: c.expanded ? "#F59E0B" : "#38BDF8",
         fill: true,
+        expanded: c.expanded,
       });
     }
   });

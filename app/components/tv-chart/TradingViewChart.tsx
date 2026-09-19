@@ -852,18 +852,21 @@ export function TradingViewChart({
           const boxH = Math.max(2, yLower - yUpper);
           const isDuan = band.layer === "chan_zs_duan";
           const isUncomplete = band.status === "uncomplete" || band.style === "dashed";
-          const strokeColor = isDuan ? "#818CF8" : "#38BDF8";
-          const fillColor = isDuan ? "rgba(129, 140, 248, 0.20)" : "rgba(56, 189, 248, 0.20)";
+          const isExpanded = Boolean(band.expanded);
+          const strokeColor = isDuan ? "#818CF8" : (isExpanded ? "#F59E0B" : "#38BDF8");
+          const fillColor = isDuan
+            ? "rgba(129, 140, 248, 0.20)"
+            : (isExpanded ? "rgba(245, 158, 11, 0.15)" : "rgba(56, 189, 248, 0.20)");
           ctx.fillStyle = fillColor;
           ctx.fillRect(xLeft, yUpper, boxW, boxH);
           ctx.strokeStyle = strokeColor;
-          ctx.lineWidth = isDuan ? 2 : 1.5;
-          ctx.setLineDash(isUncomplete ? [6, 3] : (isDuan ? [] : [4, 2]));
+          ctx.lineWidth = isDuan ? 2 : (isExpanded ? 2 : 1.5);
+          ctx.setLineDash(isUncomplete ? [6, 3] : (isDuan ? [] : (isExpanded ? [6, 3] : [4, 2])));
           ctx.strokeRect(xLeft, yUpper, boxW, boxH);
           ctx.setLineDash([]);
           ctx.fillStyle = strokeColor;
           ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-          const baseLabel = isDuan ? "段中枢" : "笔中枢";
+          const baseLabel = isDuan ? "段中枢" : (isExpanded ? "笔中枢(扩展)" : "笔中枢");
           const label = isUncomplete ? `${baseLabel}(进行中)` : baseLabel;
           const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14;
           ctx.fillText(`${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`, xLeft + 4, textY);

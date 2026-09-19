@@ -92,6 +92,7 @@ export interface IFetchChannel {
   level: ChannelLevel;
   type: ChannelType;
   status?: ChannelStatus;
+  expanded?: boolean;
   startId: number;
   endId: number;
   trend: TrendDirection;
