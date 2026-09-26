@@ -18,7 +18,6 @@ import { useTheme } from "next-themes";
 import type { OhlcHoverVo, TradingViewChartProps } from "./types";
 import type { VisualCommandVo } from "@/app/api/client";
 import {
-  formatShanghaiDateTime,
   formatShanghaiSmartTime,
   formatShanghaiTime,
   getShanghaiDateParts,

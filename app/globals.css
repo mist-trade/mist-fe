@@ -1323,6 +1323,18 @@ table,
   border-color: #3b82f6;
 }
 
+.replay-btn.dump-btn {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  font-weight: 500;
+}
+
+.replay-btn.dump-btn:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: #10b981;
+}
+
 .speed-cluster {
   display: inline-flex;
   align-items: center;

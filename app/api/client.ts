@@ -1077,3 +1077,139 @@ export const fetchVisualCommands = (query: VisualCommandQuery) => {
     { method: "GET" }
   );
 };
+
+export interface SimulationSignalVo {
+  signalTime: string;
+  signalType: string;
+  badgeText: string;
+  triggerPrice: number;
+  isBuy: boolean;
+  confidence: number;
+  decisionTrace: Record<string, unknown> | null;
+  securityCode: string;
+  period: number;
+}
+
+export interface SimulationFrameVo {
+  sessionId: string;
+  cursor: number;
+  total: number;
+  bar: {
+    time: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number | null;
+    amount: number | null;
+  };
+  commands: VisualCommandVo[];
+  signals: SimulationSignalVo[];
+  status: 'idle' | 'playing' | 'paused' | 'completed';
+}
+
+export interface SimulationSessionSummaryVo {
+  sessionId: string;
+  securityCode: string;
+  period: number;
+  totalBars: number;
+  preWarmBars: number;
+  currentCursor: number;
+  status: 'idle' | 'playing' | 'paused' | 'completed';
+  speedMs: number;
+}
+
+export interface StartSimulationParams {
+  securityCode: string;
+  period: number;
+  startDate?: string;
+  endDate?: string;
+  filterFenxingContainment?: boolean;
+  strategyId?: string;
+  flow?: Record<string, unknown>;
+}
+
+export const startSimulation = (params: StartSimulationParams) =>
+  requestJson<SimulationSessionSummaryVo>(
+    getMistApiBase(),
+    "/v1/simulation/start",
+    {
+      method: "POST",
+      body: JSON.stringify(params),
+    }
+  );
+
+export const controlSimulation = (params: {
+  sessionId: string;
+  action: 'play' | 'pause' | 'step_next' | 'step_prev' | 'seek' | 'set_speed';
+  param?: number;
+}) =>
+  requestJson<SimulationSessionSummaryVo>(
+    getMistApiBase(),
+    "/v1/simulation/control",
+    {
+      method: "POST",
+      body: JSON.stringify(params),
+    }
+  );
+
+export const stopSimulation = (sessionId: string) =>
+  requestJson<{ success: boolean }>(
+    getMistApiBase(),
+    "/v1/simulation/stop",
+    {
+      method: "POST",
+      body: JSON.stringify({ sessionId }),
+    }
+  );
+
+export const getSimulationStreamUrl = (sessionId: string): string => {
+  return `${getMistApiBase()}/v1/simulation/stream?sessionId=${encodeURIComponent(sessionId)}`;
+};
+
+export interface SimulationStateDumpVo {
+  dumpTime: string;
+  sessionId: string;
+  securityCode: string;
+  period: number;
+  cursor: number;
+  totalBars: number;
+  preWarmBars: number;
+  currentBar: {
+    securityId: number;
+    source: string;
+    period: number;
+    timestamp: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: string | null;
+    amount: string | null;
+    type: string;
+  } | null;
+  queueSize: number;
+  windowQueue: Array<{
+    time: string;
+    ohlc: { open: number; high: number; low: number; close: number } | null;
+    volume: string | null;
+    amount: string | null;
+    resolution: string;
+  }>;
+  renderData: {
+    commandsCount: number;
+    commands: VisualCommandVo[];
+  };
+  signalsCount: number;
+  signals: SimulationSignalVo[];
+  latestFrameSignals: SimulationSignalVo[];
+}
+
+export const fetchSimulationDump = (sessionId?: string) =>
+  requestJson<SimulationStateDumpVo>(
+    getMistApiBase(),
+    `/v1/simulation/dump${sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : ""}`,
+    { method: "GET" }
+  );
+
+

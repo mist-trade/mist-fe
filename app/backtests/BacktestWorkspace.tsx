@@ -10,11 +10,17 @@ import {
   createStrategyBacktest,
   fetchK,
   fetchVisualCommands,
+  startSimulation,
+  controlSimulation,
+  stopSimulation,
+  getSimulationStreamUrl,
+  fetchSimulationDump,
   type StrategyDefinition,
   type StrategyVersion,
   type StrategyBacktestRun,
   type StrategyBacktestSignalResult,
   type VisualCommandVo,
+  type SimulationFrameVo,
 } from "@/app/api/client";
 import type { IFetchK } from "@/app/api/types";
 import { BacktestConfigPanel, type BacktestConfigValues } from "./components/BacktestConfigPanel";
@@ -74,14 +80,14 @@ export function BacktestWorkspace() {
   const [fullCommands, setFullCommands] = useState<VisualCommandVo[]>([]);
   const [allSignalCommands, setAllSignalCommands] = useState<VisualCommandVo[]>([]);
 
-  // 单步推演复盘控制状态
+  // 实时流式推演仿真控制状态 (SSE)
   const [isReplayMode, setIsReplayMode] = useState<boolean>(false);
   const [cursorIndex, setCursorIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playSpeed, setPlaySpeed] = useState<number>(500);
   const [replayCommands, setReplayCommands] = useState<VisualCommandVo[]>([]);
-  const replayCommandsCache = useRef<Map<string, VisualCommandVo[]>>(new Map());
-  const activeReplayReqId = useRef<number>(0);
+  const [simulationSessionId, setSimulationSessionId] = useState<string | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   const [chart, setChart] = useState<ChartWorkspaceState | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -267,17 +273,12 @@ export function BacktestWorkspace() {
       );
       const mergedCommands = [...pureVisualCommands, ...signalCommands];
 
-      replayCommandsCache.current.clear();
       setRawK(kLines);
       setFullCommands(pureVisualCommands);
       setAllSignalCommands(signalCommands);
       setCursorIndex(Math.max(0, kLines.length - 1));
       setReplayCommands(pureVisualCommands);
       setIsPlaying(false);
-
-      // 记录末端全量视觉指令缓存（单步推演由游标驱动按需拉取并缓存，避免瞬间并发上千次请求打崩网络通道）
-      const visualEndKey = toVisualQueryDate(run.endDate);
-      replayCommandsCache.current.set(visualEndKey, pureVisualCommands);
 
       setChart({
         symbol,
@@ -468,125 +469,201 @@ export function BacktestWorkspace() {
     }
   };
 
-  // 单步推演交互操作集
-  const handleToggleReplayMode = (active: boolean) => {
-    setIsReplayMode(active);
-    setIsPlaying(false);
-    if (active && cursorIndex === 0 && rawK.length > 0) {
-      setCursorIndex(rawK.length - 1);
+  // 单步推演 / 实时仿真控制操作集 (SSE 长连接驱动)
+  const handleToggleReplayMode = async (active: boolean) => {
+    if (active) {
+      setIsReplayMode(true);
+      setIsPlaying(false);
+      try {
+        const summary = await startSimulation({
+          securityCode: selectedSymbol || "000001",
+          period: activeRun?.period || 30,
+          startDate: activeRun?.startDate,
+          endDate: activeRun?.endDate,
+        });
+        setSimulationSessionId(summary.sessionId);
+
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+        }
+        const es = new EventSource(getSimulationStreamUrl(summary.sessionId));
+        eventSourceRef.current = es;
+
+        es.addEventListener("frame", (event) => {
+          try {
+            const frame: SimulationFrameVo = JSON.parse(event.data);
+            setCursorIndex(frame.cursor);
+            const cmds = (frame.commands || []).filter(
+              (cmd) => cmd.layer !== "backtest_signals"
+            );
+            setReplayCommands(cmds);
+          } catch {
+            // ignore JSON parse error
+          }
+        });
+
+        es.addEventListener("status", (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.status === "completed") {
+              setIsPlaying(false);
+            }
+          } catch {
+            // ignore
+          }
+        });
+      } catch (err: unknown) {
+        console.error("启动仿真失败:", err instanceof Error ? err.message : String(err));
+      }
+    } else {
+      setIsReplayMode(false);
+      setIsPlaying(false);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      if (simulationSessionId) {
+        void stopSimulation(simulationSessionId);
+        setSimulationSessionId(null);
+      }
     }
   };
 
   const handleStepPrev = useCallback(() => {
-    setCursorIndex((prev) => Math.max(0, prev - 1));
-  }, []);
+    if (simulationSessionId) {
+      void controlSimulation({ sessionId: simulationSessionId, action: "step_prev" });
+    } else {
+      setCursorIndex((prev) => Math.max(0, prev - 1));
+    }
+  }, [simulationSessionId]);
 
   const handleStepNext = useCallback(() => {
-    setCursorIndex((prev) => Math.min(rawK.length - 1, prev + 1));
-  }, [rawK.length]);
+    if (simulationSessionId) {
+      void controlSimulation({ sessionId: simulationSessionId, action: "step_next" });
+    } else {
+      setCursorIndex((prev) => Math.min(rawK.length - 1, prev + 1));
+    }
+  }, [simulationSessionId, rawK.length]);
 
   const handleJumpFirst = useCallback(() => {
-    setCursorIndex(0);
-  }, []);
+    if (simulationSessionId) {
+      void controlSimulation({ sessionId: simulationSessionId, action: "seek", param: 0 });
+    } else {
+      setCursorIndex(0);
+    }
+  }, [simulationSessionId]);
 
   const handleJumpLast = useCallback(() => {
-    setCursorIndex(Math.max(0, rawK.length - 1));
-  }, [rawK.length]);
+    const lastIdx = Math.max(0, rawK.length - 1);
+    if (simulationSessionId) {
+      void controlSimulation({ sessionId: simulationSessionId, action: "seek", param: lastIdx });
+    } else {
+      setCursorIndex(lastIdx);
+    }
+  }, [simulationSessionId, rawK.length]);
 
   const handleJumpPrevSignal = useCallback(() => {
     const prev = [...signalIndices].reverse().find((s) => s.index < cursorIndex);
     if (prev) {
+      if (simulationSessionId) {
+        void controlSimulation({ sessionId: simulationSessionId, action: "seek", param: prev.index });
+      }
       setCursorIndex(prev.index);
       setSelectedSignal(prev.signal);
     }
-  }, [signalIndices, cursorIndex]);
+  }, [signalIndices, cursorIndex, simulationSessionId]);
 
   const handleJumpNextSignal = useCallback(() => {
     const next = signalIndices.find((s) => s.index > cursorIndex);
     if (next) {
+      if (simulationSessionId) {
+        void controlSimulation({ sessionId: simulationSessionId, action: "seek", param: next.index });
+      }
       setCursorIndex(next.index);
       setSelectedSignal(next.signal);
     }
-  }, [signalIndices, cursorIndex]);
+  }, [signalIndices, cursorIndex, simulationSessionId]);
 
   const handleSeek = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(rawK.length - 1, index));
       setCursorIndex(clamped);
+      if (simulationSessionId) {
+        void controlSimulation({ sessionId: simulationSessionId, action: "seek", param: clamped });
+      }
       const matched = signalIndices.find((s) => s.index === clamped);
       if (matched) {
         setSelectedSignal(matched.signal);
       }
     },
-    [rawK.length, signalIndices]
+    [rawK.length, signalIndices, simulationSessionId]
   );
 
   const handleTogglePlay = useCallback(() => {
-    if (!isPlaying && cursorIndex >= rawK.length - 1) {
-      setCursorIndex(0);
-    }
-    setIsPlaying((prev) => !prev);
-  }, [isPlaying, cursorIndex, rawK.length]);
-
-  // 游标推进时拉取或从缓存获取截至当期时刻的缠论几何图形
-  useEffect(() => {
-    if (!isReplayMode || !activeRun || !selectedSymbol || rawK.length === 0) {
-      return;
-    }
-    const currentBar = rawK[cursorIndex];
-    if (!currentBar) return;
-
-    const toVisualQueryDate = (iso: string | Date | number) =>
-      formatShanghaiDateTime(iso).replace(/\//g, "-");
-    const timeKey = toVisualQueryDate(currentBar.time);
-
-    if (replayCommandsCache.current.has(timeKey)) {
-      setReplayCommands(replayCommandsCache.current.get(timeKey)!);
-      return;
-    }
-
-    setReplayCommands([]);
-    const reqId = ++activeReplayReqId.current;
-    const visualStart = toVisualQueryDate(activeRun.startDate);
-
-    fetchVisualCommands({
-      code: selectedSymbol,
-      period: activeRun.period,
-      source: activeRun.source,
-      startDate: visualStart,
-      endDate: timeKey,
-    })
-      .then((res) => {
-        const cmds = (res.commands || []).filter(
-          (cmd) => cmd.layer !== "backtest_signals"
-        );
-        replayCommandsCache.current.set(timeKey, cmds);
-        if (activeReplayReqId.current === reqId) {
-          setReplayCommands(cmds);
-        }
-      })
-      .catch(() => {});
-  }, [isReplayMode, cursorIndex, activeRun, selectedSymbol, rawK]);
-
-  // 自动播放定时推演
-  useEffect(() => {
-    if (!isPlaying || !isReplayMode) return;
-    const timer = setInterval(() => {
-      setCursorIndex((prev) => {
-        if (prev >= rawK.length - 1) {
-          setIsPlaying(false);
-          return prev;
-        }
-        const nextIdx = prev + 1;
-        const matched = signalIndices.find((s) => s.index === nextIdx);
-        if (matched) {
-          setSelectedSignal(matched.signal);
-        }
-        return nextIdx;
+    const nextPlaying = !isPlaying;
+    setIsPlaying(nextPlaying);
+    if (simulationSessionId) {
+      void controlSimulation({
+        sessionId: simulationSessionId,
+        action: nextPlaying ? "play" : "pause",
       });
-    }, playSpeed);
-    return () => clearInterval(timer);
-  }, [isPlaying, isReplayMode, rawK.length, playSpeed, signalIndices]);
+    }
+  }, [isPlaying, simulationSessionId]);
+
+  const handleChangeSpeed = useCallback(
+    (speed: number) => {
+      setPlaySpeed(speed);
+      if (simulationSessionId) {
+        void controlSimulation({
+          sessionId: simulationSessionId,
+          action: "set_speed",
+          param: speed,
+        });
+      }
+    },
+    [simulationSessionId]
+  );
+
+  // 导出当前推演仿真的状态快照（队列数据、OHLCV、图元指令与决策树信号）
+  const handleDumpSimulationState = useCallback(async () => {
+    try {
+      setStatusMessage("正在提取当前仿真状态快照…");
+      const dump = await fetchSimulationDump(simulationSessionId || undefined);
+      const jsonStr = JSON.stringify(dump, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const sym = selectedSymbol || "universe";
+      const cur = dump.cursor;
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      a.href = url;
+      a.download = `sim-dump-${sym}-bar${cur}-${ts}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setStatusMessage(
+        `已导出仿真诊断快照 (游标: ${cur + 1}/${dump.totalBars}, 队列: ${dump.queueSize} 条, 图元: ${dump.renderData?.commandsCount || 0} 个, 信号: ${dump.signalsCount || 0} 个)`
+      );
+      setTimeout(() => setStatusMessage(""), 5000);
+    } catch (err) {
+      setLoadError("导出仿真快照失败: " + (err instanceof Error ? err.message : String(err)));
+      setStatusMessage("");
+    }
+  }, [simulationSessionId, selectedSymbol]);
+
+  // 页面卸载或标的切换时清理 SSE 连接
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      if (simulationSessionId) {
+        void stopSimulation(simulationSessionId);
+      }
+    };
+  }, [simulationSessionId]);
 
   // 全局键盘快捷键：[ 或 ← 步退，] 或 → 步进，Space 播放暂停，PageUp/PageDown 切买卖点
   useEffect(() => {
@@ -846,11 +923,12 @@ export function BacktestWorkspace() {
               isPlaying={isPlaying}
               onTogglePlay={handleTogglePlay}
               playSpeed={playSpeed}
-              onChangeSpeed={setPlaySpeed}
+              onChangeSpeed={handleChangeSpeed}
               onOpenDiagnosis={() => {
                 const activeSig = signalIndices.find((s) => s.index === cursorIndex)?.signal;
                 if (activeSig) setSelectedSignal(activeSig);
               }}
+              onDumpState={handleDumpSimulationState}
             />
           )}
 
