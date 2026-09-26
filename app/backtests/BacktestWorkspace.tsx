@@ -14,7 +14,6 @@ import {
   controlSimulation,
   stopSimulation,
   getSimulationStreamUrl,
-  fetchSimulationDump,
   isLocalDevEnvironment,
   type StrategyDefinition,
   type StrategyVersion,
@@ -78,6 +77,10 @@ export function BacktestWorkspace() {
 
   // 全量原始走势与全局指令
   const [rawK, setRawK] = useState<IFetchK[]>([]);
+  const rawKRef = useRef<IFetchK[]>(rawK);
+  useEffect(() => {
+    rawKRef.current = rawK;
+  }, [rawK]);
   const [fullCommands, setFullCommands] = useState<VisualCommandVo[]>([]);
   const [allSignalCommands, setAllSignalCommands] = useState<VisualCommandVo[]>([]);
 
@@ -517,9 +520,17 @@ export function BacktestWorkspace() {
       try {
         const frame: SimulationFrameVo = JSON.parse(event.data);
         setCursorIndex(frame.cursor);
-        const cmds = (frame.commands || []).filter(
-          (cmd) => cmd.layer !== "backtest_signals"
-        );
+        const minTimeMs = rawKRef.current.length > 0 ? new Date(rawKRef.current[0].time).getTime() : 0;
+        const cmds = (frame.commands || []).filter((cmd) => {
+          if (cmd.layer === "backtest_signals") return false;
+          if (minTimeMs > 0) {
+            const rawTime = cmd.startTime || cmd.fromTime || cmd.time;
+            if (rawTime && new Date(rawTime).getTime() < minTimeMs) {
+              return false;
+            }
+          }
+          return true;
+        });
         setReplayCommands(cmds);
       } catch (err) {
         console.error("解析仿真帧失败:", err);
@@ -709,34 +720,6 @@ export function BacktestWorkspace() {
       })
       .catch(() => {});
   }, [isReplayMode, cursorIndex, activeRun, selectedSymbol, rawK, simulationSessionId]);
-
-  // 导出当前推演仿真的状态快照（队列数据、OHLCV、图元指令与决策树信号）
-  const handleDumpSimulationState = useCallback(async () => {
-    try {
-      setStatusMessage("正在提取当前仿真状态快照…");
-      const dump = await fetchSimulationDump(simulationSessionId || undefined);
-      const jsonStr = JSON.stringify(dump, null, 2);
-      const blob = new Blob([jsonStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const sym = selectedSymbol || "universe";
-      const cur = dump.cursor;
-      const ts = new Date().toISOString().replace(/[:.]/g, "-");
-      a.href = url;
-      a.download = `sim-dump-${sym}-bar${cur}-${ts}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      setStatusMessage(
-        `已导出仿真诊断快照 (游标: ${cur + 1}/${dump.totalBars}, 队列: ${dump.queueSize} 条, 图元: ${dump.renderData?.commandsCount || 0} 个, 信号: ${dump.signalsCount || 0} 个)`
-      );
-      setTimeout(() => setStatusMessage(""), 5000);
-    } catch (err) {
-      setLoadError("导出仿真快照失败: " + (err instanceof Error ? err.message : String(err)));
-      setStatusMessage("");
-    }
-  }, [simulationSessionId, selectedSymbol]);
 
   // 组件卸载时释放当前活跃仿真会话资源
   const activeSessionIdRef = useRef<string | null>(null);
@@ -1020,7 +1003,6 @@ export function BacktestWorkspace() {
                 const activeSig = signalIndices.find((s) => s.index === cursorIndex)?.signal;
                 if (activeSig) setSelectedSignal(activeSig);
               }}
-              onDumpState={isDev ? handleDumpSimulationState : undefined}
               isDevMode={isDev}
             />
           )}
@@ -1039,6 +1021,7 @@ export function BacktestWorkspace() {
                 commands={displayedChart.commands}
                 height={520}
                 subChartType={showVolume ? "volume" : "none"}
+                replayMode={isReplayMode}
                 autoFitOnUpdate={!isReplayMode}
                 focusedSignalTime={
                   isReplayMode

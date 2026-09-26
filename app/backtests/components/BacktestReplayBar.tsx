@@ -29,7 +29,6 @@ export interface BacktestReplayBarProps {
   playSpeed: number;
   onChangeSpeed: (speed: number) => void;
   onOpenDiagnosis?: () => void;
-  onDumpState?: () => void;
   isDevMode?: boolean;
 }
 
@@ -68,7 +67,6 @@ export function BacktestReplayBar({
   playSpeed,
   onChangeSpeed,
   onOpenDiagnosis,
-  onDumpState,
   isDevMode,
 }: BacktestReplayBarProps) {
   const hasPrevSignal = useMemo(
@@ -252,20 +250,6 @@ export function BacktestReplayBar({
               </button>
             ))}
           </div>
-
-          {/* 仿真状态快照导出 */}
-          {onDumpState && (
-            <div className="btn-cluster" role="group" aria-label="诊断快照">
-              <button
-                type="button"
-                className="replay-btn dump-btn"
-                onClick={onDumpState}
-                title="导出当前推演仿真状态快照（队列数据、OHLCV、图元指令与决策树信号）"
-              >
-                📥 导出诊断快照
-              </button>
-            </div>
-          )}
 
           <div className="replay-shortcuts-hint">
             <span>快捷键: [ 步退 | ] 步进 | 空格 播放 | PgUp/PgDn 切换信号</span>

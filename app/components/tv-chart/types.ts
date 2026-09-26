@@ -41,6 +41,8 @@ export interface TradingViewChartProps {
   onOhlcHover?: (data: OhlcHoverVo | null) => void;
   /** 数据更新时是否自动适应视口大小，推演复盘单步推进时建议设为 false */
   autoFitOnUpdate?: boolean;
+  /** 是否处于单步推演/复盘模式：开启时自动按标准 K 线间距稳定锚定最新推进游标，杜绝空屏与忽大忽小 */
+  replayMode?: boolean;
 }
 
 export interface TradingViewLineChartProps {

@@ -187,6 +187,7 @@ export function TradingViewChart({
   showOhlcLegend = true,
   onOhlcHover,
   autoFitOnUpdate = true,
+  replayMode = false,
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -1018,8 +1019,17 @@ export function TradingViewChart({
       }
     }
 
-    if (!didFocus && autoFitOnUpdate !== false) {
-      chart.timeScale().fitContent();
+    if (!didFocus) {
+      if (replayMode) {
+        const len = prepared.candleData.length;
+        if (len > 0) {
+          const fromIdx = Math.max(0, len - 35);
+          const toIdx = Math.max(35, len + 5);
+          chart.timeScale().setVisibleLogicalRange({ from: fromIdx, to: toIdx });
+        }
+      } else if (autoFitOnUpdate !== false) {
+        chart.timeScale().fitContent();
+      }
     }
     requestAnimationFrame(drawZhongshuOverlay);
 
@@ -1031,7 +1041,7 @@ export function TradingViewChart({
       chart.unsubscribeClick(handleClick);
       containerEl?.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [prepared, commands, focusedSignalTime, height, handleCrosshair, handleClick, biColor, biWidth, isDark, autoFitOnUpdate]);
+  }, [prepared, commands, focusedSignalTime, height, handleCrosshair, handleClick, biColor, biWidth, isDark, autoFitOnUpdate, replayMode]);
 
   const legendUpColor = displayed?.isUp ? "#EF4444" : "#22C55E";
 
