@@ -477,6 +477,7 @@ export function BacktestWorkspace() {
     if (active) {
       setIsReplayMode(true);
       setIsPlaying(false);
+      setCursorIndex(0);
       if (isDev) {
         try {
           const summary = await startSimulation({
@@ -526,6 +527,7 @@ export function BacktestWorkspace() {
     } else {
       setIsReplayMode(false);
       setIsPlaying(false);
+      setCursorIndex(Math.max(0, rawK.length - 1));
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
         eventSourceRef.current = null;
@@ -611,6 +613,14 @@ export function BacktestWorkspace() {
     const nextPlaying = !isPlaying;
     setIsPlaying(nextPlaying);
     if (simulationSessionId) {
+      if (nextPlaying && cursorIndex >= rawK.length - 1) {
+        void controlSimulation({
+          sessionId: simulationSessionId,
+          action: "seek",
+          param: 0,
+        });
+        setCursorIndex(0);
+      }
       void controlSimulation({
         sessionId: simulationSessionId,
         action: nextPlaying ? "play" : "pause",
