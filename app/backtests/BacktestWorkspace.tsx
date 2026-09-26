@@ -487,39 +487,6 @@ export function BacktestWorkspace() {
             endDate: activeRun?.endDate,
           });
           setSimulationSessionId(summary.sessionId);
-
-          if (eventSourceRef.current) {
-            eventSourceRef.current.close();
-          }
-          const streamUrl = getSimulationStreamUrl(summary.sessionId);
-          if (streamUrl) {
-            const es = new EventSource(streamUrl);
-            eventSourceRef.current = es;
-
-            es.addEventListener("frame", (event) => {
-              try {
-                const frame: SimulationFrameVo = JSON.parse(event.data);
-                setCursorIndex(frame.cursor);
-                const cmds = (frame.commands || []).filter(
-                  (cmd) => cmd.layer !== "backtest_signals"
-                );
-                setReplayCommands(cmds);
-              } catch {
-                // ignore JSON parse error
-              }
-            });
-
-            es.addEventListener("status", (event) => {
-              try {
-                const data = JSON.parse(event.data);
-                if (data.status === "completed") {
-                  setIsPlaying(false);
-                }
-              } catch {
-                // ignore
-              }
-            });
-          }
         } catch (err: unknown) {
           console.error("启动本地开发仿真失败:", err instanceof Error ? err.message : String(err));
         }
@@ -528,16 +495,55 @@ export function BacktestWorkspace() {
       setIsReplayMode(false);
       setIsPlaying(false);
       setCursorIndex(Math.max(0, rawK.length - 1));
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
       if (simulationSessionId) {
         void stopSimulation(simulationSessionId);
         setSimulationSessionId(null);
       }
+      setReplayCommands(fullCommands);
     }
   };
+
+  // 仿真推流长连接 (SSE) 声明式生命周期管理
+  useEffect(() => {
+    if (!simulationSessionId || !isReplayMode) return;
+
+    const streamUrl = getSimulationStreamUrl(simulationSessionId);
+    if (!streamUrl) return;
+
+    const es = new EventSource(streamUrl);
+    eventSourceRef.current = es;
+
+    es.addEventListener("frame", (event) => {
+      try {
+        const frame: SimulationFrameVo = JSON.parse(event.data);
+        setCursorIndex(frame.cursor);
+        const cmds = (frame.commands || []).filter(
+          (cmd) => cmd.layer !== "backtest_signals"
+        );
+        setReplayCommands(cmds);
+      } catch (err) {
+        console.error("解析仿真帧失败:", err);
+      }
+    });
+
+    es.addEventListener("status", (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.status === "completed") {
+          setIsPlaying(false);
+        }
+      } catch {
+        // ignore
+      }
+    });
+
+    return () => {
+      es.close();
+      if (eventSourceRef.current === es) {
+        eventSourceRef.current = null;
+      }
+    };
+  }, [simulationSessionId, isReplayMode]);
 
   const handleStepPrev = useCallback(() => {
     if (simulationSessionId) {
@@ -732,18 +738,19 @@ export function BacktestWorkspace() {
     }
   }, [simulationSessionId, selectedSymbol]);
 
-  // 页面卸载或标的切换时清理 SSE 连接
+  // 组件卸载时释放当前活跃仿真会话资源
+  const activeSessionIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeSessionIdRef.current = simulationSessionId;
+  }, [simulationSessionId]);
+
   useEffect(() => {
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-      if (simulationSessionId) {
-        void stopSimulation(simulationSessionId);
+      if (activeSessionIdRef.current) {
+        void stopSimulation(activeSessionIdRef.current);
       }
     };
-  }, [simulationSessionId]);
+  }, []);
 
   // 全局键盘快捷键：[ 或 ← 步退，] 或 → 步进，Space 播放暂停，PageUp/PageDown 切买卖点
   useEffect(() => {
@@ -1032,6 +1039,7 @@ export function BacktestWorkspace() {
                 commands={displayedChart.commands}
                 height={520}
                 subChartType={showVolume ? "volume" : "none"}
+                autoFitOnUpdate={!isReplayMode}
                 focusedSignalTime={
                   isReplayMode
                     ? signalIndices.some((s) => s.index === cursorIndex)

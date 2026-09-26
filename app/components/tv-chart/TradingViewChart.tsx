@@ -186,6 +186,7 @@ export function TradingViewChart({
   biWidth,
   showOhlcLegend = true,
   onOhlcHover,
+  autoFitOnUpdate = true,
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -1017,7 +1018,7 @@ export function TradingViewChart({
       }
     }
 
-    if (!didFocus) {
+    if (!didFocus && autoFitOnUpdate !== false) {
       chart.timeScale().fitContent();
     }
     requestAnimationFrame(drawZhongshuOverlay);
@@ -1030,7 +1031,7 @@ export function TradingViewChart({
       chart.unsubscribeClick(handleClick);
       containerEl?.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [prepared, commands, focusedSignalTime, height, handleCrosshair, handleClick, biColor, biWidth, isDark]);
+  }, [prepared, commands, focusedSignalTime, height, handleCrosshair, handleClick, biColor, biWidth, isDark, autoFitOnUpdate]);
 
   const legendUpColor = displayed?.isUp ? "#EF4444" : "#22C55E";
 

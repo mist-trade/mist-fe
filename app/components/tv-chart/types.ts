@@ -39,6 +39,8 @@ export interface TradingViewChartProps {
   showOhlcLegend?: boolean;
   /** 十字线悬浮的 OHLC 回调，供外层在图表外渲染固定信息条 */
   onOhlcHover?: (data: OhlcHoverVo | null) => void;
+  /** 数据更新时是否自动适应视口大小，推演复盘单步推进时建议设为 false */
+  autoFitOnUpdate?: boolean;
 }
 
 export interface TradingViewLineChartProps {
