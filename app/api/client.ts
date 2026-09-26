@@ -186,6 +186,7 @@ export interface StrategyBacktestSignalResult {
   backtestRunId: number;
   securityCode: string;
   signalTime: string;
+  signalType?: string;
   confidence?: number | null;
   confidenceLevel?: 'HIGH' | 'MEDIUM' | 'LOW' | null;
   decisionTrace?: Record<string, unknown> | null;
@@ -1053,6 +1054,7 @@ export interface VisualCommandQuery {
   count?: number;
   startDate?: string;
   endDate?: string;
+  filterFenxingContainment?: boolean;
 }
 
 export const fetchVisualCommands = (query: VisualCommandQuery) => {
@@ -1065,6 +1067,9 @@ export const fetchVisualCommands = (query: VisualCommandQuery) => {
   if (query.count) params.count = String(query.count);
   if (query.startDate) params.startDate = query.startDate;
   if (query.endDate) params.endDate = query.endDate;
+  if (query.filterFenxingContainment !== undefined) {
+    params.filterFenxingContainment = String(query.filterFenxingContainment);
+  }
 
   return requestJson<VisualCommandPayloadVo>(
     getMistApiBase(),

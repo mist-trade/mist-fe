@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import {
   listStrategies,
   listStrategyVersions,
@@ -26,11 +25,7 @@ import { BacktestReplayBar } from "./components/BacktestReplayBar";
 import { WorkspaceShell } from "@/app/components/layout/WorkspaceShell";
 import { formatShanghaiDate, formatShanghaiDateTime } from "@/app/lib/time";
 
-// 动态载入 TradingView Canvas 渲染容器（禁用 SSR 避免 Canvas node 错误）
-const TradingViewChart = dynamic(
-  () => import("@/app/components/tv-chart/TradingViewChart"),
-  { ssr: false, loading: () => <div className="kline-chart-loading">图表引擎加载中…</div> }
-);
+import TradingViewChart from "@/app/components/tv-chart/TradingViewChart";
 
 interface ChartWorkspaceState {
   symbol: string;
@@ -227,13 +222,9 @@ export function BacktestWorkspace() {
         const trace = (sig.decisionTrace || {}) as Record<string, unknown>;
 
         const rawType = String(
+          sig.signalType ||
           chanBsp.type ||
-          trace.eventType ||
           ctx.type ||
-          ctx.signalTag ||
-          ctx.signalKind ||
-          trace.signalTag ||
-          trace.signalKind ||
           "signal"
         );
         const isSell =
@@ -270,36 +261,23 @@ export function BacktestWorkspace() {
         };
       });
 
-      const mergedCommands = [...(visualPayload.commands || []), ...signalCommands];
+      // 过滤掉视觉服务底图中可能携带的静态 backtest_signals，避免与动态回测信号双重叠加
+      const pureVisualCommands = (visualPayload.commands || []).filter(
+        (cmd) => cmd.layer !== "backtest_signals"
+      );
+      const mergedCommands = [...pureVisualCommands, ...signalCommands];
 
+      replayCommandsCache.current.clear();
       setRawK(kLines);
-      setFullCommands(visualPayload.commands || []);
+      setFullCommands(pureVisualCommands);
       setAllSignalCommands(signalCommands);
       setCursorIndex(Math.max(0, kLines.length - 1));
-      setReplayCommands(visualPayload.commands || []);
+      setReplayCommands(pureVisualCommands);
       setIsPlaying(false);
 
-      // Seed cache for the completed end date
+      // 记录末端全量视觉指令缓存（单步推演由游标驱动按需拉取并缓存，避免瞬间并发上千次请求打崩网络通道）
       const visualEndKey = toVisualQueryDate(run.endDate);
-      replayCommandsCache.current.set(visualEndKey, visualPayload.commands || []);
-
-      // 预热该标的的所有信号关键帧，确保单步跳转零网络延迟秒切
-      for (const sig of symbolSignals) {
-        const timeKey = toVisualQueryDate(sig.signalTime);
-        if (!replayCommandsCache.current.has(timeKey)) {
-          void fetchVisualCommands({
-            code: symbol,
-            period: run.period,
-            source: run.source,
-            startDate: visualStart,
-            endDate: timeKey,
-          })
-            .then((res) => {
-              replayCommandsCache.current.set(timeKey, res.commands || []);
-            })
-            .catch(() => {});
-        }
-      }
+      replayCommandsCache.current.set(visualEndKey, pureVisualCommands);
 
       setChart({
         symbol,
@@ -448,9 +426,15 @@ export function BacktestWorkspace() {
   // 标的买卖点信号与 K 线数组的下标对齐索引
   const signalIndices = useMemo(() => {
     if (!rawK || rawK.length === 0 || !symbolSignals || symbolSignals.length === 0) return [];
+    const minTime = new Date(rawK[0].time).getTime();
+    const maxTime = new Date(rawK[rawK.length - 1].time).getTime();
+
     return symbolSignals
       .map((sig) => {
         const sigTime = new Date(sig.signalTime).getTime();
+        if (sigTime < minTime || sigTime > maxTime) {
+          return { signal: sig, index: -1 };
+        }
         let idx = rawK.findIndex((item) => new Date(item.time).getTime() === sigTime);
         if (idx < 0) {
           idx = rawK.findIndex((item) => new Date(item.time).getTime() >= sigTime);
@@ -469,13 +453,17 @@ export function BacktestWorkspace() {
     }
     if (rawK.length > 0) {
       const sigTime = new Date(sig.signalTime).getTime();
-      let targetIdx = rawK.findIndex((k) => new Date(k.time).getTime() === sigTime);
-      if (targetIdx < 0) {
-        targetIdx = rawK.findIndex((k) => new Date(k.time).getTime() >= sigTime);
-      }
-      if (targetIdx >= 0) {
-        setCursorIndex(targetIdx);
-        setIsReplayMode(true);
+      const minTime = new Date(rawK[0].time).getTime();
+      const maxTime = new Date(rawK[rawK.length - 1].time).getTime();
+      if (sigTime >= minTime && sigTime <= maxTime) {
+        let targetIdx = rawK.findIndex((k) => new Date(k.time).getTime() === sigTime);
+        if (targetIdx < 0) {
+          targetIdx = rawK.findIndex((k) => new Date(k.time).getTime() >= sigTime);
+        }
+        if (targetIdx >= 0) {
+          setCursorIndex(targetIdx);
+          setIsReplayMode(true);
+        }
       }
     }
   };
@@ -557,6 +545,7 @@ export function BacktestWorkspace() {
       return;
     }
 
+    setReplayCommands([]);
     const reqId = ++activeReplayReqId.current;
     const visualStart = toVisualQueryDate(activeRun.startDate);
 
@@ -568,7 +557,9 @@ export function BacktestWorkspace() {
       endDate: timeKey,
     })
       .then((res) => {
-        const cmds = res.commands || [];
+        const cmds = (res.commands || []).filter(
+          (cmd) => cmd.layer !== "backtest_signals"
+        );
         replayCommandsCache.current.set(timeKey, cmds);
         if (activeReplayReqId.current === reqId) {
           setReplayCommands(cmds);
@@ -647,8 +638,11 @@ export function BacktestWorkspace() {
     const currentBar = rawK[cursorIndex];
     const currentBarTimeMs = currentBar ? new Date(currentBar.time).getTime() : 0;
     const visibleSignalCommands = allSignalCommands.filter((cmd) => {
-      return cmd.time ? new Date(cmd.time).getTime() <= currentBarTimeMs : true;
+      if (!cmd.time) return false;
+      const cmdTimeMs = new Date(cmd.time).getTime();
+      return cmdTimeMs <= currentBarTimeMs;
     });
+
     const all = [...replayCommands, ...visibleSignalCommands];
     return {
       symbol: selectedSymbol,

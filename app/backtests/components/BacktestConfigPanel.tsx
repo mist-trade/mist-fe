@@ -26,8 +26,8 @@ interface BacktestConfigPanelProps {
 }
 
 const DEFAULT_CODE = "000001";
-const DEFAULT_PERIOD = 5;
-const DEFAULT_SOURCE: DataSourceValue = "tdx";
+const DEFAULT_PERIOD = 30;
+const DEFAULT_SOURCE: DataSourceValue = "qmt";
 
 import {
   formatShanghaiLocalDateTimeInput,
@@ -36,8 +36,8 @@ import {
 } from "@/app/lib/time";
 
 const PRESET_STOCKS = [
+  { code: "000001", name: "上证指数" },
   { code: "600519", name: "贵州茅台" },
-  { code: "000001", name: "平安银行" },
   { code: "300750", name: "宁德时代" },
   { code: "002594", name: "比亚迪" },
 ];

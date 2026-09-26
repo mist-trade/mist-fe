@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:local": "MIST_API_PROXY_TARGET=http://localhost:8001 CHAN_API_PROXY_TARGET=http://localhost:8001 next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

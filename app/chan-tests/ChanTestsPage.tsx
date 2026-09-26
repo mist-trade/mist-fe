@@ -1,24 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import type { CaseWithMeta, SnapshotData } from "./lib/load-snapshot";
 import { CaseList } from "./components/CaseList";
 import { StatsPanel } from "./components/StatsPanel";
 import { snapshotToVisualCommands } from "./lib/snapshot-to-chart";
-
-// 懒加载 TradingViewChart，不进首屏 SSR
-const TradingViewChart = dynamic(
-  () => import("@/app/components/tv-chart/TradingViewChart"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[550px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
-        加载 TradingView 快照图表...
-      </div>
-    ),
-  }
-);
+import TradingViewChart from "@/app/components/tv-chart/TradingViewChart";
 
 interface ChanTestsPageProps {
   cases: CaseWithMeta[];

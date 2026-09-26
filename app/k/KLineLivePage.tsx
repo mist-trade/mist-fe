@@ -11,21 +11,9 @@ import {
   type SecurityOption,
   type VisualCommandVo,
 } from "@/app/api/client";
-import dynamic from "next/dynamic";
 import type { IFetchK } from "@/app/api/types";
 import { WorkspaceShell } from "@/app/components/layout/WorkspaceShell";
-
-const TradingViewChart = dynamic(
-  () => import("@/app/components/tv-chart/TradingViewChart"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[550px] flex items-center justify-center bg-surface-raised rounded-lg text-text-muted animate-pulse">
-        加载 TradingView 图表...
-      </div>
-    ),
-  }
-);
+import TradingViewChart from "@/app/components/tv-chart/TradingViewChart";
 
 interface VisualChartState {
   k: IFetchK[];

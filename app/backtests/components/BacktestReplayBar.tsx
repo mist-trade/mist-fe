@@ -33,7 +33,7 @@ export interface BacktestReplayBarProps {
 
 function getSignalLabel(signal: StrategyBacktestSignalResult): { label: string; isSell: boolean } {
   const ctx = (signal.contextSnapshot || {}) as Record<string, unknown>;
-  const rawType = String(ctx.type || ctx.signalKind || "signal");
+  const rawType = String(signal.signalType || ctx.type || "signal");
   const isSell = rawType.includes("sell") || rawType === "exit";
 
   let label = "买点";

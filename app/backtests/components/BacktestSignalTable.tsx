@@ -27,7 +27,7 @@ const CHAN_LABEL_MAP: Record<string, string> = {
 function parseSignalInfo(sig: StrategyBacktestSignalResult) {
   const ctx = (sig.contextSnapshot || {}) as Record<string, unknown>;
   const chanBsp = (ctx.chanBsp || {}) as Record<string, unknown>;
-  const rawType = String(chanBsp.type || ctx.type || ctx.signalKind || "signal");
+  const rawType = String(sig.signalType || chanBsp.type || ctx.type || "signal");
 
   const isBuy = rawType.includes("buy") || rawType === "entry";
   let label = CHAN_LABEL_MAP[rawType];
