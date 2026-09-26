@@ -877,21 +877,34 @@ export const fetchStrategyBacktestRun = (runId: number) =>
     { method: "GET" }
   );
 
+/**
+ * 获取回测信号结果（完整分页结构，包含 items 与 nextCursor）。
+ * 遵循质量规范《包装结构防反复拆包组装准则》，透传标准分页信封，杜绝丢弃游标元数据。
+ */
 export const fetchStrategyBacktestSignals = async (
-  runId: number
-): Promise<StrategyBacktestSignalResult[]> => {
+  runId: number,
+  query?: { cursor?: string | null; limit?: number }
+): Promise<BacktestSignalPageVo> => {
+  const params: Record<string, string> = {};
+  if (query?.cursor) params.cursor = query.cursor;
+  if (query?.limit) params.limit = String(query.limit);
+  const search = new URLSearchParams(params).toString();
   const result = await requestJson<
     BacktestSignalPageVo | StrategyBacktestSignalResult[]
-  >(getMistApiBase(), `/v1/strategy-backtests/${runId}/signals`, {
-    method: "GET",
-  });
+  >(
+    getMistApiBase(),
+    `/v1/strategy-backtests/${runId}/signals${search ? `?${search}` : ""}`,
+    {
+      method: "GET",
+    }
+  );
+  if (result && Array.isArray((result as BacktestSignalPageVo).items)) {
+    return result as BacktestSignalPageVo;
+  }
   if (Array.isArray(result)) {
-    return result;
+    return { items: result, nextCursor: null };
   }
-  if (result && Array.isArray(result.items)) {
-    return result.items;
-  }
-  return [];
+  return { items: [], nextCursor: null };
 };
 
 export const fetchK = async (query: KLineQuery): Promise<IFetchK[]> => {
@@ -913,12 +926,20 @@ export const fetchK = async (query: KLineQuery): Promise<IFetchK[]> => {
   return [];
 };
 
+/**
+ * @deprecated 历史遗留端点。自 integrate-lightweight-charts-web-visualization 起，
+ * 全仓缠论几何图元统一由 `/v1/visual/commands` (fetchVisualCommands) 作为唯一真源驱动，
+ * 禁止在前端新页面中继续引入该底层子接口。
+ */
 export const fetchMergeK = (query: KLineQuery) =>
   requestJson<IMergeK[]>(getAnalysisApiBase(), "/v1/chan/merge-k", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
+/**
+ * @deprecated 历史遗留转换函数，保留仅供旧单元测试兼容。
+ */
 export function normalizeBiPhases(value: unknown): IFetchBiPhases {
   if (Array.isArray(value)) {
     return { phaseA: value, phaseB: value } as IFetchBiPhases;
@@ -937,6 +958,9 @@ export function normalizeBiPhases(value: unknown): IFetchBiPhases {
   );
 }
 
+/**
+ * @deprecated 历史遗留端点。全仓缠论几何图元统一由 `/v1/visual/commands` 驱动。
+ */
 export const fetchBi = async (query: KLineQuery) =>
   normalizeBiPhases(
     await requestJson<unknown>(getAnalysisApiBase(), "/v1/chan/bi", {
@@ -945,12 +969,18 @@ export const fetchBi = async (query: KLineQuery) =>
     })
   );
 
+/**
+ * @deprecated 历史遗留端点。全仓缠论几何图元统一由 `/v1/visual/commands` 驱动。
+ */
 export const fetchFenxing = (query: KLineQuery) =>
   requestJson<IFenxing[]>(getAnalysisApiBase(), "/v1/chan/fenxing", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
+/**
+ * @deprecated 历史遗留转换函数，保留仅供旧单元测试兼容。
+ */
 export function normalizeChannelPhases(value: unknown): IFetchChannelPhases {
   if (Array.isArray(value)) {
     return { phaseA: value, phaseB: value } as IFetchChannelPhases;
@@ -969,6 +999,9 @@ export function normalizeChannelPhases(value: unknown): IFetchChannelPhases {
   );
 }
 
+/**
+ * @deprecated 历史遗留端点。全仓缠论几何图元统一由 `/v1/visual/commands` 驱动。
+ */
 export const fetchChannel = async (query: KLineQuery) =>
   normalizeChannelPhases(
     await requestJson<unknown>(
@@ -981,12 +1014,18 @@ export const fetchChannel = async (query: KLineQuery) =>
     )
   );
 
+/**
+ * @deprecated 历史遗留端点。全仓缠论几何图元统一由 `/v1/visual/commands` 驱动。
+ */
 export const fetchDuan = (query: KLineQuery) =>
   requestJson<IFetchDuan[]>(getAnalysisApiBase(), "/v1/chan/duan", {
     method: "POST",
     body: JSON.stringify(query),
   });
 
+/**
+ * @deprecated 历史遗留转换函数，保留仅供旧单元测试兼容。
+ */
 export function normalizeDuanChannelPhases(
   value: unknown
 ): IFetchDuanChannelPhases {
@@ -1007,6 +1046,9 @@ export function normalizeDuanChannelPhases(
   );
 }
 
+/**
+ * @deprecated 历史遗留端点。全仓缠论几何图元统一由 `/v1/visual/commands` 驱动。
+ */
 export const fetchDuanChannel = async (query: KLineQuery) =>
   normalizeDuanChannelPhases(
     await requestJson<unknown>(

@@ -18,6 +18,12 @@ jest.mock("@/app/api/client", () => ({
   fetchStrategyBacktestSignals: jest.fn(),
   listStrategies: jest.fn(),
   listStrategyVersions: jest.fn(),
+  isLocalDevEnvironment: jest.fn(() => true),
+  startSimulation: jest.fn(),
+  controlSimulation: jest.fn(),
+  stopSimulation: jest.fn(),
+  getSimulationStreamUrl: jest.fn(),
+  fetchSimulationDump: jest.fn(),
 }));
 
 // Mock dynamic TradingViewChart

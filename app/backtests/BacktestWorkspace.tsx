@@ -179,9 +179,8 @@ export function BacktestWorkspace() {
     symbol: string
   ) => {
     try {
-      setStatusMessage("加载回测买卖点信号与 K 线图表…");
-      const fetchedSignals = await fetchStrategyBacktestSignals(run.id).catch(() => []);
-      const sigList = Array.isArray(fetchedSignals) ? fetchedSignals : [];
+      const pageResult = await fetchStrategyBacktestSignals(run.id).catch(() => ({ items: [], nextCursor: null }));
+      const sigList = Array.isArray(pageResult) ? pageResult : (pageResult?.items || []);
       setSignals(sigList);
 
       if (symbol) {
@@ -399,8 +398,8 @@ export function BacktestWorkspace() {
 
     if (run.status === "completed") {
       try {
-        const fetchedSignals = await fetchStrategyBacktestSignals(run.id);
-        const sigList = Array.isArray(fetchedSignals) ? fetchedSignals : [];
+        const pageResult = await fetchStrategyBacktestSignals(run.id);
+        const sigList = Array.isArray(pageResult) ? pageResult : (pageResult?.items || []);
         setSignals(sigList);
         const firstSymbol = run.targetUniverse?.[0] || "";
         setSelectedSymbol(firstSymbol);
