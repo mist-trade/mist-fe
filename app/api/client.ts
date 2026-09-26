@@ -12,7 +12,7 @@ const DEFAULT_MIST_API_BASE_PATH = "/api/mist";
 const DEFAULT_CHAN_API_BASE_PATH = "/api/chan";
 
 const TIMEOUT = Number.parseInt(
-  process.env.NEXT_PUBLIC_API_TIMEOUT || "10000",
+  process.env.NEXT_PUBLIC_API_TIMEOUT || "30000",
   10
 );
 
@@ -643,7 +643,7 @@ async function requestJson<T>(
       "Content-Type": "application/json",
       ...(init.headers || {}),
     },
-    signal: AbortSignal.timeout(TIMEOUT),
+    signal: init?.signal ?? AbortSignal.timeout(TIMEOUT),
   });
 
   if (response.status === 204) {
@@ -684,7 +684,7 @@ export async function requestNoContent(
       "Content-Type": "application/json",
       ...(init.headers || {}),
     },
-    signal: AbortSignal.timeout(TIMEOUT),
+    signal: init?.signal ?? AbortSignal.timeout(TIMEOUT),
   });
 
   const requestId = await readRequestId(response);
