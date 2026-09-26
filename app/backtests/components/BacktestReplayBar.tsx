@@ -30,6 +30,7 @@ export interface BacktestReplayBarProps {
   onChangeSpeed: (speed: number) => void;
   onOpenDiagnosis?: () => void;
   onDumpState?: () => void;
+  isDevMode?: boolean;
 }
 
 function getSignalLabel(signal: StrategyBacktestSignalResult): { label: string; isSell: boolean } {
@@ -68,6 +69,7 @@ export function BacktestReplayBar({
   onChangeSpeed,
   onOpenDiagnosis,
   onDumpState,
+  isDevMode,
 }: BacktestReplayBarProps) {
   const hasPrevSignal = useMemo(
     () => signalIndices.some((s) => s.index < cursorIndex),
@@ -123,6 +125,9 @@ export function BacktestReplayBar({
               </span>
               <span className="info-tag tnum">
                 收盘: ¥{Number(currentBar.close).toFixed(2)}
+              </span>
+              <span className={`info-tag env-tag ${isDevMode ? "dev" : "prod"}`} title={isDevMode ? "当前连接本地开发仿真引擎 (逐 Bar 推流)" : "当前运行于离线复盘模式 (非本地开发环境)"}>
+                {isDevMode ? "🧪 本地仿真" : "📜 历史复盘"}
               </span>
             </div>
           )}

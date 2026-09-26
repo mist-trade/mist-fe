@@ -15,6 +15,7 @@ import {
   stopSimulation,
   getSimulationStreamUrl,
   fetchSimulationDump,
+  isLocalDevEnvironment,
   type StrategyDefinition,
   type StrategyVersion,
   type StrategyBacktestRun,
@@ -88,6 +89,9 @@ export function BacktestWorkspace() {
   const [replayCommands, setReplayCommands] = useState<VisualCommandVo[]>([]);
   const [simulationSessionId, setSimulationSessionId] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const isDev = useMemo(() => isLocalDevEnvironment(), []);
+  const replayCommandsCache = useRef<Map<string, VisualCommandVo[]>>(new Map());
+  const activeReplayReqId = useRef<number>(0);
 
   const [chart, setChart] = useState<ChartWorkspaceState | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -469,51 +473,56 @@ export function BacktestWorkspace() {
     }
   };
 
-  // 单步推演 / 实时仿真控制操作集 (SSE 长连接驱动)
+  // 单步推演 / 实时仿真控制操作集 (仅在本地开发环境激活 SSE 仿真引擎，非本地/生产环境走纯前端离线复盘)
   const handleToggleReplayMode = async (active: boolean) => {
     if (active) {
       setIsReplayMode(true);
       setIsPlaying(false);
-      try {
-        const summary = await startSimulation({
-          securityCode: selectedSymbol || "000001",
-          period: activeRun?.period || 30,
-          startDate: activeRun?.startDate,
-          endDate: activeRun?.endDate,
-        });
-        setSimulationSessionId(summary.sessionId);
+      if (isDev) {
+        try {
+          const summary = await startSimulation({
+            securityCode: selectedSymbol || "000001",
+            period: activeRun?.period || 30,
+            startDate: activeRun?.startDate,
+            endDate: activeRun?.endDate,
+          });
+          setSimulationSessionId(summary.sessionId);
 
-        if (eventSourceRef.current) {
-          eventSourceRef.current.close();
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+          }
+          const streamUrl = getSimulationStreamUrl(summary.sessionId);
+          if (streamUrl) {
+            const es = new EventSource(streamUrl);
+            eventSourceRef.current = es;
+
+            es.addEventListener("frame", (event) => {
+              try {
+                const frame: SimulationFrameVo = JSON.parse(event.data);
+                setCursorIndex(frame.cursor);
+                const cmds = (frame.commands || []).filter(
+                  (cmd) => cmd.layer !== "backtest_signals"
+                );
+                setReplayCommands(cmds);
+              } catch {
+                // ignore JSON parse error
+              }
+            });
+
+            es.addEventListener("status", (event) => {
+              try {
+                const data = JSON.parse(event.data);
+                if (data.status === "completed") {
+                  setIsPlaying(false);
+                }
+              } catch {
+                // ignore
+              }
+            });
+          }
+        } catch (err: unknown) {
+          console.error("启动本地开发仿真失败:", err instanceof Error ? err.message : String(err));
         }
-        const es = new EventSource(getSimulationStreamUrl(summary.sessionId));
-        eventSourceRef.current = es;
-
-        es.addEventListener("frame", (event) => {
-          try {
-            const frame: SimulationFrameVo = JSON.parse(event.data);
-            setCursorIndex(frame.cursor);
-            const cmds = (frame.commands || []).filter(
-              (cmd) => cmd.layer !== "backtest_signals"
-            );
-            setReplayCommands(cmds);
-          } catch {
-            // ignore JSON parse error
-          }
-        });
-
-        es.addEventListener("status", (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.status === "completed") {
-              setIsPlaying(false);
-            }
-          } catch {
-            // ignore
-          }
-        });
-      } catch (err: unknown) {
-        console.error("启动仿真失败:", err instanceof Error ? err.message : String(err));
       }
     } else {
       setIsReplayMode(false);
@@ -607,8 +616,10 @@ export function BacktestWorkspace() {
         sessionId: simulationSessionId,
         action: nextPlaying ? "play" : "pause",
       });
+    } else if (nextPlaying && cursorIndex >= rawK.length - 1) {
+      setCursorIndex(0);
     }
-  }, [isPlaying, simulationSessionId]);
+  }, [isPlaying, simulationSessionId, cursorIndex, rawK.length]);
 
   const handleChangeSpeed = useCallback(
     (speed: number) => {
@@ -623,6 +634,66 @@ export function BacktestWorkspace() {
     },
     [simulationSessionId]
   );
+
+  // 非仿真模式（生产离线复盘）下的自动播放定时器
+  useEffect(() => {
+    if (!isPlaying || !isReplayMode || simulationSessionId) return;
+    const timer = setInterval(() => {
+      setCursorIndex((prev) => {
+        if (prev >= rawK.length - 1) {
+          setIsPlaying(false);
+          return prev;
+        }
+        const nextIdx = prev + 1;
+        const matched = signalIndices.find((s) => s.index === nextIdx);
+        if (matched) {
+          setSelectedSignal(matched.signal);
+        }
+        return nextIdx;
+      });
+    }, playSpeed);
+    return () => clearInterval(timer);
+  }, [isPlaying, isReplayMode, rawK.length, playSpeed, signalIndices, simulationSessionId]);
+
+  // 非仿真模式下，随游标推进获取截至当前时刻的纯几何图元
+  useEffect(() => {
+    if (!isReplayMode || !activeRun || !selectedSymbol || rawK.length === 0 || simulationSessionId) {
+      return;
+    }
+    const currentBar = rawK[cursorIndex];
+    if (!currentBar) return;
+
+    const toVisualQueryDate = (iso: string | Date | number) =>
+      formatShanghaiDateTime(iso).replace(/\//g, "-");
+    const timeKey = toVisualQueryDate(currentBar.time);
+
+    if (replayCommandsCache.current.has(timeKey)) {
+      setReplayCommands(replayCommandsCache.current.get(timeKey)!);
+      return;
+    }
+
+    setReplayCommands([]);
+    const reqId = ++activeReplayReqId.current;
+    const visualStart = toVisualQueryDate(activeRun.startDate);
+
+    fetchVisualCommands({
+      code: selectedSymbol,
+      period: activeRun.period,
+      source: activeRun.source,
+      startDate: visualStart,
+      endDate: timeKey,
+    })
+      .then((res) => {
+        const cmds = (res.commands || []).filter(
+          (cmd) => cmd.layer !== "backtest_signals"
+        );
+        replayCommandsCache.current.set(timeKey, cmds);
+        if (activeReplayReqId.current === reqId) {
+          setReplayCommands(cmds);
+        }
+      })
+      .catch(() => {});
+  }, [isReplayMode, cursorIndex, activeRun, selectedSymbol, rawK, simulationSessionId]);
 
   // 导出当前推演仿真的状态快照（队列数据、OHLCV、图元指令与决策树信号）
   const handleDumpSimulationState = useCallback(async () => {
@@ -928,7 +999,8 @@ export function BacktestWorkspace() {
                 const activeSig = signalIndices.find((s) => s.index === cursorIndex)?.signal;
                 if (activeSig) setSelectedSignal(activeSig);
               }}
-              onDumpState={handleDumpSimulationState}
+              onDumpState={isDev ? handleDumpSimulationState : undefined}
+              isDevMode={isDev}
             />
           )}
 

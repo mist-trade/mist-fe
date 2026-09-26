@@ -1129,8 +1129,25 @@ export interface StartSimulationParams {
   flow?: Record<string, unknown>;
 }
 
-export const startSimulation = (params: StartSimulationParams) =>
-  requestJson<SimulationSessionSummaryVo>(
+/**
+ * 校验当前是否处于本地开发环境 (dev)
+ * 整个仿真推演套件（startSimulation、controlSimulation、stream、dump）仅限本地开发环境可用，
+ * 生产环境严格禁止调用。
+ */
+export const isLocalDevEnvironment = (): boolean => {
+  return (
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_ENABLE_LOCAL_SIMULATION === "true"
+  );
+};
+
+export const startSimulation = (params: StartSimulationParams) => {
+  if (!isLocalDevEnvironment()) {
+    return Promise.reject(
+      new Error("仿真推演服务仅限本地开发环境 (dev) 调用，当前生产/非本地环境已严格禁用。")
+    );
+  }
+  return requestJson<SimulationSessionSummaryVo>(
     getMistApiBase(),
     "/v1/simulation/start",
     {
@@ -1138,13 +1155,19 @@ export const startSimulation = (params: StartSimulationParams) =>
       body: JSON.stringify(params),
     }
   );
+};
 
 export const controlSimulation = (params: {
   sessionId: string;
   action: 'play' | 'pause' | 'step_next' | 'step_prev' | 'seek' | 'set_speed';
   param?: number;
-}) =>
-  requestJson<SimulationSessionSummaryVo>(
+}) => {
+  if (!isLocalDevEnvironment()) {
+    return Promise.reject(
+      new Error("仿真推演服务仅限本地开发环境 (dev) 调用，当前生产/非本地环境已严格禁用。")
+    );
+  }
+  return requestJson<SimulationSessionSummaryVo>(
     getMistApiBase(),
     "/v1/simulation/control",
     {
@@ -1152,9 +1175,13 @@ export const controlSimulation = (params: {
       body: JSON.stringify(params),
     }
   );
+};
 
-export const stopSimulation = (sessionId: string) =>
-  requestJson<{ success: boolean }>(
+export const stopSimulation = (sessionId: string) => {
+  if (!isLocalDevEnvironment()) {
+    return Promise.resolve({ success: false });
+  }
+  return requestJson<{ success: boolean }>(
     getMistApiBase(),
     "/v1/simulation/stop",
     {
@@ -1162,8 +1189,12 @@ export const stopSimulation = (sessionId: string) =>
       body: JSON.stringify({ sessionId }),
     }
   );
+};
 
 export const getSimulationStreamUrl = (sessionId: string): string => {
+  if (!isLocalDevEnvironment()) {
+    return "";
+  }
   return `${getMistApiBase()}/v1/simulation/stream?sessionId=${encodeURIComponent(sessionId)}`;
 };
 
@@ -1205,11 +1236,17 @@ export interface SimulationStateDumpVo {
   latestFrameSignals: SimulationSignalVo[];
 }
 
-export const fetchSimulationDump = (sessionId?: string) =>
-  requestJson<SimulationStateDumpVo>(
+export const fetchSimulationDump = (sessionId?: string) => {
+  if (!isLocalDevEnvironment()) {
+    return Promise.reject(
+      new Error("仿真诊断快照导出仅限本地开发环境 (dev) 调用，当前生产/非本地环境已严格禁用。")
+    );
+  }
+  return requestJson<SimulationStateDumpVo>(
     getMistApiBase(),
     `/v1/simulation/dump${sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : ""}`,
     { method: "GET" }
   );
+};
 
 
