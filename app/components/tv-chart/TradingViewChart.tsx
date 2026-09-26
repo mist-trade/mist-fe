@@ -589,15 +589,18 @@ export function TradingViewChart({
       } else if (cmd.type === "band") {
         zsBands.push(cmd);
       } else if (cmd.type === "text" && cmd.time) {
-        const isSell = cmd.position === "above" || (cmd.text && cmd.text.includes("卖"));
-        markers.push({
-          time: toUTCTimestamp(cmd.time),
-          position: isSell ? "aboveBar" : "belowBar",
-          color: isSell ? "#22C55E" : "#EF4444",
-          shape: isSell ? "arrowDown" : "arrowUp",
-          text: cmd.text || "",
-          size: 1.2,
-        });
+        const markerTime = toUTCTimestamp(cmd.time);
+        if (prepared.map.has(markerTime as number)) {
+          const isSell = cmd.position === "above" || (cmd.text && cmd.text.includes("卖"));
+          markers.push({
+            time: markerTime,
+            position: isSell ? "aboveBar" : "belowBar",
+            color: isSell ? "#22C55E" : "#EF4444",
+            shape: isSell ? "arrowDown" : "arrowUp",
+            text: cmd.text || "",
+            size: 1.2,
+          });
+        }
       }
     }
 
