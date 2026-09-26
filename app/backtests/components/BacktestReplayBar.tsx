@@ -44,6 +44,7 @@ function getSignalLabel(signal: StrategyBacktestSignalResult): { label: string; 
   else if (rawType === "second_sell") label = "2卖";
   else if (rawType === "third_buy") label = "3买";
   else if (rawType === "third_sell") label = "3卖";
+  else if (ctx.badgeText && typeof ctx.badgeText === "string") label = ctx.badgeText;
 
   return { label, isSell };
 }

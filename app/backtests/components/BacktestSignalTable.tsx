@@ -31,6 +31,9 @@ function parseSignalInfo(sig: StrategyBacktestSignalResult) {
 
   const isBuy = rawType.includes("buy") || rawType === "entry";
   let label = CHAN_LABEL_MAP[rawType];
+  if (!label && ctx.badgeText && typeof ctx.badgeText === "string") {
+    label = ctx.badgeText;
+  }
   if (!label) {
     label = (ctx.signalTag as string) || (isBuy ? "买入" : "卖出");
   }
