@@ -780,8 +780,17 @@ export function BacktestWorkspace() {
       }
       return null;
     }
+    const minVisibleTimeMs = rawK[0] ? new Date(rawK[0].time).getTime() : 0;
     if (!isReplayMode) {
-      const all = [...fullCommands, ...allSignalCommands];
+      const maxVisibleTimeMs = rawK[rawK.length - 1]
+        ? new Date(rawK[rawK.length - 1].time).getTime()
+        : Infinity;
+      const inRangeSignalCommands = allSignalCommands.filter((cmd) => {
+        if (!cmd.time) return false;
+        const cmdTimeMs = new Date(cmd.time).getTime();
+        return cmdTimeMs >= minVisibleTimeMs && cmdTimeMs <= maxVisibleTimeMs;
+      });
+      const all = [...fullCommands, ...inRangeSignalCommands];
       return {
         symbol: selectedSymbol,
         k: rawK,
@@ -793,7 +802,7 @@ export function BacktestWorkspace() {
     const visibleSignalCommands = allSignalCommands.filter((cmd) => {
       if (!cmd.time) return false;
       const cmdTimeMs = new Date(cmd.time).getTime();
-      return cmdTimeMs <= currentBarTimeMs;
+      return cmdTimeMs >= minVisibleTimeMs && cmdTimeMs <= currentBarTimeMs;
     });
 
     const all = [...replayCommands, ...visibleSignalCommands];
