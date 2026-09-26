@@ -100,7 +100,7 @@ type PreparedK = {
 };
 
 function prepareK(k: TradingViewChartProps["k"]): PreparedK {
-  if (!k || k.length === 0) {
+  if (!k || !Array.isArray(k) || k.length === 0) {
     return { map: new Map(), candleData: [], volumeData: [], lastVo: null };
   }
   const sortedK = [...k]

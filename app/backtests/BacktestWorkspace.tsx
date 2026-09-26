@@ -276,17 +276,17 @@ export function BacktestWorkspace() {
         (cmd) => cmd.layer !== "backtest_signals"
       );
       const mergedCommands = [...pureVisualCommands, ...signalCommands];
-
-      setRawK(kLines);
+      const safeK = Array.isArray(kLines) ? kLines : [];
+      setRawK(safeK);
       setFullCommands(pureVisualCommands);
       setAllSignalCommands(signalCommands);
-      setCursorIndex(Math.max(0, kLines.length - 1));
+      setCursorIndex(Math.max(0, safeK.length - 1));
       setReplayCommands(pureVisualCommands);
       setIsPlaying(false);
 
       setChart({
         symbol,
-        k: kLines,
+        k: safeK,
         commands: mergedCommands,
       });
     } catch (err) {
@@ -774,7 +774,12 @@ export function BacktestWorkspace() {
 
   // 根据当前复盘模式与图层开关构建最终展示的图表数据与几何指令
   const displayedChart = useMemo(() => {
-    if (!rawK || rawK.length === 0) return chart;
+    if (!rawK || !Array.isArray(rawK) || rawK.length === 0) {
+      if (chart && Array.isArray(chart.k) && chart.k.length > 0) {
+        return chart;
+      }
+      return null;
+    }
     if (!isReplayMode) {
       const all = [...fullCommands, ...allSignalCommands];
       return {

@@ -894,11 +894,24 @@ export const fetchStrategyBacktestSignals = async (
   return [];
 };
 
-export const fetchK = (query: KLineQuery) =>
-  requestJson<IFetchK[]>(getMistApiBase(), "/v1/indicators/k", {
+export const fetchK = async (query: KLineQuery): Promise<IFetchK[]> => {
+  const result = await requestJson<
+    IFetchK[] | { klines?: IFetchK[]; items?: IFetchK[] }
+  >(getMistApiBase(), "/v1/indicators/k", {
     method: "POST",
     body: JSON.stringify(query),
   });
+  if (Array.isArray(result)) {
+    return result;
+  }
+  if (result && Array.isArray((result as { klines?: IFetchK[] }).klines)) {
+    return (result as { klines: IFetchK[] }).klines;
+  }
+  if (result && Array.isArray((result as { items?: IFetchK[] }).items)) {
+    return (result as { items: IFetchK[] }).items;
+  }
+  return [];
+};
 
 export const fetchMergeK = (query: KLineQuery) =>
   requestJson<IMergeK[]>(getAnalysisApiBase(), "/v1/chan/merge-k", {
