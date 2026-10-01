@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import type { StrategyBacktestSignalResult } from "@/app/api/client";
 import { formatShanghaiDateTime } from "@/app/lib/time";
 
@@ -54,7 +54,7 @@ function parseSignalInfo(sig: StrategyBacktestSignalResult) {
   };
 }
 
-export function BacktestSignalTable({
+export const BacktestSignalTable = memo(function BacktestSignalTable({
   signals,
   selectedSignalId,
   onSelectSignal,
@@ -243,6 +243,6 @@ export function BacktestSignalTable({
       </div>
     </div>
   );
-}
+});
 
 export default BacktestSignalTable;

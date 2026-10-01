@@ -240,7 +240,13 @@ export default function DualTimeframeChanPage() {
           startDate,
           endDate,
           layers: "chan",
-        }),
+        }).catch(() => ({
+          code,
+          period: currentConfig.macroPeriod,
+          source,
+          totalKlines: 0,
+          commands: [],
+        })),
         fetchK({
           code,
           period: currentConfig.microPeriod,
@@ -255,7 +261,13 @@ export default function DualTimeframeChanPage() {
           startDate,
           endDate,
           layers: "chan",
-        }),
+        }).catch(() => ({
+          code,
+          period: currentConfig.microPeriod,
+          source,
+          totalKlines: 0,
+          commands: [],
+        })),
       ]);
 
       if (requestIdRef.current !== reqId) return;

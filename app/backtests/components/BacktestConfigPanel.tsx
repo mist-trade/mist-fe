@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import type {
   DataSourceValue,
   StrategyDefinition,
@@ -51,7 +51,7 @@ function getDefaultDates() {
   };
 }
 
-export function BacktestConfigPanel({
+export const BacktestConfigPanel = memo(function BacktestConfigPanel({
   strategies,
   versions,
   selectedStrategyId,
@@ -274,6 +274,6 @@ export function BacktestConfigPanel({
       </div>
     </form>
   );
-}
+});
 
 export default BacktestConfigPanel;

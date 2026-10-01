@@ -40,6 +40,8 @@ export interface ChanSwing {
   type: "bi" | "duan";
   startTime: string;
   endTime: string;
+  t1: number;
+  t2: number;
   startPrice: number;
   endPrice: number;
   isUp: boolean;
@@ -126,8 +128,18 @@ function prepareK(k: TradingViewChartProps["k"]): PreparedK {
         Number.isFinite(item.low) &&
         Number.isFinite(item.close) &&
         Number.isFinite(item.timeMs)
-    )
-    .sort((a, b) => a.timeMs - b.timeMs);
+    );
+
+  let isSorted = true;
+  for (let i = 1; i < sortedK.length; i++) {
+    if (sortedK[i].timeMs < sortedK[i - 1].timeMs) {
+      isSorted = false;
+      break;
+    }
+  }
+  if (!isSorted) {
+    sortedK.sort((a, b) => a.timeMs - b.timeMs);
+  }
 
   const seenTimes = new Set<number>();
   const candleData: CandlestickData[] = [];
@@ -175,7 +187,7 @@ function prepareK(k: TradingViewChartProps["k"]): PreparedK {
   return { map, candleData, volumeData, lastVo };
 }
 
-export function TradingViewChart({
+export const TradingViewChart = React.memo(function TradingViewChart({
   k,
   commands = [],
   height = 550,
@@ -194,7 +206,13 @@ export function TradingViewChart({
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const biSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const duanSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const strokeSeriesRef = useRef<Map<string, ISeriesApi<"Line">>>(new Map());
+  const lastFedCandleDataRef = useRef<CandlestickData[] | null>(null);
+  const lastMarkersKeyRef = useRef<string>("");
+  const lastKRef = useRef<TradingViewChartProps["k"] | null>(null);
+  const isMouseDownRef = useRef(false);
 
   const prepared = useMemo(() => prepareK(k), [k]);
 
@@ -294,9 +312,25 @@ export function TradingViewChart({
       });
     }
 
+    const biSeries = chart.addLineSeries({
+      color: "#FACC15",
+      lineWidth: 1,
+      title: "笔",
+      crosshairMarkerVisible: false,
+    });
+
+    const duanSeries = chart.addLineSeries({
+      color: "#E879F9",
+      lineWidth: 2,
+      title: "线段",
+      crosshairMarkerVisible: false,
+    });
+
     chartRef.current = chart;
     candleSeriesRef.current = candleSeries;
     volumeSeriesRef.current = volumeSeries;
+    biSeriesRef.current = biSeries;
+    duanSeriesRef.current = duanSeries;
 
     const handleResize = () => {
       if (containerRef.current && chartRef.current) {
@@ -322,6 +356,10 @@ export function TradingViewChart({
       chartRef.current = null;
       candleSeriesRef.current = null;
       volumeSeriesRef.current = null;
+      biSeriesRef.current = null;
+      duanSeriesRef.current = null;
+      lastFedCandleDataRef.current = null;
+      lastMarkersKeyRef.current = "";
       strokeSeries.clear();
     };
   }, [isDark, height, subChartType]);
@@ -353,11 +391,15 @@ export function TradingViewChart({
           const high = Math.max(sp, ep);
           const low = Math.min(sp, ep);
           const diff = high - low;
+          const t1 = toUTCTimestamp(cmd.startTime) as number;
+          const t2 = toUTCTimestamp(cmd.endTime) as number;
           list.push({
             id: cmd.id || `${cmd.layer || "bi"}_${cmd.startTime}_${cmd.endTime}`,
             type: cmd.layer === "chan_duan" ? "duan" : "bi",
             startTime: cmd.startTime,
             endTime: cmd.endTime,
+            t1,
+            t2,
             startPrice: sp,
             endPrice: ep,
             isUp,
@@ -402,23 +444,23 @@ export function TradingViewChart({
       let minDistance = 14;
 
       for (const swing of swingsRef.current) {
-        const t1 = toUTCTimestamp(swing.startTime);
-        const t2 = toUTCTimestamp(swing.endTime);
+        const t1 = swing.t1;
+        const t2 = swing.t2;
 
         if (visibleRange) {
-          if ((t2 as number) < (visibleRange.from as number) || (t1 as number) > (visibleRange.to as number)) {
+          if (t2 < (visibleRange.from as number) || t1 > (visibleRange.to as number)) {
             continue;
           }
         }
 
-        let x1 = timeScale.timeToCoordinate(t1);
-        let x2 = timeScale.timeToCoordinate(t2);
+        let x1 = timeScale.timeToCoordinate(t1 as UTCTimestamp);
+        let x2 = timeScale.timeToCoordinate(t2 as UTCTimestamp);
 
         if (visibleRange) {
-          if (x1 === null && (t1 as number) <= (visibleRange.from as number)) {
+          if (x1 === null && t1 <= (visibleRange.from as number)) {
             x1 = 0 as unknown as import("lightweight-charts").Coordinate;
           }
-          if (x2 === null && (t2 as number) >= (visibleRange.to as number)) {
+          if (x2 === null && t2 >= (visibleRange.to as number)) {
             x2 = width as unknown as import("lightweight-charts").Coordinate;
           }
         }
@@ -482,7 +524,18 @@ export function TradingViewChart({
         }
       }
 
-      // Magnetic snap check for Bi / Duan lines
+      // Magnetic snap check for Bi / Duan lines (skip while user is dragging/panning chart)
+      if (isMouseDownRef.current) {
+        if (hoveredSwingRef.current !== null) {
+          hoveredSwingRef.current = null;
+          hoverProjRef.current = null;
+          setHoveredSwing(null);
+          if (containerRef.current) containerRef.current.style.cursor = "default";
+          drawZhongshuOverlayRef.current?.();
+        }
+        return;
+      }
+
       const hitSwing = param.point ? findNearestSwing(param.point.x, param.point.y) : null;
       if (hitSwing) {
         if (hoveredSwingRef.current?.id !== hitSwing.swing.id) {
@@ -531,20 +584,22 @@ export function TradingViewChart({
     const candleSeries = candleSeriesRef.current;
     const volumeSeries = volumeSeriesRef.current;
     if (!chart || !candleSeries) return;
+
     if (prepared.candleData.length === 0) {
-      candleSeries.setData([]);
-      volumeSeries?.setData([]);
+      if (lastFedCandleDataRef.current !== prepared.candleData) {
+        lastFedCandleDataRef.current = prepared.candleData;
+        candleSeries.setData([]);
+        volumeSeries?.setData([]);
+      }
     } else {
-      candleSeries.setData(prepared.candleData);
-      if (volumeSeries) {
-        volumeSeries.setData(prepared.volumeData);
+      if (lastFedCandleDataRef.current !== prepared.candleData) {
+        lastFedCandleDataRef.current = prepared.candleData;
+        candleSeries.setData(prepared.candleData);
+        if (volumeSeries) {
+          volumeSeries.setData(prepared.volumeData);
+        }
       }
     }
-
-    strokeSeriesRef.current.forEach((series) => {
-      chart.removeSeries(series);
-    });
-    strokeSeriesRef.current.clear();
 
     chart.subscribeCrosshairMove(handleCrosshair);
     chart.subscribeClick(handleClick);
@@ -561,15 +616,6 @@ export function TradingViewChart({
     };
     containerEl?.addEventListener("mouseleave", handleMouseLeave);
 
-    if (!commands || commands.length === 0) {
-      chart.timeScale().fitContent();
-      return () => {
-        chart.unsubscribeCrosshairMove(handleCrosshair);
-        chart.unsubscribeClick(handleClick);
-        containerEl?.removeEventListener("mouseleave", handleMouseLeave);
-      };
-    }
-
     const markers: SeriesMarker<UTCTimestamp>[] = [];
     const biLines: VisualCommandVo[] = [];
     const duanLines: VisualCommandVo[] = [];
@@ -578,37 +624,38 @@ export function TradingViewChart({
     const fibLines: VisualCommandVo[] = [];
     const fibTexts: VisualCommandVo[] = [];
 
-    for (const cmd of commands) {
-      if (cmd.layer === "fibonacci") {
-        if (cmd.type === "band") fibBands.push(cmd);
-        else if (cmd.type === "line") fibLines.push(cmd);
-        else if (cmd.type === "text") fibTexts.push(cmd);
-      } else if (cmd.type === "line") {
-        if (cmd.layer === "chan_duan") duanLines.push(cmd);
-        else biLines.push(cmd);
-      } else if (cmd.type === "band") {
-        zsBands.push(cmd);
-      } else if (cmd.type === "text" && cmd.time) {
-        const isSell = cmd.position === "above" || (cmd.text && cmd.text.includes("卖"));
-        markers.push({
-          time: toUTCTimestamp(cmd.time),
-          position: isSell ? "aboveBar" : "belowBar",
-          color: isSell ? "#22C55E" : "#EF4444",
-          shape: isSell ? "arrowDown" : "arrowUp",
-          text: cmd.text || "",
-          size: 1.2,
-        });
+    if (commands && commands.length > 0) {
+      for (const cmd of commands) {
+        if (cmd.layer === "fibonacci") {
+          if (cmd.type === "band") fibBands.push(cmd);
+          else if (cmd.type === "line") fibLines.push(cmd);
+          else if (cmd.type === "text") fibTexts.push(cmd);
+        } else if (cmd.type === "line") {
+          if (cmd.layer === "chan_duan") duanLines.push(cmd);
+          else biLines.push(cmd);
+        } else if (cmd.type === "band") {
+          zsBands.push(cmd);
+        } else if (cmd.type === "text" && cmd.time) {
+          const isSell = cmd.position === "above" || (cmd.text && cmd.text.includes("卖"));
+          markers.push({
+            time: toUTCTimestamp(cmd.time),
+            position: isSell ? "aboveBar" : "belowBar",
+            color: isSell ? "#22C55E" : "#EF4444",
+            shape: isSell ? "arrowDown" : "arrowUp",
+            text: cmd.text || "",
+            size: 1.2,
+          });
+        }
       }
     }
 
-    if (biLines.length > 0) {
+    const biSeries = biSeriesRef.current;
+    if (biLines.length > 0 && biSeries) {
       const strokeColor = biColor || biLines[0]?.color || "#FACC15";
       const strokeWidth = (biWidth || biLines[0]?.width || 1) as 1 | 2 | 3 | 4;
-      const biSeries = chart.addLineSeries({
+      biSeries.applyOptions({
         color: strokeColor,
         lineWidth: strokeWidth,
-        title: "笔",
-        crosshairMarkerVisible: false,
       });
       const biSeen = new Map<number, number>();
       for (const line of biLines) {
@@ -626,14 +673,13 @@ export function TradingViewChart({
       const pts: LineData[] = Array.from(biSeen.entries())
         .sort((a, b) => a[0] - b[0])
         .map(([time, value]) => ({ time: time as UTCTimestamp, value }));
-      if (pts.length > 0) {
-        biSeries.setData(pts);
-        strokeSeriesRef.current.set("chan_bi", biSeries);
-      }
+      biSeries.setData(pts);
+    } else if (biSeries) {
+      biSeries.setData([]);
     }
 
-    if (duanLines.length > 0) {
-      const duanSeries = chart.addLineSeries({ color: "#E879F9", lineWidth: 2, title: "线段", crosshairMarkerVisible: false });
+    const duanSeries = duanSeriesRef.current;
+    if (duanLines.length > 0 && duanSeries) {
       const duanSeen = new Map<number, number>();
       for (const line of duanLines) {
         if (line.startTime && line.startPrice !== undefined) {
@@ -650,10 +696,9 @@ export function TradingViewChart({
       const pts: LineData[] = Array.from(duanSeen.entries())
         .sort((a, b) => a[0] - b[0])
         .map(([time, value]) => ({ time: time as UTCTimestamp, value }));
-      if (pts.length > 0) {
-        duanSeries.setData(pts);
-        strokeSeriesRef.current.set("chan_duan", duanSeries);
-      }
+      duanSeries.setData(pts);
+    } else if (duanSeries) {
+      duanSeries.setData([]);
     }
 
     const drawZhongshuOverlay = () => {
@@ -665,10 +710,14 @@ export function TradingViewChart({
       const currentCandle = candleSeriesRef.current;
       const width = container.clientWidth;
       const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      const targetW = Math.round(width * dpr);
+      const targetH = Math.round(height * dpr);
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+      }
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -995,17 +1044,33 @@ export function TradingViewChart({
       }
     };
 
-    requestAnimationFrame(drawZhongshuOverlay);
-    const overlayTimer1 = setTimeout(drawZhongshuOverlay, 50);
-    const overlayTimer2 = setTimeout(drawZhongshuOverlay, 200);
+    let rafScheduled = false;
+    const scheduleDrawZhongshuOverlay = () => {
+      if (rafScheduled) return;
+      rafScheduled = true;
+      requestAnimationFrame(() => {
+        rafScheduled = false;
+        drawZhongshuOverlay();
+      });
+    };
 
-    chart.timeScale().subscribeVisibleLogicalRangeChange(drawZhongshuOverlay);
-    chart.timeScale().subscribeVisibleTimeRangeChange(drawZhongshuOverlay);
+    scheduleDrawZhongshuOverlay();
+    const overlayTimer1 = setTimeout(scheduleDrawZhongshuOverlay, 50);
+    const overlayTimer2 = setTimeout(scheduleDrawZhongshuOverlay, 200);
 
-    if (markers.length > 0) {
-      markers.sort((a, b) => (a.time as number) - (b.time as number));
-      candleSeries.setMarkers(markers);
+    chart.timeScale().subscribeVisibleLogicalRangeChange(scheduleDrawZhongshuOverlay);
+
+    const validMarkers = markers
+      .filter((m) => prepared.map.has(m.time as number))
+      .sort((a, b) => (a.time as number) - (b.time as number));
+    const markersKey = validMarkers.map((m) => `${m.time}_${m.text}`).join(";");
+    if (lastMarkersKeyRef.current !== markersKey) {
+      lastMarkersKeyRef.current = markersKey;
+      candleSeries.setMarkers(validMarkers);
     }
+
+    const kChanged = lastKRef.current !== k;
+    lastKRef.current = k;
 
     let didFocus = false;
     if (focusedSignalTime) {
@@ -1027,11 +1092,19 @@ export function TradingViewChart({
           const toIdx = Math.max(35, len + 5);
           chart.timeScale().setVisibleLogicalRange({ from: fromIdx, to: toIdx });
         }
-      } else if (autoFitOnUpdate !== false) {
+      } else if (autoFitOnUpdate !== false && kChanged) {
         chart.timeScale().fitContent();
       }
     }
-    requestAnimationFrame(drawZhongshuOverlay);
+
+    const handleMouseDown = () => {
+      isMouseDownRef.current = true;
+    };
+    const handleMouseUp = () => {
+      isMouseDownRef.current = false;
+    };
+    containerEl?.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
       clearTimeout(overlayTimer1);
@@ -1039,9 +1112,12 @@ export function TradingViewChart({
       drawZhongshuOverlayRef.current = null;
       chart.unsubscribeCrosshairMove(handleCrosshair);
       chart.unsubscribeClick(handleClick);
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(scheduleDrawZhongshuOverlay);
+      containerEl?.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
       containerEl?.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [prepared, commands, focusedSignalTime, height, handleCrosshair, handleClick, biColor, biWidth, isDark, autoFitOnUpdate, replayMode]);
+  }, [k, prepared, commands, focusedSignalTime, height, handleCrosshair, handleClick, biColor, biWidth, isDark, autoFitOnUpdate, replayMode]);
 
   const legendUpColor = displayed?.isUp ? "#EF4444" : "#22C55E";
 
@@ -1111,6 +1187,6 @@ export function TradingViewChart({
       <canvas ref={overlayCanvasRef} className="pointer-events-none absolute inset-0 z-10" />
     </div>
   );
-}
+});
 
 export default TradingViewChart;

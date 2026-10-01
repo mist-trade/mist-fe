@@ -43,7 +43,7 @@ export function DrawdownChart({
     <ChartContainer
       height={200}
       loading={loading}
-      isEmpty={isEmpty || data.length === 0}
+      isEmpty={isEmpty || !data || data.length === 0}
       emptyText="暂无回撤数据"
       error={error}
       onRetry={onRetry}

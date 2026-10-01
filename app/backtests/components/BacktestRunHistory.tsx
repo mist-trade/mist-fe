@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { StrategyBacktestRun } from "@/app/api/client";
 import { formatShanghaiShort } from "@/app/lib/time";
 
@@ -43,7 +44,7 @@ const getStatusLabel = (status: string) => {
   }
 };
 
-export function BacktestRunHistory({
+export const BacktestRunHistory = memo(function BacktestRunHistory({
   runs,
   activeRunId,
   onSelectRun,
@@ -88,4 +89,4 @@ export function BacktestRunHistory({
       )}
     </aside>
   );
-}
+});

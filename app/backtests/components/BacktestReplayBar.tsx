@@ -49,7 +49,7 @@ function getSignalLabel(signal: StrategyBacktestSignalResult): { label: string; 
   return { label, isSell };
 }
 
-export function BacktestReplayBar({
+export const BacktestReplayBar = React.memo(function BacktestReplayBar({
   isReplayMode,
   onToggleReplayMode,
   cursorIndex,
@@ -237,9 +237,8 @@ export function BacktestReplayBar({
           <div className="speed-cluster" aria-label="推演速率调节">
             <span className="speed-label">推演速率:</span>
             {[
-              { label: "0.5x", value: 1000 },
-              { label: "1.0x", value: 500 },
               { label: "2.0x", value: 250 },
+              { label: "4.0x", value: 125 },
             ].map((item) => (
               <button
                 key={item.label}
@@ -301,6 +300,6 @@ export function BacktestReplayBar({
       )}
     </section>
   );
-}
+});
 
 export default BacktestReplayBar;

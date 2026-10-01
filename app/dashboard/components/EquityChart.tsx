@@ -53,7 +53,7 @@ export function EquityChart({
     <ChartContainer
       height={320}
       loading={loading}
-      isEmpty={isEmpty || data.length === 0}
+      isEmpty={isEmpty || !data || data.length === 0}
       emptyText="暂无权益数据"
       error={error}
       onRetry={onRetry}

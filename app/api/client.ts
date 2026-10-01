@@ -1135,9 +1135,12 @@ export const fetchVisualCommands = (query: VisualCommandQuery) => {
 
 export interface SimulationSignalVo {
   signalTime: string;
+  triggerTime?: string;
+  pivotTime?: string;
+  triggerPrice: number;
+  pivotPrice?: number;
   signalType: string;
   badgeText: string;
-  triggerPrice: number;
   isBuy: boolean;
   confidence: number;
   decisionTrace: Record<string, unknown> | null;
@@ -1160,6 +1163,7 @@ export interface SimulationFrameVo {
   };
   commands: VisualCommandVo[];
   signals: SimulationSignalVo[];
+  latestSignals?: SimulationSignalVo[];
   status: 'idle' | 'playing' | 'paused' | 'completed';
 }
 

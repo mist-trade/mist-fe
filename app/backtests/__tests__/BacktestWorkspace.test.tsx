@@ -251,4 +251,36 @@ describe("BacktestWorkspace", () => {
     fireEvent.click(biZsBtn);
     expect(biZsBtn).not.toHaveClass("active");
   });
+
+  it("does not open DecisionTraceDrawer during replay stepping, but opens on explicit diagnosis click", async () => {
+    render(<BacktestWorkspace />);
+
+    await screen.findByRole("heading", { name: "发起回测任务" });
+    await screen.findByText(/版本 v1/);
+    fireEvent.click(screen.getByRole("button", { name: "发起回测" }));
+
+    await screen.findByTestId("mock-tv-chart");
+
+    // Toggle to replay mode
+    fireEvent.click(screen.getByText("⏮ 单步复盘模式"));
+
+    // Step button should not open drawer
+    const stepNextBtn = screen.getByRole("button", { name: "步进 ▶" });
+    fireEvent.click(stepNextBtn);
+    expect(screen.queryByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).not.toBeInTheDocument();
+
+    // Explicit diagnosis click opens drawer
+    fireEvent.click(screen.getByRole("button", { name: "诊断 & 定位" }));
+    expect(await screen.findByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).toBeInTheDocument();
+
+    // Close drawer
+    fireEvent.click(screen.getByRole("button", { name: "✕" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).not.toBeInTheDocument();
+    });
+
+    // Step again - drawer should remain closed
+    fireEvent.click(stepNextBtn);
+    expect(screen.queryByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).not.toBeInTheDocument();
+  });
 });
