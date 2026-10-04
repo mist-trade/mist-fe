@@ -867,8 +867,13 @@ export const TradingViewChart = React.memo(function TradingViewChart({
         }
       }
 
-      // 2. Render Chan Zhongshu Boxes
-      for (const band of zsBands) {
+      // 2. Render Chan Zhongshu Boxes (Render expanded outer bounding boxes first as background)
+      const sortedZsBands = [...zsBands].sort((a, b) => {
+        if (a.expanded && !b.expanded) return -1;
+        if (!a.expanded && b.expanded) return 1;
+        return 0;
+      });
+      for (const band of sortedZsBands) {
         if (!band.fromTime || !band.toTime || band.top === undefined || band.bottom === undefined) continue;
         const t1 = toUTCTimestamp(band.fromTime);
         const t2 = toUTCTimestamp(band.toTime);
@@ -904,29 +909,33 @@ export const TradingViewChart = React.memo(function TradingViewChart({
           const isUncomplete = band.status === "uncomplete" || band.style === "dashed";
           const isExpanded = Boolean(band.expanded);
           const isExtended = Boolean(band.extended);
-          const strokeColor = isDuan ? "#818CF8" : (isExpanded ? "#F59E0B" : "#38BDF8");
-          const fillColor = isDuan
-            ? "rgba(129, 140, 248, 0.20)"
-            : (isExpanded ? "rgba(245, 158, 11, 0.15)" : "rgba(56, 189, 248, 0.20)");
+          const strokeColor = isExpanded
+            ? (isDuan ? "#E879F9" : "#F59E0B")
+            : (isDuan ? "#818CF8" : "#38BDF8");
+          const fillColor = isExpanded
+            ? (isDuan ? "rgba(232, 121, 249, 0.18)" : "rgba(245, 158, 11, 0.15)")
+            : (isDuan ? "rgba(129, 140, 248, 0.20)" : "rgba(56, 189, 248, 0.20)");
           ctx.fillStyle = fillColor;
           ctx.fillRect(xLeft, yUpper, boxW, boxH);
           ctx.strokeStyle = strokeColor;
-          ctx.lineWidth = isDuan ? 2 : (isExpanded ? 2 : 1.5);
-          ctx.setLineDash(isUncomplete ? [6, 3] : (isDuan ? [] : (isExpanded ? [6, 3] : [4, 2])));
+          ctx.lineWidth = isExpanded ? 2.5 : (isDuan ? 2 : 1.5);
+          ctx.setLineDash(
+            isUncomplete ? [6, 3] : (isExpanded ? [8, 4] : (isDuan ? [] : [4, 2]))
+          );
           ctx.strokeRect(xLeft, yUpper, boxW, boxH);
           ctx.setLineDash([]);
           ctx.fillStyle = strokeColor;
           ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
           let baseLabel = isDuan ? "段中枢" : "笔中枢";
-          if (!isDuan) {
-            if (isExpanded) {
-              baseLabel = "笔中枢(扩展)";
-            } else if (isExtended) {
-              baseLabel = "笔中枢(延伸)";
-            }
+          if (isExpanded) {
+            baseLabel = isDuan ? "段中枢[高一级扩展]" : "笔中枢(扩展)";
+          } else if (isExtended) {
+            baseLabel = isDuan ? "段中枢(延伸)" : "笔中枢(延伸)";
           }
           const label = isUncomplete ? `${baseLabel}(进行中)` : baseLabel;
-          const textY = yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14;
+          const textY = isExpanded
+            ? (yUpper - 18 > 12 ? yUpper - 18 : yUpper + 28)
+            : (yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14);
           ctx.fillText(`${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`, xLeft + 4, textY);
         }
       }

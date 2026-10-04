@@ -8,7 +8,7 @@ import {
   type IFetchK,
   type IMergeK,
   type IFetchBi,
-  type IFetchChannel,
+  type IFetchBiChannel,
   type IFenxing,
   type FenxingType,
 } from "@/app/api/types";
@@ -21,8 +21,8 @@ export interface ChartBiPhases {
 }
 
 export interface ChartChannelPhases {
-  phaseA: IFetchChannel[];
-  phaseB: IFetchChannel[];
+  phaseA: IFetchBiChannel[];
+  phaseB: IFetchBiChannel[];
 }
 
 export interface ChartData {
@@ -107,15 +107,17 @@ export function snapshotToChart(snap: SnapshotData): ChartData {
     type: asFenxingType(x.type),
   }));
   const channelRaw = snap.channel as
-    | IFetchChannel[]
-    | { phaseA: IFetchChannel[]; phaseB: IFetchChannel[] };
-  const normalizeChannel = (x: IFetchChannel) => ({
+    | IFetchBiChannel[]
+    | { phaseA: IFetchBiChannel[]; phaseB: IFetchBiChannel[] };
+  const normalizeChannel = (x: IFetchBiChannel): IFetchBiChannel => ({
     ...x,
     trend: asTrend(x.trend),
     type: asChannelType(x.type),
     level: asChannelLevel(x.level),
     status: asChannelStatus(x.status),
     bis: (x.bis ?? []).map(asBi),
+    entryBi: x.entryBi ? asBi(x.entryBi) : (x.bis && x.bis[0] ? asBi(x.bis[0]) : ({} as IFetchBi)),
+    leaveBi: x.leaveBi ? asBi(x.leaveBi) : undefined,
   });
   const channel = Array.isArray(channelRaw)
     ? {

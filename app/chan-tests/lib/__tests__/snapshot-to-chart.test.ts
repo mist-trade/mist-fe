@@ -86,8 +86,6 @@ describe("snapshotToChart", () => {
       startId: 1,
       endId: 5,
       trend: "up",
-      displayStartId: 1,
-      displayEndId: 5,
     };
 
     const chart = snapshotToChart({

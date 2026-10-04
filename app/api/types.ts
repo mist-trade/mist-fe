@@ -32,6 +32,7 @@ export enum BiStatus {
 export enum ChannelLevel {
   Bi = "bi",
   Duan = "duan",
+  Macro = "macro",
 }
 
 export enum ChannelType {
@@ -84,7 +85,7 @@ export interface IFetchBi {
   endFenxing: IFenxing | null;
 }
 
-export interface IFetchChannel {
+export interface IFetchBiChannel {
   zg: number;
   zd: number;
   gg: number;
@@ -94,12 +95,13 @@ export interface IFetchChannel {
   status?: ChannelStatus;
   extended?: boolean;
   expanded?: boolean;
+  upgradedLevel?: ChannelLevel;
   startId: number;
   endId: number;
   trend: TrendDirection;
   bis: IFetchBi[];
-  displayStartId: number;
-  displayEndId: number;
+  entryBi: IFetchBi;
+  leaveBi?: IFetchBi;
 }
 
 export enum DuanType {
@@ -137,11 +139,12 @@ export interface IFetchDuanChannel {
   type: ChannelType;
   status?: ChannelStatus;
   expanded?: boolean;
+  upgradedLevel?: ChannelLevel;
   startId: number;
   endId: number;
   duans: IFetchDuan[];
-  displayStartId: number;
-  displayEndId: number;
+  entryDuan: IFetchDuan;
+  leaveDuan?: IFetchDuan;
 }
 
 export interface IFetchDuanChannelPhases {
@@ -158,13 +161,13 @@ export type ChanBspEventType =
   | "third_sell";
 
 /**
- * 两阶段中枢结果（镜像后端 ChannelTwoPhaseResult）：
- * - phaseA: 固定5笔滑窗枚举的所有基础中枢
- * - phaseB: 定点迭代合并后的最终中枢序列
+ * 两阶段笔中枢结果（镜像后端 BiChannelTwoPhaseResult）：
+ * - phaseA: 枚举的所有基础笔中枢
+ * - phaseB: 定点迭代合并后的最终笔中枢序列
  */
-export interface IFetchChannelPhases {
-  phaseA: IFetchChannel[];
-  phaseB: IFetchChannel[];
+export interface IFetchBiChannelPhases {
+  phaseA: IFetchBiChannel[];
+  phaseB: IFetchBiChannel[];
 }
 
 /**

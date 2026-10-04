@@ -1,7 +1,7 @@
 import type {
   IFenxing,
   IFetchBiPhases,
-  IFetchChannelPhases,
+  IFetchBiChannelPhases,
   IFetchDuan,
   IFetchDuanChannelPhases,
   IFetchK,
@@ -978,12 +978,9 @@ export const fetchFenxing = (query: KLineQuery) =>
     body: JSON.stringify(query),
   });
 
-/**
- * @deprecated 历史遗留转换函数，保留仅供旧单元测试兼容。
- */
-export function normalizeChannelPhases(value: unknown): IFetchChannelPhases {
+export function normalizeBiChannelPhases(value: unknown): IFetchBiChannelPhases {
   if (Array.isArray(value)) {
-    return { phaseA: value, phaseB: value } as IFetchChannelPhases;
+    return { phaseA: value, phaseB: value } as IFetchBiChannelPhases;
   }
   if (
     value &&
@@ -991,7 +988,7 @@ export function normalizeChannelPhases(value: unknown): IFetchChannelPhases {
     Array.isArray((value as { phaseA?: unknown }).phaseA) &&
     Array.isArray((value as { phaseB?: unknown }).phaseB)
   ) {
-    const { phaseA, phaseB } = value as IFetchChannelPhases;
+    const { phaseA, phaseB } = value as IFetchBiChannelPhases;
     return { phaseA, phaseB };
   }
   throw new Error(
@@ -999,14 +996,11 @@ export function normalizeChannelPhases(value: unknown): IFetchChannelPhases {
   );
 }
 
-/**
- * @deprecated 历史遗留端点。全仓缠论几何图元统一由 `/v1/visual/commands` 驱动。
- */
-export const fetchChannel = async (query: KLineQuery) =>
-  normalizeChannelPhases(
+export const fetchBiChannel = async (query: KLineQuery) =>
+  normalizeBiChannelPhases(
     await requestJson<unknown>(
       getAnalysisApiBase(),
-      "/v1/chan/channel",
+      "/v1/chan/bi-channel",
       {
         method: "POST",
         body: JSON.stringify(query),

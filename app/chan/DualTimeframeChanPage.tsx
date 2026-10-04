@@ -185,7 +185,9 @@ export default function DualTimeframeChanPage() {
   const [showMacroBi, setShowMacroBi] = useState(true);
   const [showMicroBi, setShowMicroBi] = useState(true);
   const [showMicroZs, setShowMicroZs] = useState(true);
-  const [showMicroDuan, setShowMicroDuan] = useState(false);
+  const [showMicroDuan, setShowMicroDuan] = useState(true);
+  const [showMicroDuanZs, setShowMicroDuanZs] = useState(true);
+  const [showMicroBsp, setShowMicroBsp] = useState(true);
 
   // 数据状态
   const [dataMacro, setDataMacro] = useState<TimeframeData | null>(null);
@@ -316,9 +318,20 @@ export default function DualTimeframeChanPage() {
     if (!dataMacro?.commands) return [];
     return dataMacro.commands.filter((cmd) => {
       if (cmd.layer === "chan_bi") return showMacroBi;
+      if (cmd.layer === "chan_duan") return showMicroDuan;
+      if (cmd.layer === "chan_zs_bi") return showMicroZs;
+      if (cmd.layer === "chan_zs_duan") return showMicroDuanZs;
+      if (cmd.layer === "chan_bsp" || cmd.layer === "chan_bsp_duan") return showMicroBsp;
       return false;
     });
-  }, [dataMacro?.commands, showMacroBi]);
+  }, [
+    dataMacro?.commands,
+    showMacroBi,
+    showMicroDuan,
+    showMicroZs,
+    showMicroDuanZs,
+    showMicroBsp,
+  ]);
 
   const displayedCommandsMicro = useMemo(() => {
     if (!dataMicro?.commands) return [];
@@ -326,9 +339,18 @@ export default function DualTimeframeChanPage() {
       if (cmd.layer === "chan_bi") return showMicroBi;
       if (cmd.layer === "chan_zs_bi") return showMicroZs;
       if (cmd.layer === "chan_duan") return showMicroDuan;
+      if (cmd.layer === "chan_zs_duan") return showMicroDuanZs;
+      if (cmd.layer === "chan_bsp" || cmd.layer === "chan_bsp_duan") return showMicroBsp;
       return false;
     });
-  }, [dataMicro?.commands, showMicroBi, showMicroZs, showMicroDuan]);
+  }, [
+    dataMicro?.commands,
+    showMicroBi,
+    showMicroZs,
+    showMicroDuan,
+    showMicroDuanZs,
+    showMicroBsp,
+  ]);
 
   // 预设区间选择
   const handleSelectQuickRange = (range: { start: string; end: string }) => {
@@ -343,6 +365,14 @@ export default function DualTimeframeChanPage() {
     dataMicro?.commands.filter((c) => c.layer === "chan_bi").length ?? 0;
   const countMicroZs =
     dataMicro?.commands.filter((c) => c.layer === "chan_zs_bi").length ?? 0;
+  const countMicroDuans =
+    dataMicro?.commands.filter((c) => c.layer === "chan_duan").length ?? 0;
+  const countMicroDuanZs =
+    dataMicro?.commands.filter((c) => c.layer === "chan_zs_duan").length ?? 0;
+  const countMicroBsp =
+    dataMicro?.commands.filter(
+      (c) => c.layer === "chan_bsp" || c.layer === "chan_bsp_duan"
+    ).length ?? 0;
 
   return (
     <div className="chan-page" style={{ minHeight: "calc(100vh - 52px)", background: "var(--surface-base)" }}>
@@ -519,8 +549,28 @@ export default function DualTimeframeChanPage() {
                     checked={showMicroDuan}
                     onChange={(e) => setShowMicroDuan(e.target.checked)}
                   />
-                  <span style={{ color: "#E879F9" }}>
-                    {currentConfig.microLabel} 线段
+                  <span style={{ color: "#E879F9", fontWeight: 600 }}>
+                    ━ {currentConfig.microLabel} 线段 ({countMicroDuans})
+                  </span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={showMicroDuanZs}
+                    onChange={(e) => setShowMicroDuanZs(e.target.checked)}
+                  />
+                  <span style={{ color: "#818CF8", fontWeight: 600 }}>
+                    ■ {currentConfig.microLabel} 段中枢 ({countMicroDuanZs})
+                  </span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={showMicroBsp}
+                    onChange={(e) => setShowMicroBsp(e.target.checked)}
+                  />
+                  <span style={{ color: "#EF4444", fontWeight: 600 }}>
+                    ▲ 笔/段买卖点 ({countMicroBsp})
                   </span>
                 </label>
               </div>

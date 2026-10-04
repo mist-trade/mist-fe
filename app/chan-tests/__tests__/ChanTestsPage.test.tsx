@@ -3,7 +3,7 @@ import {
   BiStatus,
   ChannelStatus,
   type IFetchBi,
-  type IFetchChannel,
+  type IFetchBiChannel,
 } from "@/app/api/types";
 import { ChanTestsPage } from "../ChanTestsPage";
 import type {
@@ -61,7 +61,7 @@ function createChannel(status: ChannelStatus) {
       createBi(BiStatus.Valid, "2025-01-10T16:00:00.000Z"),
       createBi(BiStatus.Valid, "2025-01-11T16:00:00.000Z"),
     ],
-  } as unknown as IFetchChannel;
+  } as unknown as IFetchBiChannel;
 }
 
 function createMeta(key: string, name: string): SnapshotMeta {

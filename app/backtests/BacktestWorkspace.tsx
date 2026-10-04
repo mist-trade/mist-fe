@@ -97,12 +97,6 @@ export function BacktestWorkspace() {
       setFullCommands(pureVisualCommands);
       setAllSignalCommands(signalCommands);
 
-      setChart({
-        symbol,
-        k: safeK,
-        commands: mergedCommands,
-      });
-
       return safeK;
     },
     []

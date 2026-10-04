@@ -10,7 +10,7 @@ import {
   disableStrategyDefinition,
   enableStrategyDefinition,
   fetchBi,
-  fetchChannel,
+  fetchBiChannel,
   fetchDuan,
   fetchDuanChannel,
   fetchFenxing,
@@ -732,7 +732,7 @@ describe("Mist frontend API client", () => {
     await fetchMergeK(query);
     await fetchBi(query);
     await fetchFenxing(query);
-    await fetchChannel(query);
+    await fetchBiChannel(query);
 
     expect(global.fetch).toHaveBeenNthCalledWith(
       1,
@@ -751,7 +751,7 @@ describe("Mist frontend API client", () => {
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
       4,
-      "/api/chan/v1/chan/channel",
+      "/api/chan/v1/chan/bi-channel",
       expect.objectContaining({ method: "POST", body: JSON.stringify(query) })
     );
   });
@@ -798,7 +798,7 @@ describe("Mist frontend API client", () => {
     (global.fetch as jest.Mock).mockResolvedValue(successEnvelope(array));
 
     await expect(
-      fetchChannel({
+      fetchBiChannel({
         code: "600519",
         source: "tdx",
         period: 1440,
@@ -824,8 +824,8 @@ describe("Mist frontend API client", () => {
       .mockResolvedValueOnce(successEnvelope(canonical))
       .mockResolvedValueOnce(successEnvelope({ phaseA: [] }));
 
-    await expect(fetchChannel(query)).resolves.toEqual(canonical);
-    await expect(fetchChannel(query)).rejects.toThrow(
+    await expect(fetchBiChannel(query)).resolves.toEqual(canonical);
+    await expect(fetchBiChannel(query)).rejects.toThrow(
       "channel response must be an array or contain phaseA and phaseB arrays"
     );
   });

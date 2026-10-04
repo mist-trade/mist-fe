@@ -16,6 +16,7 @@ describe("backtest-signal-visual.util", () => {
       high: 11,
       low: 9.5,
       close: 10.5,
+      amount: 1000000,
     },
     {
       id: 2,
@@ -25,6 +26,7 @@ describe("backtest-signal-visual.util", () => {
       high: 12,
       low: 10,
       close: 11.8,
+      amount: 1000000,
     },
   ];
 
