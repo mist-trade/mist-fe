@@ -138,10 +138,12 @@ export interface IFetchDuanChannel {
   level: ChannelLevel;
   type: ChannelType;
   status?: ChannelStatus;
+  extended?: boolean;
   expanded?: boolean;
   upgradedLevel?: ChannelLevel;
   startId: number;
   endId: number;
+  trend: TrendDirection;
   duans: IFetchDuan[];
   entryDuan: IFetchDuan;
   leaveDuan?: IFetchDuan;

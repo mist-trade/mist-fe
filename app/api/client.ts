@@ -1083,6 +1083,7 @@ export interface VisualCommandVo {
   status?: "complete" | "uncomplete";
   extended?: boolean;
   expanded?: boolean;
+  absorbed?: boolean;
   fill?: boolean;
   position?: "above" | "below" | "center";
 }

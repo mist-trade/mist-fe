@@ -931,6 +931,8 @@ export const TradingViewChart = React.memo(function TradingViewChart({
             baseLabel = isDuan ? "段中枢[高一级扩展]" : "笔中枢(扩展)";
           } else if (isExtended) {
             baseLabel = isDuan ? "段中枢(延伸)" : "笔中枢(延伸)";
+          } else if (band.absorbed) {
+            baseLabel = isDuan ? "段中枢[构件]" : "笔中枢[构件]";
           }
           const label = isUncomplete ? `${baseLabel}(进行中)` : baseLabel;
           const textY = isExpanded
