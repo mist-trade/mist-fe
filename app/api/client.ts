@@ -1083,6 +1083,7 @@ export interface VisualCommandVo {
   status?: "complete" | "uncomplete";
   extended?: boolean;
   expanded?: boolean;
+  upgradedLevel?: "macro" | "duan" | "bi" | string;
   absorbed?: boolean;
   fill?: boolean;
   position?: "above" | "below" | "center";

@@ -909,33 +909,60 @@ export const TradingViewChart = React.memo(function TradingViewChart({
           const isUncomplete = band.status === "uncomplete" || band.style === "dashed";
           const isExpanded = Boolean(band.expanded);
           const isExtended = Boolean(band.extended);
-          const strokeColor = isExpanded
-            ? (isDuan ? "#E879F9" : "#F59E0B")
-            : (isDuan ? "#818CF8" : "#38BDF8");
-          const fillColor = isExpanded
-            ? (isDuan ? "rgba(232, 121, 249, 0.18)" : "rgba(245, 158, 11, 0.15)")
-            : (isDuan ? "rgba(129, 140, 248, 0.20)" : "rgba(56, 189, 248, 0.20)");
+          const isUpgraded = isDuan && band.upgradedLevel === "macro";
+          const isAbsorbed = Boolean(band.absorbed);
+
+          let strokeColor: string;
+          let fillColor: string;
+
+          if (isDuan) {
+            if (isExpanded) {
+              strokeColor = "#E879F9"; // 亮玫紫：波动扩展大框
+              fillColor = "rgba(232, 121, 249, 0.18)";
+            } else if (isUpgraded) {
+              strokeColor = "#A855F7"; // 深紫罗兰：9段延伸升级（方案A）
+              fillColor = "rgba(168, 85, 247, 0.18)";
+            } else {
+              strokeColor = "#818CF8"; // 经典靛蓝：普通中枢及延伸
+              fillColor = isAbsorbed ? "rgba(129, 140, 248, 0.12)" : "rgba(129, 140, 248, 0.20)";
+            }
+          } else {
+            // 笔中枢：所有延伸保持天蓝，仅扩展使用琥珀橙
+            strokeColor = isExpanded ? "#F59E0B" : "#38BDF8";
+            fillColor = isExpanded ? "rgba(245, 158, 11, 0.15)" : (isAbsorbed ? "rgba(56, 189, 248, 0.12)" : "rgba(56, 189, 248, 0.20)");
+          }
+
           ctx.fillStyle = fillColor;
           ctx.fillRect(xLeft, yUpper, boxW, boxH);
           ctx.strokeStyle = strokeColor;
-          ctx.lineWidth = isExpanded ? 2.5 : (isDuan ? 2 : 1.5);
+          ctx.lineWidth = (isExpanded || isUpgraded) ? 2.5 : (isAbsorbed ? 1.5 : (isDuan ? 2 : 1.5));
           ctx.setLineDash(
-            isUncomplete ? [6, 3] : (isExpanded ? [8, 4] : (isDuan ? [] : [4, 2]))
+            isUncomplete
+              ? [6, 3]
+              : isExpanded
+                ? [8, 4]
+                : isDuan
+                  ? []
+                  : [4, 2]
           );
           ctx.strokeRect(xLeft, yUpper, boxW, boxH);
           ctx.setLineDash([]);
           ctx.fillStyle = strokeColor;
           ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
           let baseLabel = isDuan ? "段中枢" : "笔中枢";
-          if (isExpanded) {
+          if (isAbsorbed) {
+            baseLabel = isDuan ? "段中枢[构件]" : "笔中枢[构件]";
+          } else if (isExpanded) {
             baseLabel = isDuan ? "段中枢[高一级扩展]" : "笔中枢(扩展)";
+          } else if (isUpgraded) {
+            baseLabel = "段中枢[9段延伸升级]";
           } else if (isExtended) {
             baseLabel = isDuan ? "段中枢(延伸)" : "笔中枢(延伸)";
-          } else if (band.absorbed) {
-            baseLabel = isDuan ? "段中枢[构件]" : "笔中枢[构件]";
           }
+
           const label = isUncomplete ? `${baseLabel}(进行中)` : baseLabel;
-          const textY = isExpanded
+          const textY = (isExpanded || isUpgraded)
             ? (yUpper - 18 > 12 ? yUpper - 18 : yUpper + 28)
             : (yUpper - 4 > 12 ? yUpper - 4 : yUpper + 14);
           ctx.fillText(`${label} [${bottom.toFixed(2)} - ${top.toFixed(2)}]`, xLeft + 4, textY);
