@@ -35,16 +35,16 @@ export interface BacktestReplayBarProps {
 function getSignalLabel(signal: StrategyBacktestSignalResult): { label: string; isSell: boolean } {
   const ctx = (signal.contextSnapshot || {}) as Record<string, unknown>;
   const rawType = String(signal.signalType || ctx.type || "signal");
-  const isSell = rawType.includes("sell") || rawType === "exit";
+  const isSell =
+    rawType.includes("sell") ||
+    rawType === "exit" ||
+    ctx.action === "SELL";
 
-  let label = "买点";
-  if (rawType === "first_buy") label = "1买";
-  else if (rawType === "first_sell") label = "1卖";
-  else if (rawType === "second_buy") label = "2买";
-  else if (rawType === "second_sell") label = "2卖";
-  else if (rawType === "third_buy") label = "3买";
-  else if (rawType === "third_sell") label = "3卖";
-  else if (ctx.badgeText && typeof ctx.badgeText === "string") label = ctx.badgeText;
+  const label =
+    signal.badgeText ||
+    (typeof ctx.badgeText === "string" ? ctx.badgeText : undefined) ||
+    (typeof ctx.signalTag === "string" ? ctx.signalTag : undefined) ||
+    (isSell ? "卖点" : "买点");
 
   return { label, isSell };
 }

@@ -60,7 +60,7 @@ describe("BacktestConfigPanel", () => {
       />
     );
 
-    fireEvent.change(screen.getByPlaceholderText("如 000001, 600519"), {
+    fireEvent.change(screen.getByPlaceholderText("如 000001, 300750"), {
       target: { value: "" },
     });
     fireEvent.click(screen.getByRole("button", { name: "发起回测" }));

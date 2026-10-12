@@ -187,6 +187,7 @@ export interface StrategyBacktestSignalResult {
   securityCode: string;
   signalTime: string;
   signalType?: string;
+  badgeText?: string;
   confidence?: number | null;
   confidenceLevel?: 'HIGH' | 'MEDIUM' | 'LOW' | null;
   decisionTrace?: Record<string, unknown> | null;

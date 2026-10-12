@@ -11,9 +11,9 @@ export type ChanSource = "tdx";
 export interface ChanTestCase {
   /** 唯一标识，用作快照目录名，如 'shanghai-index-2024-2025' */
   key: string;
-  /** 显示名，如 '贵州茅台 2026' */
+  /** 显示名，如 '上证指数 2024-2025' */
   name: string;
-  /** 证券代码，如 '600519' */
+  /** 证券代码，如 '000001' */
   code: string;
   /** 数据源（本方案聚焦 tdx） */
   source: ChanSource;
@@ -30,15 +30,11 @@ export interface ChanTestCase {
 import { shanghaiIndex2024_2025 } from "./chan/shanghai-index-2024-2025";
 import { csi300_2024_2025 } from "./chan/csi300-2024-2025";
 import { chiNext2024_2025 } from "./chan/chi-next-2024-2025";
-import { maotai2024_2025 } from "./chan/maotai-2024-2025";
-import { maotai2024_2026 } from "./chan/maotai-2024-2026";
 
 export const chanTestCases: ChanTestCase[] = [
   shanghaiIndex2024_2025,
   csi300_2024_2025,
   chiNext2024_2025,
-  maotai2024_2025,
-  maotai2024_2026,
 ];
 
 /** 按 key 查找用例 */

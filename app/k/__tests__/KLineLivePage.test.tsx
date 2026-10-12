@@ -29,14 +29,14 @@ const mockedCollectKLines = collectKLines as jest.Mock;
 const originalEnv = process.env;
 
 const securities = [
-  { code: "600519", name: "贵州茅台", type: "stock", status: 1 },
-  { code: "000001", name: "平安银行", type: "stock", status: 1 },
+  { code: "000001", name: "上证指数", type: "index", status: 1 },
+  { code: "300750", name: "宁德时代", type: "stock", status: 1 },
 ];
 
 const kLines = [
   {
     id: 1,
-    symbol: "600519",
+    symbol: "000001",
     time: "2026-06-30T00:00:00.000Z",
     amount: 1000,
     open: 1,
@@ -58,20 +58,20 @@ describe("KLineLivePage", () => {
     mockedFetchSecurities.mockResolvedValue(securities);
     mockedFetchK.mockResolvedValue(kLines);
     mockedFetchVisualCommands.mockResolvedValue({ commands: [] });
-    mockedCollectKLines.mockResolvedValue({ code: "600519", period: 1440, count: 1 });
+    mockedCollectKLines.mockResolvedValue({ code: "000001", period: 1440, count: 1 });
   });
 
   afterEach(() => {
     process.env = originalEnv;
   });
 
-  it("renders with securities and loads default 600519 chart when no query", async () => {
+  it("renders with securities and loads default 000001 chart when no query", async () => {
     render(<KLineLivePage />);
 
     expect(screen.getByRole("heading", { name: "K 线工作台" })).toBeInTheDocument();
     expect(await screen.findByTestId("tv-chart")).toHaveTextContent("K lines: 1");
     expect(mockedFetchK).toHaveBeenCalledWith(
-      expect.objectContaining({ code: "600519" })
+      expect.objectContaining({ code: "000001" })
     );
   });
 
@@ -87,12 +87,12 @@ describe("KLineLivePage", () => {
     render(<KLineLivePage />);
 
     const searchInput = screen.getByPlaceholderText("搜索代码或名称");
-    fireEvent.change(searchInput, { target: { value: "茅台" } });
+    fireEvent.change(searchInput, { target: { value: "宁德" } });
 
-    const option = await screen.findByRole("button", { name: "600519 贵州茅台" });
+    const option = await screen.findByRole("button", { name: "300750 宁德时代" });
     fireEvent.click(option);
 
-    expect(window.location.search).toContain("code=600519");
+    expect(window.location.search).toContain("code=300750");
     expect(await screen.findByTestId("tv-chart")).toHaveTextContent("K lines: 1");
   });
 
@@ -100,14 +100,14 @@ describe("KLineLivePage", () => {
     window.history.pushState(
       null,
       "",
-      "/k?code=600519&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
+      "/k?code=000001&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
     );
 
     render(<KLineLivePage />);
 
-    expect(await screen.findByText("贵州茅台")).toBeInTheDocument();
+    expect(await screen.findByText("上证指数")).toBeInTheDocument();
     expect(mockedFetchK).toHaveBeenCalledWith({
-      code: "600519",
+      code: "000001",
       source: "tdx",
       period: 1440,
       startDate: "2026-01-01",
@@ -123,7 +123,7 @@ describe("KLineLivePage", () => {
     window.history.pushState(
       null,
       "",
-      "/k?code=600519&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
+      "/k?code=000001&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
     );
 
     render(<KLineLivePage />);
@@ -137,7 +137,7 @@ describe("KLineLivePage", () => {
     window.history.pushState(
       null,
       "",
-      "/k?code=600519&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
+      "/k?code=000001&source=tdx&period=1440&startDate=2026-01-01&endDate=2026-06-30"
     );
 
     render(<KLineLivePage />);
@@ -147,7 +147,7 @@ describe("KLineLivePage", () => {
 
     expect(await screen.findByText("已刷新 1 条 K 线")).toBeInTheDocument();
     expect(mockedCollectKLines).toHaveBeenCalledWith({
-      code: "600519",
+      code: "000001",
       source: "tdx",
       period: 1440,
       startDate: "2026-01-01",

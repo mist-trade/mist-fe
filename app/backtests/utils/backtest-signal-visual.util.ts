@@ -18,6 +18,7 @@ export function toBacktestSignalResult(
     securityCode: sig.securityCode,
     signalTime: sig.signalTime,
     signalType: sig.signalType,
+    badgeText: sig.badgeText,
     confidence: sig.confidence,
     confidenceLevel: "HIGH",
     decisionTrace: sig.decisionTrace,
@@ -68,17 +69,14 @@ export function convertBacktestSignalsToCommands(
       rawType === "exit" ||
       ctx.action === "SELL" ||
       trace.action === "SELL";
+    const isBuy = !isSell;
 
-    let label = isSell ? "卖点" : "买点";
-    if (rawType === "first_buy") label = "1买";
-    else if (rawType === "first_sell") label = "1卖";
-    else if (rawType === "second_buy") label = "2买";
-    else if (rawType === "second_sell") label = "2卖";
-    else if (rawType === "third_buy") label = "3买";
-    else if (rawType === "third_sell") label = "3卖";
-    else if (ctx.badgeText && typeof ctx.badgeText === "string") label = ctx.badgeText;
-    else if (ctx.signalTag && typeof ctx.signalTag === "string") label = ctx.signalTag;
-    else if (trace.signalTag && typeof trace.signalTag === "string") label = trace.signalTag;
+    const label =
+      sig.badgeText ||
+      (typeof ctx.badgeText === "string" ? ctx.badgeText : undefined) ||
+      (typeof ctx.signalTag === "string" ? ctx.signalTag : undefined) ||
+      (typeof trace.signalTag === "string" ? trace.signalTag : undefined) ||
+      (isBuy ? "买点" : "卖点");
 
     const rawPrice = ctx.pivotPrice ?? ctx.triggerPrice ?? trace.price ?? ctx.price;
     const price =

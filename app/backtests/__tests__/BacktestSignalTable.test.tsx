@@ -9,6 +9,7 @@ describe("BacktestSignalTable", () => {
       backtestRunId: 10,
       securityCode: "000001",
       signalTime: "2026-08-26T14:45:00.000Z",
+      badgeText: "1卖",
       contextSnapshot: {
         type: "first_sell",
         price: 3850.5,
@@ -20,6 +21,7 @@ describe("BacktestSignalTable", () => {
       backtestRunId: 10,
       securityCode: "000001",
       signalTime: "2026-08-26T10:15:00.000Z",
+      badgeText: "1买",
       contextSnapshot: {
         type: "first_buy",
         price: 3810.0,

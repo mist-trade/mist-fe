@@ -26,8 +26,7 @@ const SECURITY_SEARCH_LIMIT = 20;
 const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "qmt"]);
 
 const PRESET_STOCKS = [
-  { code: "600519", name: "贵州茅台" },
-  { code: "000001", name: "平安银行" },
+  { code: "000001", name: "上证指数" },
   { code: "300750", name: "宁德时代" },
   { code: "002594", name: "比亚迪" },
 ];
@@ -47,7 +46,7 @@ function defaultStartDate() {
   return `${parts.year}-01-01`;
 }
 
-const DEFAULT_CODE = "600519";
+const DEFAULT_CODE = "000001";
 
 function getDefaultQuery(): KLineQuery {
   return {

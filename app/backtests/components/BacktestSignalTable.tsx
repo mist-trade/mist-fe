@@ -15,28 +15,21 @@ const formatDateTime = (value?: string | null) => {
   return formatShanghaiDateTime(value);
 };
 
-const CHAN_LABEL_MAP: Record<string, string> = {
-  first_buy: "1买",
-  first_sell: "1卖",
-  second_buy: "2买",
-  second_sell: "2卖",
-  third_buy: "3买",
-  third_sell: "3卖",
-};
-
 function parseSignalInfo(sig: StrategyBacktestSignalResult) {
   const ctx = (sig.contextSnapshot || {}) as Record<string, unknown>;
   const chanBsp = (ctx.chanBsp || {}) as Record<string, unknown>;
   const rawType = String(sig.signalType || chanBsp.type || ctx.type || "signal");
 
-  const isBuy = rawType.includes("buy") || rawType === "entry";
-  let label = CHAN_LABEL_MAP[rawType];
-  if (!label && ctx.badgeText && typeof ctx.badgeText === "string") {
-    label = ctx.badgeText;
-  }
-  if (!label) {
-    label = (ctx.signalTag as string) || (isBuy ? "买入" : "卖出");
-  }
+  const isBuy =
+    rawType.includes("buy") ||
+    rawType === "entry" ||
+    ctx.action === "BUY";
+
+  const label =
+    sig.badgeText ||
+    (typeof ctx.badgeText === "string" ? ctx.badgeText : undefined) ||
+    (typeof ctx.signalTag === "string" ? ctx.signalTag : undefined) ||
+    (isBuy ? "买入" : "卖出");
 
   const rawPrice = ctx.triggerPrice ?? ctx.price;
   const price = typeof rawPrice === "number" ? rawPrice : Number(rawPrice ?? 0);

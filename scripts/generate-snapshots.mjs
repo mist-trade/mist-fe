@@ -7,7 +7,7 @@
  *
  * 用法:
  *   pnpm run snapshots:generate                    # 全部用例
- *   pnpm run snapshots:generate -- --case=maotai-2026   # 单个用例
+ *   pnpm run snapshots:generate -- --case=shanghai-index-2024-2025   # 单个用例
  *
  * 环境变量:
  *   SNAPSHOT_BACKEND_URL  chan app 地址（默认 http://192.168.31.182:8008）

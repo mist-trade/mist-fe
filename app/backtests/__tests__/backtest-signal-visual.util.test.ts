@@ -66,6 +66,7 @@ describe("backtest-signal-visual.util", () => {
         securityCode: "000001",
         signalTime: "2026-08-26T10:00:00.000Z",
         signalType: "first_buy",
+        badgeText: "1买",
         contextSnapshot: {
           type: "first_buy",
           action: "BUY",
@@ -82,6 +83,7 @@ describe("backtest-signal-visual.util", () => {
         securityCode: "000001",
         signalTime: "2026-08-26T10:00:00.000Z",
         signalType: "second_sell",
+        badgeText: "2卖",
         contextSnapshot: {
           type: "second_sell",
           action: "SELL",

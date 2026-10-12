@@ -37,7 +37,6 @@ import {
 
 const PRESET_STOCKS = [
   { code: "000001", name: "上证指数" },
-  { code: "600519", name: "贵州茅台" },
   { code: "300750", name: "宁德时代" },
   { code: "002594", name: "比亚迪" },
 ];
@@ -181,7 +180,7 @@ export const BacktestConfigPanel = memo(function BacktestConfigPanel({
           <label htmlFor="target-code-input">标的代码 (支持逗号分隔多标的)</label>
           <input
             id="target-code-input"
-            placeholder="如 000001, 600519"
+            placeholder="如 000001, 300750"
             value={targetCode}
             onChange={(e) => setTargetCode(e.target.value)}
           />
