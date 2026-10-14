@@ -41,7 +41,7 @@ const strategy = {
   name: "突破策略",
   description: "收盘价突破阈值",
   status: "enabled",
-  targetUniverse: ["600519", "000001"],
+  targetUniverse: ["000001", "000001"],
   periods: [1440],
   sources: ["tdx"],
   currentVersionId: 5,
@@ -68,7 +68,7 @@ const signal = {
   strategyDefinitionId: 3,
   strategyVersionId: 5,
   securityId: 17,
-  security: { id: 17, code: "600519", name: "贵州茅台" },
+  security: { id: 17, code: "000001", name: "上证指数" },
   period: 1440,
   source: "tdx",
   signalTime: "2026-07-07T09:30:00.000Z",
@@ -98,7 +98,7 @@ const alert = {
   id: 9,
   strategySignalId: 7,
   status: "pending",
-  dedupeKey: "3:5:600519:1440:tdx:2026-07-07",
+  dedupeKey: "3:5:000001:1440:tdx:2026-07-07",
   createdAt: "2026-07-07T09:31:00.000Z",
 };
 
@@ -147,7 +147,7 @@ async function submitCreateForm(fields: {
     });
   }
   if (fields.targetUniverse !== undefined) {
-    fireEvent.change(screen.getByPlaceholderText("逗号分隔，如 600519, 000001"), {
+    fireEvent.change(screen.getByPlaceholderText("逗号分隔，如 000001"), {
       target: { value: fields.targetUniverse },
     });
   }
@@ -191,7 +191,7 @@ describe("StrategiesPage", () => {
     expect(await screen.findByRole("heading", { name: "突破策略" })).toBeInTheDocument();
     expect(screen.getAllByText("enabled").length).toBeGreaterThan(0);
     expect(screen.getAllByText("当前版本 #5").length).toBeGreaterThan(0);
-    expect(screen.getByText("600519, 000001")).toBeInTheDocument();
+    expect(screen.getByText("000001, 000001")).toBeInTheDocument();
   });
 
   it("shows the current version signal kind as read-only metadata", async () => {
@@ -207,7 +207,7 @@ describe("StrategiesPage", () => {
 
     await submitCreateForm({
       name: "新策略",
-      targetUniverse: "600519",
+      targetUniverse: "000001",
       signalKind: "entry",
     });
 
@@ -216,7 +216,7 @@ describe("StrategiesPage", () => {
     const payload = mockedCreateStrategyDefinition.mock.calls[0][0] as StrategyDefinitionPayload;
     expect(payload.signalKind).toBe("entry");
     expect(payload.name).toBe("新策略");
-    expect(payload.targetUniverse).toEqual(["600519"]);
+    expect(payload.targetUniverse).toEqual(["000001"]);
     expect(payload.rule).toBeDefined();
 
     const rule = payload.rule as Record<string, unknown>;
@@ -231,7 +231,7 @@ describe("StrategiesPage", () => {
 
     await submitCreateForm({
       name: "退出策略",
-      targetUniverse: "600519",
+      targetUniverse: "000001",
       signalKind: "exit",
     });
 
@@ -250,7 +250,7 @@ describe("StrategiesPage", () => {
 
     await submitCreateForm({
       name: "缠论买卖点策略",
-      targetUniverse: "600519",
+      targetUniverse: "000001",
       signalKind: "entry",
     });
 
@@ -279,8 +279,8 @@ describe("StrategiesPage", () => {
     fireEvent.change(await screen.findByPlaceholderText("如：双因子共识动量突破策略"), {
       target: { value: "新策略" },
     });
-    fireEvent.change(screen.getByPlaceholderText("逗号分隔，如 600519, 000001"), {
-      target: { value: "600519" },
+    fireEvent.change(screen.getByPlaceholderText("逗号分隔，如 000001"), {
+      target: { value: "000001" },
     });
     fireEvent.change(screen.getByLabelText("信号类型"), { target: { value: "entry" } });
 
@@ -325,8 +325,8 @@ describe("StrategiesPage", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: "实时信号历史" }));
 
-    expect(await screen.findByText("600519")).toBeInTheDocument();
-    expect(screen.getByText("贵州茅台")).toBeInTheDocument();
+    expect(await screen.findByText("000001")).toBeInTheDocument();
+    expect(screen.getByText("上证指数")).toBeInTheDocument();
     expect(screen.getByText("HIGH 88.5%")).toBeInTheDocument();
     expect(screen.getByText("买入 (BUY)")).toBeInTheDocument();
 

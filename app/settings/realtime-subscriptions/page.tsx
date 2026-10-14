@@ -212,7 +212,7 @@ export default function RealtimeSubscriptionsPage() {
         return;
       }
       if (!/^\d{6}\.(SH|SZ|BJ)$/.test(newProviderSymbol)) {
-        setSubmitError("providerSymbol 必须形如 600519.SH。");
+        setSubmitError("providerSymbol 必须形如 000001.SH。");
         setIsSubmitting(false);
         return;
       }
@@ -437,7 +437,7 @@ export default function RealtimeSubscriptionsPage() {
               </select>
             </label>
             <label>
-              providerSymbol（如 600519.SH）
+              providerSymbol（如 000001.SH）
               <input
                 value={newProviderSymbol}
                 onChange={(e) => setNewProviderSymbol(e.target.value)}

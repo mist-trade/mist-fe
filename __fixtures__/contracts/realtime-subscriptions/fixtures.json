@@ -1,11 +1,11 @@
 {
   "newRequest": {
     "mode": "new",
-    "securityCode": "600519",
-    "securityName": "贵州茅台",
+    "securityCode": "000001",
+    "securityName": "上证指数",
     "securityType": "STOCK",
     "source": "qmt",
-    "providerSymbol": "600519.SH"
+    "providerSymbol": "000001.SH"
   },
   "existingRequest": {
     "mode": "existing",
@@ -19,12 +19,12 @@
       "assignmentId": 8,
       "securityId": 1,
       "securitySourceConfigId": 17,
-      "securityCode": "600519",
-      "securityName": "贵州茅台",
+      "securityCode": "000001",
+      "securityName": "上证指数",
       "securityType": "STOCK",
       "securityStatus": "ACTIVE",
       "source": "qmt",
-      "providerSymbol": "600519.SH",
+      "providerSymbol": "000001.SH",
       "desired": true,
       "active": null,
       "activeEvidence": null,
@@ -48,12 +48,12 @@
           "assignmentId": 8,
           "securityId": 1,
           "securitySourceConfigId": 17,
-          "securityCode": "600519",
-          "securityName": "贵州茅台",
+          "securityCode": "000001",
+          "securityName": "上证指数",
           "securityType": "STOCK",
           "securityStatus": "SUSPENDED",
           "source": "qmt",
-          "providerSymbol": "600519.SH",
+          "providerSymbol": "000001.SH",
           "desired": false,
           "active": true,
           "activeEvidence": "qmt_durable_registry",
@@ -83,14 +83,14 @@
         "id": 17,
         "securityId": 1,
         "source": "qmt",
-        "formatCode": "600519.SH",
+        "formatCode": "000001.SH",
         "priority": 10,
         "enabled": true
       }
     ],
     "timestamp": "2026-08-04T15:06:00.000Z",
     "requestId": "http-fixture-sources",
-    "path": "/v1/securities/600519/sources"
+    "path": "/v1/securities/000001/sources"
   },
   "activateSuccess": {
     "success": true,
@@ -99,7 +99,7 @@
     "data": null,
     "timestamp": "2026-08-04T15:07:00.000Z",
     "requestId": "http-fixture-activate",
-    "path": "/v1/securities/600519/activate"
+    "path": "/v1/securities/000001/activate"
   },
   "deactivateSuccess": {
     "success": true,
@@ -108,7 +108,7 @@
     "data": null,
     "timestamp": "2026-08-04T15:08:00.000Z",
     "requestId": "http-fixture-deactivate",
-    "path": "/v1/securities/600519/deactivate"
+    "path": "/v1/securities/000001/deactivate"
   },
   "sourceLocked": {
     "success": false,
@@ -145,7 +145,7 @@
     "statusCode": 200,
     "code": "REALTIME_SECURITY_EXISTS",
     "message": "Security already exists",
-    "data": { "securityId": 1, "securityCode": "600519" },
+    "data": { "securityId": 1, "securityCode": "000001" },
     "timestamp": "2026-08-04T15:11:10.000Z",
     "requestId": "http-fixture-security-exists",
     "path": "/v1/realtime-subscriptions"

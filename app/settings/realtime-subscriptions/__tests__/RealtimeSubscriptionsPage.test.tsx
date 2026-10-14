@@ -52,12 +52,12 @@ const baseAssignment = (overrides: Partial<RealtimeSubscriptionVo> = {}): Realti
   assignmentId: 8,
   securityId: 1,
   securitySourceConfigId: 17,
-  securityCode: "600519",
-  securityName: "贵州茅台",
+  securityCode: "000001",
+  securityName: "上证指数",
   securityType: "STOCK",
   securityStatus: "ACTIVE",
   source: "qmt",
-  providerSymbol: "600519.SH",
+  providerSymbol: "000001.SH",
   desired: true,
   active: true,
   activeEvidence: "qmt_durable_registry",
@@ -95,19 +95,19 @@ describe("RealtimeSubscriptionsPage", () => {
     render(<RealtimeSubscriptionsPage />);
     await waitFor(() => expect(screen.getByTestId("empty")).toBeInTheDocument());
 
-    fireEvent.change(screen.getByTestId("new-code"), { target: { value: "600519" } });
-    fireEvent.change(screen.getByTestId("new-name"), { target: { value: "贵州茅台" } });
-    fireEvent.change(screen.getByTestId("new-provider-symbol"), { target: { value: "600519.SH" } });
+    fireEvent.change(screen.getByTestId("new-code"), { target: { value: "000001" } });
+    fireEvent.change(screen.getByTestId("new-name"), { target: { value: "上证指数" } });
+    fireEvent.change(screen.getByTestId("new-provider-symbol"), { target: { value: "000001.SH" } });
     fireEvent.click(screen.getByTestId("submit-init"));
 
     await waitFor(() => {
       expect(initializeRealtimeSubscription).toHaveBeenCalledWith({
         mode: "new",
-        securityCode: "600519",
-        securityName: "贵州茅台",
+        securityCode: "000001",
+        securityName: "上证指数",
         securityType: "STOCK",
         source: "tdx",
-        providerSymbol: "600519.SH",
+        providerSymbol: "000001.SH",
       });
     });
   });
@@ -115,11 +115,11 @@ describe("RealtimeSubscriptionsPage", () => {
   it("existing mode: looks up one Security sources and submits only the config id (no N+1)", async () => {
     mockList(jest.fn().mockResolvedValue(buildPage([])));
     const sources: SecuritySourceVo[] = [
-      { id: 17, securityId: 1, source: "qmt", formatCode: "600519.SH", priority: 10, enabled: true },
-      { id: 18, securityId: 1, source: "tdx", formatCode: "600519.SH", priority: 20, enabled: true },
+      { id: 17, securityId: 1, source: "qmt", formatCode: "000001.SH", priority: 10, enabled: true },
+      { id: 18, securityId: 1, source: "tdx", formatCode: "000001.SH", priority: 20, enabled: true },
       // disabled + non-realtime source must be filtered out of presentation
-      { id: 19, securityId: 1, source: "ef", formatCode: "600519.SH", priority: 30, enabled: true },
-      { id: 20, securityId: 1, source: "tdx", formatCode: "600519.SH", priority: 40, enabled: false },
+      { id: 19, securityId: 1, source: "ef", formatCode: "000001.SH", priority: 30, enabled: true },
+      { id: 20, securityId: 1, source: "tdx", formatCode: "000001.SH", priority: 40, enabled: false },
     ];
     (lookupSecuritySources as jest.Mock).mockResolvedValue(sources);
     (initializeRealtimeSubscription as jest.Mock).mockResolvedValue(baseAssignment());
@@ -128,15 +128,15 @@ describe("RealtimeSubscriptionsPage", () => {
     await waitFor(() => expect(screen.getByTestId("empty")).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId("mode-existing"));
-    fireEvent.change(screen.getByTestId("existing-code"), { target: { value: "600519" } });
+    fireEvent.change(screen.getByTestId("existing-code"), { target: { value: "000001" } });
     fireEvent.click(screen.getByTestId("lookup-sources"));
 
     await waitFor(() => expect(screen.getByTestId("sources-table")).toBeInTheDocument());
     // lookupSecuritySources called exactly once, for that one code (no N+1, no enumeration)
     expect(lookupSecuritySources).toHaveBeenCalledTimes(1);
-    expect(lookupSecuritySources).toHaveBeenCalledWith("600519");
+    expect(lookupSecuritySources).toHaveBeenCalledWith("000001");
     // formatCode shown read-only; disabled/ef filtered out
-    expect(screen.getByTestId("source-format-17").textContent).toBe("600519.SH");
+    expect(screen.getByTestId("source-format-17").textContent).toBe("000001.SH");
     expect(screen.queryByTestId("source-format-19")).toBeNull();
 
     fireEvent.click(screen.getByTestId("source-radio-17"));
@@ -231,10 +231,10 @@ describe("RealtimeSubscriptionsPage", () => {
     (activateSecurity as jest.Mock).mockResolvedValue(null);
 
     render(<RealtimeSubscriptionsPage />);
-    await waitFor(() => expect(screen.getByTestId("activate-600519")).not.toBeDisabled());
-    fireEvent.click(screen.getByTestId("activate-600519"));
+    await waitFor(() => expect(screen.getByTestId("activate-000001")).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId("activate-000001"));
 
-    await waitFor(() => expect(activateSecurity).toHaveBeenCalledWith("600519"));
+    await waitFor(() => expect(activateSecurity).toHaveBeenCalledWith("000001"));
     await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
   });
 
@@ -250,12 +250,12 @@ describe("RealtimeSubscriptionsPage", () => {
     mockList(jest.fn().mockResolvedValue(buildPage([baseAssignment({ desired: false, securityStatus: "SUSPENDED" })])));
 
     render(<RealtimeSubscriptionsPage />);
-    await waitFor(() => expect(screen.getByTestId("activate-600519")).not.toBeDisabled());
-    fireEvent.click(screen.getByTestId("activate-600519"));
+    await waitFor(() => expect(screen.getByTestId("activate-000001")).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId("activate-000001"));
 
     // While pending, a second activate click must not trigger another call.
     await waitFor(() => expect(activateSecurity).toHaveBeenCalledTimes(1));
-    fireEvent.click(screen.getByTestId("activate-600519"));
+    fireEvent.click(screen.getByTestId("activate-000001"));
     expect(activateSecurity).toHaveBeenCalledTimes(1);
 
     resolveActivate(null);
@@ -273,7 +273,7 @@ describe("RealtimeSubscriptionsPage", () => {
       null
     );
     const fresh = buildPage(
-      [baseAssignment({ assignmentId: 2, securityCode: "600519", securityName: "fresh" })],
+      [baseAssignment({ assignmentId: 2, securityCode: "000001", securityName: "fresh" })],
       null
     );
     let resolveStale: (v: RealtimeSubscriptionPageVo) => void = () => {};
@@ -303,12 +303,12 @@ describe("RealtimeSubscriptionsPage", () => {
     fireEvent.click(screen.getByTestId("page-prev"));
 
     // The newer (fresh) result is rendered.
-    await waitFor(() => expect(screen.getByTestId("cell-code").textContent).toBe("600519"));
+    await waitFor(() => expect(screen.getByTestId("cell-code").textContent).toBe("000001"));
 
     // Now the stale (older) response resolves late — it must NOT overwrite fresh.
     resolveStale(stale);
     // Re-render settles; assert the fresh value persists.
-    await waitFor(() => expect(screen.getByTestId("cell-code").textContent).toBe("600519"));
+    await waitFor(() => expect(screen.getByTestId("cell-code").textContent).toBe("000001"));
     expect(listMock).toHaveBeenCalledTimes(3);
   });
 
@@ -342,8 +342,8 @@ describe("RealtimeSubscriptionsPage", () => {
       desired: true,
     })])));
     render(<RealtimeSubscriptionsPage />);
-    await waitFor(() => expect(screen.getByTestId("qmt-blocked-600519")).toBeInTheDocument());
-    expect(screen.getByTestId("qmt-blocked-600519").textContent).toContain("runbook");
+    await waitFor(() => expect(screen.getByTestId("qmt-blocked-000001")).toBeInTheDocument());
+    expect(screen.getByTestId("qmt-blocked-000001").textContent).toContain("runbook");
     // No raw control / sync / recovery mutation buttons exist anywhere.
     const buttons = screen.queryAllByRole("button");
     const texts = buttons.map((b) => b.textContent || "");
@@ -426,8 +426,8 @@ describe("RealtimeSubscriptionsPage", () => {
     }));
 
     render(<RealtimeSubscriptionsPage />);
-    await waitFor(() => expect(screen.getByTestId("activate-600519")).not.toBeDisabled());
-    fireEvent.click(screen.getByTestId("activate-600519"));
+    await waitFor(() => expect(screen.getByTestId("activate-000001")).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId("activate-000001"));
     await waitFor(() => expect(screen.getByTestId("load-error").textContent).toContain("REALTIME_ACTIVE_CAPACITY_REACHED"));
   });
 });

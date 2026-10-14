@@ -142,7 +142,7 @@ describe("Mist frontend API client", () => {
             success: true,
             statusCode: 200,
             message: "SUCCESS",
-            data: [{ code: "600519" }],
+            data: [{ code: "000001" }],
             timestamp: "2026-08-03T00:00:00.000Z",
             requestId: "http-1",
             path: "/v1/securities",
@@ -150,7 +150,7 @@ describe("Mist frontend API client", () => {
           200,
           undefined
         )
-      ).toEqual([{ code: "600519" }]);
+      ).toEqual([{ code: "000001" }]);
     });
 
     it("returns data from a valid HTTP 201 success envelope", () => {
@@ -386,7 +386,7 @@ describe("Mist frontend API client", () => {
             success: true,
             statusCode: 200,
             message: "SUCCESS",
-            data: { code: "600519" },
+            data: { code: "000001" },
             timestamp: "2026-08-03T00:00:00.000Z",
             requestId: "http-1",
             path: "/v1/securities",
@@ -396,7 +396,7 @@ describe("Mist frontend API client", () => {
           200,
           undefined
         )
-      ).toEqual({ code: "600519" });
+      ).toEqual({ code: "000001" });
     });
 
     it("preserves code/httpStatus/requestId/data/errors on the thrown API error", () => {
@@ -433,12 +433,12 @@ describe("Mist frontend API client", () => {
     it("loads securities from a valid HTTP 200 success envelope", async () => {
       (global.fetch as jest.Mock).mockResolvedValue(
         successEnvelope([
-          { code: "600519", name: "贵州茅台", type: "stock", status: 1 },
+          { code: "000001", name: "上证指数", type: "stock", status: 1 },
         ])
       );
 
       await expect(fetchSecurities()).resolves.toEqual([
-        { code: "600519", name: "贵州茅台", type: "stock", status: 1 },
+        { code: "000001", name: "上证指数", type: "stock", status: 1 },
       ]);
       expect(global.fetch).toHaveBeenCalledWith(
         "/api/mist/v1/securities",
@@ -588,7 +588,7 @@ describe("Mist frontend API client", () => {
             success: true,
             statusCode: 200,
             message: "SUCCESS",
-            data: [{ code: "600519" }],
+            data: [{ code: "000001" }],
             timestamp: "2026-08-03T00:00:00.000Z",
             requestId: "http-1",
             path: "/v1/securities",
@@ -599,7 +599,7 @@ describe("Mist frontend API client", () => {
         )
       );
 
-      await expect(fetchSecurities()).resolves.toEqual([{ code: "600519" }]);
+      await expect(fetchSecurities()).resolves.toEqual([{ code: "000001" }]);
     });
 
     it("fail-closes a data-returning request that receives HTTP 204", async () => {
@@ -649,11 +649,11 @@ describe("Mist frontend API client", () => {
 
   it("collects K-lines through the Mist backend with the selected query", async () => {
     (global.fetch as jest.Mock).mockResolvedValue(
-      successEnvelope({ code: "600519", period: 1440, count: 2 })
+      successEnvelope({ code: "000001", period: 1440, count: 2 })
     );
 
     await collectKLines({
-      code: "600519",
+      code: "000001",
       source: "tdx",
       period: 1440,
       startDate: "2026-01-01",
@@ -665,7 +665,7 @@ describe("Mist frontend API client", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          code: "600519",
+          code: "000001",
           source: "tdx",
           period: 1440,
           startDate: "2026-01-01",
@@ -680,7 +680,7 @@ describe("Mist frontend API client", () => {
       successEnvelope([
         {
           id: 1,
-          symbol: "600519",
+          symbol: "000001",
           time: "2026-06-30T00:00:00.000Z",
           amount: 1000,
           open: 1,
@@ -692,7 +692,7 @@ describe("Mist frontend API client", () => {
     );
 
     const result = await fetchK({
-      code: "600519",
+      code: "000001",
       source: "tdx",
       period: 1440,
       startDate: "2026-01-01",
@@ -708,7 +708,7 @@ describe("Mist frontend API client", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          code: "600519",
+          code: "000001",
           source: "tdx",
           period: 1440,
           startDate: "2026-01-01",
@@ -722,7 +722,7 @@ describe("Mist frontend API client", () => {
     (global.fetch as jest.Mock).mockResolvedValue(successEnvelope([]));
 
     const query = {
-      code: "600519",
+      code: "000001",
       source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
@@ -762,7 +762,7 @@ describe("Mist frontend API client", () => {
 
     await expect(
       fetchBi({
-        code: "600519",
+        code: "000001",
         source: "tdx",
         period: 1440,
         startDate: "2026-01-01",
@@ -773,7 +773,7 @@ describe("Mist frontend API client", () => {
 
   it("preserves canonical bi phases and rejects partial objects", async () => {
     const query = {
-      code: "600519",
+      code: "000001",
       source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
@@ -799,7 +799,7 @@ describe("Mist frontend API client", () => {
 
     await expect(
       fetchBiChannel({
-        code: "600519",
+        code: "000001",
         source: "tdx",
         period: 1440,
         startDate: "2026-01-01",
@@ -810,7 +810,7 @@ describe("Mist frontend API client", () => {
 
   it("preserves canonical channel phases and rejects partial objects", async () => {
     const query = {
-      code: "600519",
+      code: "000001",
       source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
@@ -834,7 +834,7 @@ describe("Mist frontend API client", () => {
     (global.fetch as jest.Mock).mockResolvedValue(successEnvelope([]));
 
     const query = {
-      code: "600519",
+      code: "000001",
       source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
@@ -862,7 +862,7 @@ describe("Mist frontend API client", () => {
 
     await expect(
       fetchDuanChannel({
-        code: "600519",
+        code: "000001",
         source: "tdx",
         period: 1440,
         startDate: "2026-01-01",
@@ -873,7 +873,7 @@ describe("Mist frontend API client", () => {
 
   it("preserves canonical duan-channel phases and rejects partial objects", async () => {
     const query = {
-      code: "600519",
+      code: "000001",
       source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
@@ -900,7 +900,7 @@ describe("Mist frontend API client", () => {
     const strategyPayload = {
       name: "突破策略",
       description: "volume gt 100",
-      targetUniverse: ["600519"],
+      targetUniverse: ["000001"],
       periods: [1440],
       sources: ["tdx" as const],
       rule: { field: "k.volume", operator: "gt", value: "100" },
@@ -963,7 +963,7 @@ describe("Mist frontend API client", () => {
     await acknowledgeStrategyAlertEvent(9);
     await createStrategyBacktest({
       strategyVersionId: 5,
-      targetUniverse: ["600519"],
+      targetUniverse: ["000001"],
       period: 1440,
       source: "tdx",
       startDate: "2026-01-01",
@@ -1034,7 +1034,7 @@ describe("Mist frontend API client", () => {
     await fetchStrategyAlertEvents();
     await createStrategyBacktest({
       strategyVersionId: 5,
-      targetUniverse: ["600519"],
+      targetUniverse: ["000001"],
       period: 1440,
       source: "tdx",
       startDate: "2026-01-01",

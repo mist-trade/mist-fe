@@ -65,7 +65,7 @@ export default function StrategiesWorkspace() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [targetUniverse, setTargetUniverse] = useState("600519, 000001");
+  const [targetUniverse, setTargetUniverse] = useState("000001");
   const [periods, setPeriods] = useState("1440");
   const [sources, setSources] = useState("tdx");
   const [signalKind, setSignalKind] = useState<StrategySignalKind>("entry");
@@ -363,7 +363,7 @@ export default function StrategiesWorkspace() {
                     目标证券
                     <input
                       onChange={(e) => setTargetUniverse(e.target.value)}
-                      placeholder="逗号分隔，如 600519, 000001"
+                      placeholder="逗号分隔，如 000001"
                       value={targetUniverse}
                     />
                   </label>

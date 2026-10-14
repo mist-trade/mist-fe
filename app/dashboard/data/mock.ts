@@ -148,8 +148,8 @@ export function getPositions(): PositionRow[] {
   return [
     {
       key: "1",
-      symbol: "600519",
-      name: "贵州茅台",
+      symbol: "000001",
+      name: "上证指数",
       quantity: 200,
       costPrice: 1680.5,
       lastPrice: 1742.3,

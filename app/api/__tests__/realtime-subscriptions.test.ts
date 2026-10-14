@@ -222,8 +222,8 @@ describe("realtime subscription API client", () => {
       (global.fetch as jest.Mock).mockResolvedValue(
         envelopeResponse(FIXTURES.securitySources as never)
       );
-      await lookupSecuritySources("600519");
-      expect(lastUrl()).toBe("/api/mist/v1/securities/600519/sources");
+      await lookupSecuritySources("000001");
+      expect(lastUrl()).toBe("/api/mist/v1/securities/000001/sources");
       expect(lastInit().method).toBe("GET");
     });
 
@@ -231,8 +231,8 @@ describe("realtime subscription API client", () => {
       (global.fetch as jest.Mock).mockResolvedValue(
         envelopeResponse(FIXTURES.securitySources as never)
       );
-      const sources = await lookupSecuritySources("600519");
-      expect(sources[0].formatCode).toBe("600519.SH");
+      const sources = await lookupSecuritySources("000001");
+      expect(sources[0].formatCode).toBe("000001.SH");
       expect(sources[0].id).toBe(17);
     });
   });
@@ -242,9 +242,9 @@ describe("realtime subscription API client", () => {
       (global.fetch as jest.Mock).mockResolvedValue(
         envelopeResponse(FIXTURES.activateSuccess as never)
       );
-      const result = await activateSecurity("600519");
+      const result = await activateSecurity("000001");
       expect(result).toBeNull();
-      expect(lastUrl()).toBe("/api/mist/v1/securities/600519/activate");
+      expect(lastUrl()).toBe("/api/mist/v1/securities/000001/activate");
       expect(lastInit().method).toBe("PUT");
     });
 
@@ -252,9 +252,9 @@ describe("realtime subscription API client", () => {
       (global.fetch as jest.Mock).mockResolvedValue(
         envelopeResponse(FIXTURES.deactivateSuccess as never)
       );
-      const result = await deactivateSecurity("600519");
+      const result = await deactivateSecurity("000001");
       expect(result).toBeNull();
-      expect(lastUrl()).toBe("/api/mist/v1/securities/600519/deactivate");
+      expect(lastUrl()).toBe("/api/mist/v1/securities/000001/deactivate");
       expect(lastInit().method).toBe("PUT");
     });
 
@@ -268,7 +268,7 @@ describe("realtime subscription API client", () => {
         text: async () => "",
       };
       (global.fetch as jest.Mock).mockResolvedValue(noContent);
-      await expect(activateSecurity("600519")).rejects.toBeInstanceOf(
+      await expect(activateSecurity("000001")).rejects.toBeInstanceOf(
         MistApiContractError
       );
     });
@@ -279,7 +279,7 @@ describe("realtime subscription API client", () => {
           requestId: "http-fixture-activate",
         })
       );
-      await activateSecurity("600519");
+      await activateSecurity("000001");
       // No throw == success; request id is observable via the rejection path.
     });
   });

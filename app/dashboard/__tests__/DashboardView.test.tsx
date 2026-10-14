@@ -57,7 +57,7 @@ describe("Dashboard 概览页", () => {
     await renderView();
 
     expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.getByText("贵州茅台")).toBeInTheDocument();
+    expect(screen.getByText("上证指数")).toBeInTheDocument();
     expect(screen.getByText("宁德时代")).toBeInTheDocument();
   });
 
