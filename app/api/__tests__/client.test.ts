@@ -21,6 +21,7 @@ import {
   fetchStrategyBacktestRun,
   listStrategyBacktestRuns,
   fetchStrategyBacktestSignals,
+  listStrategyBacktestTrades,
 
   fetchStrategySignals,
   getAnalysisApiBase,
@@ -971,6 +972,11 @@ describe("Mist frontend API client", () => {
     });
     await fetchStrategyBacktestRun(11);
     await fetchStrategyBacktestSignals(11);
+    await listStrategyBacktestTrades(11, {
+      limit: 20,
+      offset: 0,
+      securityCode: "600519",
+    });
 
     expect(global.fetch).toHaveBeenNthCalledWith(
       1,
@@ -1000,6 +1006,11 @@ describe("Mist frontend API client", () => {
     expect(global.fetch).toHaveBeenNthCalledWith(
       6,
       "/api/mist/v1/strategy-backtests/11/signals",
+      expect.objectContaining({ method: "GET" })
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      7,
+      "/api/mist/v1/strategy-backtests/11/trades?limit=20&offset=0&securityCode=600519",
       expect.objectContaining({ method: "GET" })
     );
   });

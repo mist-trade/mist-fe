@@ -177,6 +177,13 @@ export interface StrategyBacktestRun {
   startedAt?: string | null;
   completedAt?: string | null;
   errorMessage?: string | null;
+  navSeries?: readonly {
+    date: string;
+    totalEquity: number;
+    cash?: number;
+    marketValue?: number;
+  }[] | null;
+  benchmarkCode?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -194,6 +201,30 @@ export interface StrategyBacktestSignalResult {
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
   createdAt?: string;
+}
+
+export interface StrategyBacktestTradeResult {
+  id: number;
+  backtestRunId: number;
+  securityId?: number | null;
+  securityCode: string;
+  entryTime: string;
+  exitTime: string;
+  holdingBars: number;
+  entryPrice: number;
+  exitPrice: number;
+  quantity: number;
+  realizedPnl: number;
+  returnRatio: number;
+  exitReason: string;
+  createdAt?: string;
+}
+
+export interface BacktestTradePageVo {
+  items: StrategyBacktestTradeResult[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface FactorPluginVo {
@@ -907,6 +938,24 @@ export const fetchStrategyBacktestSignals = async (
   }
   return { items: [], nextCursor: null };
 };
+
+export const listStrategyBacktestTrades = (
+  runId: number,
+  query?: { limit?: number; offset?: number; securityCode?: string }
+) => {
+  const params: Record<string, string> = {};
+  if (query?.limit !== undefined) params.limit = String(query.limit);
+  if (query?.offset !== undefined) params.offset = String(query.offset);
+  if (query?.securityCode) params.securityCode = query.securityCode;
+  const search = new URLSearchParams(params).toString();
+  return requestJson<BacktestTradePageVo>(
+    getMistApiBase(),
+    `/v1/strategy-backtests/${runId}/trades${search ? `?${search}` : ""}`,
+    { method: "GET" }
+  );
+};
+
+export const fetchStrategyBacktestTrades = listStrategyBacktestTrades;
 
 export const fetchK = async (query: KLineQuery): Promise<IFetchK[]> => {
   const result = await requestJson<
