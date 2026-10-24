@@ -23,7 +23,7 @@ interface VisualChartState {
 const DEFAULT_SOURCE: DataSourceValue = "tdx";
 const DEFAULT_PERIOD = 1440;
 const SECURITY_SEARCH_LIMIT = 20;
-const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "qmt"]);
+const DATA_SOURCE_VALUES = new Set<DataSourceValue>(["ef", "tdx", "qmt", "vendor_a"]);
 
 const PRESET_STOCKS = [
   { code: "000001", name: "上证指数" },
@@ -338,6 +338,7 @@ export default function KLineLivePage() {
                   }
                 >
                   <option value="tdx">TDX</option>
+                  <option value="vendor_a">第三方长历史 (vendor_a)</option>
                   <option value="ef">东方财富</option>
                   <option value="qmt">QMT</option>
                 </select>

@@ -22,7 +22,7 @@ const TIMEOUT = Number.parseInt(
  * `mqmt` value was renamed to `qmt` and MUST NOT be re-introduced as an alias
  * or silently remapped. `ef` remains for the historical/EastMoney K-line paths.
  */
-export type DataSourceValue = "ef" | "tdx" | "qmt";
+export type DataSourceValue = "ef" | "tdx" | "qmt" | "vendor_a";
 export type StrategyStatus = "draft" | "enabled" | "disabled" | "archived";
 export type StrategyAlertStatus = "pending" | "delivered" | "acked" | "failed";
 export type BacktestRunStatus = "pending" | "running" | "completed" | "failed";

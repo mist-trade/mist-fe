@@ -429,6 +429,7 @@ export default function DualTimeframeChanPage() {
                 >
                   <option value="qmt">QMT (实盘/高精度)</option>
                   <option value="tdx">TDX</option>
+                  <option value="vendor_a">第三方长历史 (vendor_a)</option>
                   <option value="ef">东方财富</option>
                 </select>
               </label>

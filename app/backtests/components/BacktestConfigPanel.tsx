@@ -222,6 +222,7 @@ export const BacktestConfigPanel = memo(function BacktestConfigPanel({
             >
               <option value="tdx">TDX</option>
               <option value="qmt">QMT</option>
+              <option value="vendor_a">第三方长历史 (vendor_a)</option>
               <option value="ef">东方财富</option>
             </select>
           </label>
