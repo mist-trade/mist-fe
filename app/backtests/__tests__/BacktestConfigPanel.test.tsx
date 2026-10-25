@@ -89,7 +89,6 @@ describe("BacktestConfigPanel", () => {
         strategyVersionId: 10,
         targetUniverse: ["000001"],
         period: 30,
-        source: "qmt",
         startDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
         endDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
       })

@@ -173,7 +173,6 @@ export function useBacktestTasks(options?: UseBacktestTasksOptions) {
         strategyVersionId: values.strategyVersionId,
         targetUniverse: values.targetUniverse,
         period: values.period,
-        source: values.source,
         startDate: values.startDate,
         endDate: values.endDate,
       });
@@ -189,7 +188,7 @@ export function useBacktestTasks(options?: UseBacktestTasksOptions) {
         strategyVersionId: values.strategyVersionId,
         targetUniverse: values.targetUniverse,
         period: values.period,
-        source: values.source,
+        source: "canonical",
         startDate: values.startDate,
         endDate: values.endDate,
         status: "pending",

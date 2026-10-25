@@ -51,7 +51,6 @@ const DEFAULT_CODE = "000001";
 function getDefaultQuery(): KLineQuery {
   return {
     code: DEFAULT_CODE,
-    source: DEFAULT_SOURCE,
     period: DEFAULT_PERIOD,
     startDate: defaultStartDate(),
     endDate: todayString(),
@@ -66,7 +65,6 @@ function getFocusTimeFromUrl(): string | null {
 function getQueryFromUrl(): KLineQuery {
   if (typeof window === "undefined") return getDefaultQuery();
   const params = new URLSearchParams(window.location.search);
-  const source = params.get("source");
   const urlCode = params.get("code");
   const focusTime = params.get("focusTime");
 
@@ -94,7 +92,6 @@ function getQueryFromUrl(): KLineQuery {
 
   return {
     code: urlCode !== null ? urlCode : DEFAULT_CODE,
-    source: isDataSourceValue(source) ? source : DEFAULT_SOURCE,
     period: Number(params.get("period") || DEFAULT_PERIOD),
     startDate,
     endDate,
@@ -108,7 +105,6 @@ function hasCompleteQuery(query: KLineQuery) {
 function updateUrl(query: KLineQuery, focusTime?: string | null) {
   const params = new URLSearchParams();
   if (query.code) params.set("code", query.code);
-  if (query.source) params.set("source", query.source);
   if (query.period) params.set("period", String(query.period));
   if (query.startDate) params.set("startDate", query.startDate);
   if (query.endDate) params.set("endDate", query.endDate);
@@ -118,6 +114,8 @@ function updateUrl(query: KLineQuery, focusTime?: string | null) {
 
 export default function KLineLivePage() {
   const [query, setQuery] = useState<KLineQuery>(getQueryFromUrl);
+  const [collectSource, setCollectSource] =
+    useState<DataSourceValue>(DEFAULT_SOURCE);
   const [focusTime] = useState<string | null>(getFocusTimeFromUrl);
   const [securities, setSecurities] = useState<SecurityOption[]>([]);
   const [stockFilter, setStockFilter] = useState("");
@@ -197,7 +195,6 @@ export default function KLineLivePage() {
         fetchVisualCommands({
           code: nextQuery.code,
           period: nextQuery.period,
-          source: nextQuery.source,
           startDate: nextQuery.startDate,
           endDate: nextQuery.endDate,
         }).catch((err) => {
@@ -205,7 +202,6 @@ export default function KLineLivePage() {
           return {
             code: nextQuery.code,
             period: nextQuery.period,
-            source: nextQuery.source,
             totalKlines: 0,
             commands: [],
           };
@@ -268,7 +264,7 @@ export default function KLineLivePage() {
     setChartError("");
     setStatusMessage("");
     try {
-      const result = await collectKLines(query);
+      const result = await collectKLines({ ...query, source: collectSource });
       await loadChart(query);
       setStatusMessage(`已刷新 ${result.count} 条 K 线`);
     } catch (error) {
@@ -326,15 +322,15 @@ export default function KLineLivePage() {
               </label>
 
               <label className="field">
-                数据源
+                采集源
                 <select
-                  value={query.source}
+                  value={collectSource}
                   onChange={(event) =>
-                    setQueryAndUrl({
-                      source: isDataSourceValue(event.target.value)
+                    setCollectSource(
+                      isDataSourceValue(event.target.value)
                         ? event.target.value
                         : DEFAULT_SOURCE,
-                    })
+                    )
                   }
                 >
                   <option value="tdx">TDX</option>

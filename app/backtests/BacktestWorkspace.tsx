@@ -73,14 +73,12 @@ export function BacktestWorkspace() {
         fetchK({
           code: symbol,
           period: run.period,
-          source: run.source,
           startDate: visualStart,
           endDate: visualEnd,
         }),
         fetchVisualCommands({
           code: symbol,
           period: run.period,
-          source: run.source,
           startDate: visualStart,
           endDate: visualEnd,
         }).catch(() => ({ totalKlines: 0, commands: [] })),

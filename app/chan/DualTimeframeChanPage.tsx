@@ -164,7 +164,6 @@ const MODE_CONFIGS: Record<TimeframeMode, ModeConfig> = {
   },
 };
 
-const DEFAULT_SOURCE: DataSourceValue = "qmt";
 const PRESET_STOCKS = [
   { code: "000001", name: "上证指数" },
   { code: "300750", name: "宁德时代" },
@@ -176,7 +175,6 @@ export default function DualTimeframeChanPage() {
   const currentConfig = MODE_CONFIGS[mode];
 
   const [code, setCode] = useState("000001");
-  const [source, setSource] = useState<DataSourceValue>(DEFAULT_SOURCE);
   const [startDate, setStartDate] = useState(() => currentConfig.defaultStart());
   const [endDate, setEndDate] = useState(() => formatShanghaiDate(new Date()));
 
@@ -230,42 +228,36 @@ export default function DualTimeframeChanPage() {
         fetchK({
           code,
           period: currentConfig.macroPeriod,
-          source,
           startDate,
           endDate,
         }),
         fetchVisualCommands({
           code,
           period: currentConfig.macroPeriod,
-          source,
           startDate,
           endDate,
           layers: "chan",
         }).catch(() => ({
           code,
           period: currentConfig.macroPeriod,
-          source,
           totalKlines: 0,
           commands: [],
         })),
         fetchK({
           code,
           period: currentConfig.microPeriod,
-          source,
           startDate,
           endDate,
         }),
         fetchVisualCommands({
           code,
           period: currentConfig.microPeriod,
-          source,
           startDate,
           endDate,
           layers: "chan",
         }).catch(() => ({
           code,
           period: currentConfig.microPeriod,
-          source,
           totalKlines: 0,
           commands: [],
         })),
@@ -292,7 +284,6 @@ export default function DualTimeframeChanPage() {
     }
   }, [
     code,
-    source,
     startDate,
     endDate,
     currentConfig.macroPeriod,
@@ -419,19 +410,6 @@ export default function DualTimeframeChanPage() {
                   onChange={(e) => setCode(e.target.value.trim())}
                   placeholder="代码 (如 000001)"
                 />
-              </label>
-
-              <label className="field">
-                数据源
-                <select
-                  value={source}
-                  onChange={(e) => setSource(e.target.value as DataSourceValue)}
-                >
-                  <option value="qmt">QMT (实盘/高精度)</option>
-                  <option value="tdx">TDX</option>
-                  <option value="vendor_a">第三方长历史 (vendor_a)</option>
-                  <option value="ef">东方财富</option>
-                </select>
               </label>
 
               <label className="field">

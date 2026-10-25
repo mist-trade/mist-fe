@@ -108,7 +108,6 @@ describe("KLineLivePage", () => {
     expect(await screen.findByText("上证指数")).toBeInTheDocument();
     expect(mockedFetchK).toHaveBeenCalledWith({
       code: "000001",
-      source: "tdx",
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",

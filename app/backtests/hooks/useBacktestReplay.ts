@@ -360,7 +360,6 @@ export function useBacktestReplay({
     fetchVisualCommands({
       code: selectedSymbol,
       period: activeRun.period,
-      source: activeRun.source,
       startDate: visualStart,
       endDate: timeKey,
     })

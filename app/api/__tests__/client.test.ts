@@ -479,7 +479,6 @@ describe("Mist frontend API client", () => {
           strategyVersionId: 1,
           targetUniverse: [],
           period: 1440,
-          source: "tdx",
           startDate: "2026-01-01",
           endDate: "2026-06-30",
         })
@@ -694,7 +693,6 @@ describe("Mist frontend API client", () => {
 
     const result = await fetchK({
       code: "000001",
-      source: "tdx",
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",
@@ -710,7 +708,6 @@ describe("Mist frontend API client", () => {
         method: "POST",
         body: JSON.stringify({
           code: "000001",
-          source: "tdx",
           period: 1440,
           startDate: "2026-01-01",
           endDate: "2026-06-30",
@@ -724,7 +721,6 @@ describe("Mist frontend API client", () => {
 
     const query = {
       code: "000001",
-      source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",
@@ -764,7 +760,6 @@ describe("Mist frontend API client", () => {
     await expect(
       fetchBi({
         code: "000001",
-        source: "tdx",
         period: 1440,
         startDate: "2026-01-01",
         endDate: "2026-06-30",
@@ -775,7 +770,6 @@ describe("Mist frontend API client", () => {
   it("preserves canonical bi phases and rejects partial objects", async () => {
     const query = {
       code: "000001",
-      source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",
@@ -801,7 +795,6 @@ describe("Mist frontend API client", () => {
     await expect(
       fetchBiChannel({
         code: "000001",
-        source: "tdx",
         period: 1440,
         startDate: "2026-01-01",
         endDate: "2026-06-30",
@@ -812,7 +805,6 @@ describe("Mist frontend API client", () => {
   it("preserves canonical channel phases and rejects partial objects", async () => {
     const query = {
       code: "000001",
-      source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",
@@ -836,7 +828,6 @@ describe("Mist frontend API client", () => {
 
     const query = {
       code: "000001",
-      source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",
@@ -864,7 +855,6 @@ describe("Mist frontend API client", () => {
     await expect(
       fetchDuanChannel({
         code: "000001",
-        source: "tdx",
         period: 1440,
         startDate: "2026-01-01",
         endDate: "2026-06-30",
@@ -875,7 +865,6 @@ describe("Mist frontend API client", () => {
   it("preserves canonical duan-channel phases and rejects partial objects", async () => {
     const query = {
       code: "000001",
-      source: "tdx" as const,
       period: 1440,
       startDate: "2026-01-01",
       endDate: "2026-06-30",
@@ -966,7 +955,6 @@ describe("Mist frontend API client", () => {
       strategyVersionId: 5,
       targetUniverse: ["000001"],
       period: 1440,
-      source: "tdx",
       startDate: "2026-01-01",
       endDate: "2026-06-30",
     });
@@ -1047,7 +1035,6 @@ describe("Mist frontend API client", () => {
       strategyVersionId: 5,
       targetUniverse: ["000001"],
       period: 1440,
-      source: "tdx",
       startDate: "2026-01-01",
       endDate: "2026-06-30",
     });

@@ -2,7 +2,6 @@
 
 import { memo, useState } from "react";
 import type {
-  DataSourceValue,
   StrategyDefinition,
   StrategyVersion,
 } from "@/app/api/client";
@@ -11,7 +10,6 @@ export interface BacktestConfigValues {
   strategyVersionId: number;
   targetUniverse: string[];
   period: number;
-  source: DataSourceValue;
   startDate: string;
   endDate: string;
 }
@@ -27,7 +25,6 @@ interface BacktestConfigPanelProps {
 
 const DEFAULT_CODE = "000001";
 const DEFAULT_PERIOD = 30;
-const DEFAULT_SOURCE: DataSourceValue = "qmt";
 
 import {
   formatShanghaiLocalDateTimeInput,
@@ -60,7 +57,6 @@ export const BacktestConfigPanel = memo(function BacktestConfigPanel({
 }: BacktestConfigPanelProps) {
   const [targetCode, setTargetCode] = useState(DEFAULT_CODE);
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
-  const [source, setSource] = useState<DataSourceValue>(DEFAULT_SOURCE);
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
 
   const defaultDates = getDefaultDates();
@@ -131,7 +127,6 @@ export const BacktestConfigPanel = memo(function BacktestConfigPanel({
       strategyVersionId: activeVersionId,
       targetUniverse: targets,
       period,
-      source,
       startDate: startIso,
       endDate: endIso,
     });
@@ -211,19 +206,6 @@ export const BacktestConfigPanel = memo(function BacktestConfigPanel({
               <option value={30}>30 分钟</option>
               <option value={60}>60 分钟</option>
               <option value={1440}>日线 (1440m)</option>
-            </select>
-          </label>
-
-          <label className="field">
-            数据源
-            <select
-              value={source}
-              onChange={(e) => setSource(e.target.value as DataSourceValue)}
-            >
-              <option value="tdx">TDX</option>
-              <option value="qmt">QMT</option>
-              <option value="vendor_a">第三方长历史 (vendor_a)</option>
-              <option value="ef">东方财富</option>
             </select>
           </label>
         </div>

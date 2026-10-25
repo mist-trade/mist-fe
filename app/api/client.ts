@@ -36,10 +36,14 @@ export type StrategySignalKind = "entry" | "exit";
 
 export interface KLineQuery {
   code: string;
-  source?: DataSourceValue;
   period: number;
   startDate: string;
   endDate: string;
+}
+
+/** Collection jobs still choose the provider they collect from. */
+export interface CollectKLineQuery extends KLineQuery {
+  source: DataSourceValue;
 }
 
 export interface SecurityOption {
@@ -147,7 +151,6 @@ export interface StrategyBacktestRequest {
   strategyVersionId: number;
   targetUniverse: string[];
   period: number;
-  source: DataSourceValue;
   startDate: string;
   endDate: string;
 }
@@ -168,7 +171,8 @@ export interface StrategyBacktestRun {
   strategyVersionId: number;
   targetUniverse: string[];
   period: number;
-  source: DataSourceValue;
+  /** `canonical` for runs assembled from the splice policy; legacy runs keep a provider. */
+  source: DataSourceValue | "canonical";
   startDate: string;
   endDate: string;
   status: BacktestRunStatus;
@@ -801,7 +805,7 @@ export const deactivateSecurity = (code: string) =>
     { method: "PUT" }
   );
 
-export const collectKLines = (query: KLineQuery) =>
+export const collectKLines = (query: CollectKLineQuery) =>
   requestJson<CollectKLinesResult>(getMistApiBase(), "/v1/collector/collect", {
     method: "POST",
     body: JSON.stringify(query),
