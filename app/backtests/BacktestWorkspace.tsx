@@ -85,11 +85,10 @@ export function BacktestWorkspace() {
       ]);
 
       const safeK = Array.isArray(kLines) ? kLines : [];
-      const signalCommands = convertBacktestSignalsToCommands(symbolSignals, safeK);
+      const signalCommands = convertBacktestSignalsToCommands(symbolSignals, safeK, "tactical_events");
       const pureVisualCommands = (visualPayload.commands || []).filter(
-        (cmd) => cmd.layer !== "backtest_signals"
+        (cmd) => cmd.layer !== "backtest_signals" && cmd.layer !== "tactical_events" && cmd.layer !== "raw_signals"
       );
-      const mergedCommands = [...pureVisualCommands, ...signalCommands];
 
       setRawK(safeK);
       setFullCommands(pureVisualCommands);
@@ -103,7 +102,9 @@ export function BacktestWorkspace() {
   // 3. 加载回测记录的信号和图表
   const loadRunSignalsAndChart = useCallback(
     async (run: StrategyBacktestRun, symbol: string): Promise<IFetchK[]> => {
-      const pageResult = await fetchStrategyBacktestSignals(run.id).catch(() => ({
+      const pageResult = await fetchStrategyBacktestSignals(run.id, {
+        layer: "tactical_events",
+      }).catch(() => ({
         items: [],
         nextCursor: null,
       }));

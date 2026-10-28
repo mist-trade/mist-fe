@@ -919,11 +919,12 @@ export const fetchStrategyBacktestRun = (runId: number) =>
  */
 export const fetchStrategyBacktestSignals = async (
   runId: number,
-  query?: { cursor?: string | null; limit?: number }
+  query?: { cursor?: string | null; limit?: number; layer?: string }
 ): Promise<BacktestSignalPageVo> => {
   const params: Record<string, string> = {};
   if (query?.cursor) params.cursor = query.cursor;
   if (query?.limit) params.limit = String(query.limit);
+  if (query?.layer) params.layer = query.layer;
   const search = new URLSearchParams(params).toString();
   const result = await requestJson<
     BacktestSignalPageVo | StrategyBacktestSignalResult[]

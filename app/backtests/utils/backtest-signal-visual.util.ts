@@ -46,7 +46,8 @@ export function toBacktestSignalResult(
  */
 export function convertBacktestSignalsToCommands(
   symbolSignals: StrategyBacktestSignalResult[],
-  safeK: IFetchK[]
+  safeK: IFetchK[],
+  layerName = "tactical_events"
 ): VisualCommandVo[] {
   const minTimeMs = safeK[0] ? new Date(safeK[0].time).getTime() : 0;
   const maxTimeMs = safeK[safeK.length - 1]
@@ -93,7 +94,7 @@ export function convertBacktestSignalsToCommands(
     return {
       id: `backtest_sig_${sig.id}`,
       type: "text",
-      layer: "backtest_signals",
+      layer: layerName,
       time: targetTime,
       price,
       text: label,
