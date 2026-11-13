@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const rewrites = [];
     const mistTarget = process.env.MIST_API_PROXY_TARGET;
-    const chanTarget = process.env.CHAN_API_PROXY_TARGET;
+    const chanTarget = process.env.CHAN_API_PROXY_TARGET || mistTarget;
 
     if (mistTarget) {
       rewrites.push({

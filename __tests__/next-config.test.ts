@@ -33,6 +33,21 @@ describe("next config local API proxy", () => {
     ]);
   });
 
+  it("rewrites /api/chan to MIST_API_PROXY_TARGET when CHAN_API_PROXY_TARGET is unset", async () => {
+    process.env.MIST_API_PROXY_TARGET = "http://192.168.31.182:8001/";
+
+    await expect(nextConfig.rewrites?.()).resolves.toEqual([
+      {
+        source: "/api/mist/:path*",
+        destination: "http://192.168.31.182:8001/:path*",
+      },
+      {
+        source: "/api/chan/:path*",
+        destination: "http://192.168.31.182:8001/:path*",
+      },
+    ]);
+  });
+
   it("builds a standalone production server for Docker images", () => {
     expect(nextConfig.output).toBe("standalone");
   });
