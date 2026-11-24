@@ -142,7 +142,6 @@ export interface StrategyAlertEvent {
   dedupeKey: string;
   deliveryResult?: Record<string, unknown> | null;
   createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface StrategyBacktestRequest {
