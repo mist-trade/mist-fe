@@ -2,7 +2,6 @@ import { act } from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import StrategiesPage from "../page";
 import {
-  acknowledgeStrategyAlertEvent,
   createStrategyDefinition,
   disableStrategyDefinition,
   enableStrategyDefinition,
@@ -15,7 +14,6 @@ import {
 } from "@/app/api/client";
 
 jest.mock("@/app/api/client", () => ({
-  acknowledgeStrategyAlertEvent: jest.fn(),
   createStrategyDefinition: jest.fn(),
   disableStrategyDefinition: jest.fn(),
   enableStrategyDefinition: jest.fn(),
@@ -33,7 +31,6 @@ const mockedDisableStrategyDefinition = disableStrategyDefinition as jest.Mock;
 const mockedListStrategyVersions = listStrategyVersions as jest.Mock;
 const mockedFetchStrategySignals = fetchStrategySignals as jest.Mock;
 const mockedFetchStrategyAlertEvents = fetchStrategyAlertEvents as jest.Mock;
-const mockedAcknowledgeStrategyAlertEvent = acknowledgeStrategyAlertEvent as jest.Mock;
 const mockedFetchFactorPlugins = fetchFactorPlugins as jest.Mock;
 
 const strategy = {
@@ -126,7 +123,6 @@ function setupMocks() {
   mockedListStrategyVersions.mockResolvedValue([version]);
   mockedFetchStrategySignals.mockResolvedValue([signal]);
   mockedFetchStrategyAlertEvents.mockResolvedValue([alert]);
-  mockedAcknowledgeStrategyAlertEvent.mockResolvedValue({ ...alert, status: "acked" });
   mockedCreateStrategyDefinition.mockResolvedValue(strategy);
   mockedEnableStrategyDefinition.mockResolvedValue({ ...strategy, status: "enabled" });
   mockedDisableStrategyDefinition.mockResolvedValue({ ...strategy, status: "disabled" });
@@ -304,7 +300,7 @@ describe("StrategiesPage", () => {
     expect(screen.getByRole("button", { name: "创建策略" })).toBeInTheDocument();
   });
 
-  it("runs strategy lifecycle and alert acknowledgement actions", async () => {
+  it("runs strategy lifecycle actions", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
@@ -313,10 +309,6 @@ describe("StrategiesPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "启用" }));
     await waitFor(() => expect(mockedEnableStrategyDefinition).toHaveBeenCalledWith(3));
-
-    fireEvent.click(screen.getByRole("tab", { name: "告警事件" }));
-    fireEvent.click(await screen.findByRole("button", { name: "确认告警" }));
-    await waitFor(() => expect(mockedAcknowledgeStrategyAlertEvent).toHaveBeenCalledWith(9));
   });
 
   it("renders canonical live signal identity, confidence badge, and opens white-box drawer", async () => {

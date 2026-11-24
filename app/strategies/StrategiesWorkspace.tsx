@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  acknowledgeStrategyAlertEvent,
   createStrategyDefinition,
   disableStrategyDefinition,
   enableStrategyDefinition,
@@ -205,16 +204,6 @@ export default function StrategiesWorkspace() {
         await disableStrategyDefinition(selectedStrategy.id);
       }
       await refreshStrategies();
-    } finally {
-      setIsActionRunning(false);
-    }
-  };
-
-  const acknowledgeAlert = async (id: number) => {
-    setIsActionRunning(true);
-    try {
-      const updated = await acknowledgeStrategyAlertEvent(id);
-      setAlerts((items) => items.map((item) => (item.id === id ? updated : item)));
     } finally {
       setIsActionRunning(false);
     }
@@ -553,7 +542,6 @@ export default function StrategiesWorkspace() {
                         <th>状态</th>
                         <th>去重键</th>
                         <th>触发时间</th>
-                        <th>操作</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -567,20 +555,6 @@ export default function StrategiesWorkspace() {
                             <code>{item.dedupeKey}</code>
                           </td>
                           <td className="tnum">{formatDateTime(item.createdAt)}</td>
-                          <td>
-                            {item.status === "pending" ? (
-                              <button
-                                disabled={isActionRunning}
-                                onClick={() => acknowledgeAlert(item.id)}
-                                type="button"
-                                className="action-link-btn"
-                              >
-                                确认告警
-                              </button>
-                            ) : (
-                              <span className="strategy-muted">已确认</span>
-                            )}
-                          </td>
                         </tr>
                       ))}
                     </tbody>

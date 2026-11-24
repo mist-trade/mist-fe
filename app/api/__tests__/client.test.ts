@@ -3,7 +3,6 @@ import { join } from "node:path";
 import {
   MistApiContractError,
   MistApiError,
-  acknowledgeStrategyAlertEvent,
   collectKLines,
   createStrategyBacktest,
   createStrategyDefinition,
@@ -950,7 +949,6 @@ describe("Mist frontend API client", () => {
       source: "tdx",
     });
     await fetchStrategyAlertEvents({ status: "pending", strategySignalId: 8 });
-    await acknowledgeStrategyAlertEvent(9);
     await createStrategyBacktest({
       strategyVersionId: 5,
       targetUniverse: ["000001"],
@@ -978,26 +976,21 @@ describe("Mist frontend API client", () => {
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
       3,
-      "/api/mist/v1/strategy-alert-events/9/ack",
-      expect.objectContaining({ method: "POST" })
-    );
-    expect(global.fetch).toHaveBeenNthCalledWith(
-      4,
       "/api/mist/v1/strategy-backtests",
       expect.objectContaining({ method: "POST" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
-      5,
+      4,
       "/api/mist/v1/strategy-backtests/11",
       expect.objectContaining({ method: "GET" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
-      6,
+      5,
       "/api/mist/v1/strategy-backtests/11/signals",
       expect.objectContaining({ method: "GET" })
     );
     expect(global.fetch).toHaveBeenNthCalledWith(
-      7,
+      6,
       "/api/mist/v1/strategy-backtests/11/trades?limit=20&offset=0&securityCode=600519",
       expect.objectContaining({ method: "GET" })
     );

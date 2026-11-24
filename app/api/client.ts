@@ -24,7 +24,7 @@ const TIMEOUT = Number.parseInt(
  */
 export type DataSourceValue = "ef" | "tdx" | "qmt" | "vendor_a";
 export type StrategyStatus = "draft" | "enabled" | "disabled" | "archived";
-export type StrategyAlertStatus = "pending" | "delivered" | "acked" | "failed";
+export type StrategyAlertStatus = "pending" | "delivered" | "failed";
 export type BacktestRunStatus = "pending" | "running" | "completed" | "failed";
 export type StrategySignalSource = "live" | "backtest";
 /**
@@ -140,9 +140,7 @@ export interface StrategyAlertEvent {
   strategySignalId: number;
   status: StrategyAlertStatus;
   dedupeKey: string;
-  cooldownUntil?: string | null;
   deliveryResult?: Record<string, unknown> | null;
-  acknowledgedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -864,13 +862,6 @@ export const fetchStrategyAlertEvents = (query?: StrategyAlertEventQuery) =>
     getMistApiBase(),
     buildQueryPath("/v1/strategy-alert-events", query),
     { method: "GET" }
-  );
-
-export const acknowledgeStrategyAlertEvent = (id: number) =>
-  requestJson<StrategyAlertEvent>(
-    getMistApiBase(),
-    `/v1/strategy-alert-events/${id}/ack`,
-    { method: "POST" }
   );
 
 export interface ListStrategyBacktestRunsQuery {
