@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/License-BSD--3--Clause-green.svg" alt="License" />
 </p>
 
-Mist Frontend 是面向 A 股市场的专业量化投研分析与缠论几何可视化前端工作台，基于 Next.js 16（App Router）与 React 19 构建。通过 TradingView `lightweight-charts` 提供毫秒级高性能金融交互图表，支持纯正缠论几何图元渲染、三层解耦多图层透视、流式推演仿真控制台与行情订阅运维管理。
+Mist Frontend 是面向 A 股市场的专业量化投研分析与缠论几何可视化前端工作台，基于 Next.js 16（App Router）与 React 19 构建。通过 TradingView `lightweight-charts` 提供毫秒级高性能金融交互图表，支持纯正缠论几何图元渲染、多图层透视、流式推演仿真控制台与行情订阅运维管理。
 
 ---
 
@@ -26,7 +26,7 @@ Mist Frontend 是面向 A 股市场的专业量化投研分析与缠论几何可
   - **特征序列线段（Duan）**：精准标识线段走势与破坏极值点；
   - **中枢（Zhongshu）**：半透明矩形区域渲染 Phase A 候选与 Phase B 最终定点中枢；
   - **买卖点标记（BSP）**：第一类、第二类与第三类买卖点标记（`1买` / `2买` / `3买` / `1卖` / `2卖` / `3卖`），严格锚定形态极值时刻 `pivotTime`。
-- **三层解耦多图层透视（Multi-Layer Visualizer）**：图表工具栏支持独立勾选控制：笔折线（`chan_bi`）、笔中枢（`chan_zs_bi`）、线段（`chan_duan`）、段中枢（`chan_zs_duan`）、战术事件买卖点（`tactical_events`）、原生买卖点（`chan_bsp`）。
+- **多图层透视（Multi-Layer Visualizer）**：图表工具栏支持独立勾选控制：笔折线（`chan_bi`）、笔中枢（`chan_zs_bi`）、线段（`chan_duan`）、段中枢（`chan_zs_duan`）、策略信号标记与原生买卖点（`chan_bsp`）。
 - **流式推演仿真工作台（Simulation Workbench）**：
   - 本地开发环境下支持单步推演推流（SSE 长连接 `text/event-stream`）；
   - 全功能播放控制器：`play` / `pause` / `step_next` / `step_prev` / `seek` 与多档调速；

@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/License-BSD--3--Clause-green.svg" alt="License" />
 </p>
 
-Mist Frontend is a professional quantitative trading desk and Chan Theory geometric visualization workbench tailored for the **Chinese A-share market**, built on Next.js 16 (App Router) and React 19. Leveraging TradingView `lightweight-charts`, it delivers high-performance financial charts, authentic Chan Theory structural rendering, three-tier decoupled multi-layer visual inspection, streaming simulation controls, and market subscription management.
+Mist Frontend is a professional quantitative trading desk and Chan Theory geometric visualization workbench tailored for the **Chinese A-share market**, built on Next.js 16 (App Router) and React 19. Leveraging TradingView `lightweight-charts`, it delivers high-performance financial charts, authentic Chan Theory structural rendering, multi-layer visual inspection, streaming simulation controls, and market subscription management.
 
 ---
 
@@ -26,7 +26,7 @@ Mist Frontend is a professional quantitative trading desk and Chan Theory geomet
   - **Duan (Segment)**: Feature sequence segments with precise turning and break points;
   - **Zhongshu (Central Zone)**: Translucent rectangular zones rendering Phase A candidates and Phase B finalized consolidation zones;
   - **Buy/Sell Point Markers (BSP)**: Markers for Types 1, 2, and 3 (`1买`, `2买`, `3买`, `1卖`, `2卖`, `3卖`), strictly anchored to extreme morphological moments (`pivotTime`).
-- **Three-Tier Multi-Layer Visualizer**: Interactive chart toolbar allowing independent toggling of: stroke lines (`chan_bi`), stroke zones (`chan_zs_bi`), segment lines (`chan_duan`), segment zones (`chan_zs_duan`), tactical buy/sell events (`tactical_events`), and raw buy/sell signals (`chan_bsp`).
+- **Multi-Layer Visualizer**: Interactive chart toolbar allowing independent toggling of: stroke lines (`chan_bi`), stroke zones (`chan_zs_bi`), segment lines (`chan_duan`), segment zones (`chan_zs_duan`), strategy signal markers, and raw buy/sell signals (`chan_bsp`).
 - **Streaming Simulation Workbench**:
   - Push-driven simulation in local development via Server-Sent Events (SSE `text/event-stream`);
   - Full-featured transport controls: `play`, `pause`, `step_next`, `step_prev`, `seek`, and multi-speed adjustment;
