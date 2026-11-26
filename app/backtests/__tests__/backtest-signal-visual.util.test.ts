@@ -40,7 +40,6 @@ describe("backtest-signal-visual.util", () => {
       signalType: "first_buy",
       badgeText: "1买",
       isBuy: true,
-      confidence: 0.95,
       decisionTrace: { action: "BUY" },
       securityCode: "000001",
       period: 30,
@@ -50,6 +49,8 @@ describe("backtest-signal-visual.util", () => {
     expect(res.id).toBe(42);
     expect(res.securityCode).toBe("000001");
     expect(res.signalTime).toBe("2026-08-26T10:00:00.000Z");
+    expect(res).not.toHaveProperty("confidence");
+    expect(res).not.toHaveProperty("confidenceLevel");
     expect(res.contextSnapshot.type).toBe("first_buy");
     expect(res.contextSnapshot.action).toBe("BUY");
     expect(res.contextSnapshot.triggerPrice).toBe(11.8);
@@ -124,7 +125,6 @@ describe("backtest-signal-visual.util", () => {
         signalType: "first_buy",
         badgeText: "1买",
         isBuy: true,
-        confidence: 1,
         decisionTrace: null,
         securityCode: "000001",
         period: 30,
@@ -137,7 +137,6 @@ describe("backtest-signal-visual.util", () => {
         signalType: "third_buy",
         badgeText: "3买",
         isBuy: true,
-        confidence: 1,
         decisionTrace: null,
         securityCode: "000001",
         period: 30,

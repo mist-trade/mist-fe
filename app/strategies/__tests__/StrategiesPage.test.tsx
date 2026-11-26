@@ -71,19 +71,23 @@ const signal = {
   signalTime: "2026-07-07T09:30:00.000Z",
   signalSource: "live",
   signalKind: "entry",
-  confidence: 88.5,
-  confidenceLevel: "HIGH",
   decisionTrace: {
-    totalScore: 88.5,
-    summary: "放量突破且外资加仓综合达标",
+    summary: "财务安全门禁通过，放量突破确立买点",
     trace: [
       {
-        nodeId: "consensus_factors",
-        name: "多因子加权共识打分",
-        type: "CONSENSUS",
-        score: 88.5,
+        nodeId: "guard_breakout",
+        name: "放量突破门禁",
+        type: "GUARD",
+        passed: true,
         action: "BUY",
         reason: "放量突破20日高点",
+      },
+      {
+        nodeId: "term_signal_emit",
+        name: "终结信号",
+        type: "TERMINAL",
+        action: "BUY",
+        reason: "确立买入信号",
       },
     ],
   },
@@ -138,7 +142,7 @@ async function submitCreateForm(fields: {
   signalKind?: "entry" | "exit";
 }) {
   if (fields.name !== undefined) {
-    fireEvent.change(await screen.findByPlaceholderText("如：双因子共识动量突破策略"), {
+    fireEvent.change(await screen.findByPlaceholderText("如：基本面门禁与动量突破策略"), {
       target: { value: fields.name },
     });
   }
@@ -218,6 +222,10 @@ describe("StrategiesPage", () => {
     const rule = payload.rule as Record<string, unknown>;
     expect(rule.kind).toBe("decision_flow");
     expect((rule.rootNode as Record<string, unknown>).type).toBe("GUARD");
+    const serialized = JSON.stringify(rule);
+    expect(serialized).not.toContain("minConfidence");
+    expect(serialized).not.toContain("CONSENSUS");
+    expect(screen.queryByText(/最低置信度|Consensus|CONSENSUS/)).not.toBeInTheDocument();
     expect(mockedListStrategies).toHaveBeenCalled();
   });
 
@@ -257,6 +265,32 @@ describe("StrategiesPage", () => {
     const rootNode = rule.rootNode as Record<string, unknown>;
     expect(rootNode.id).toBe("guard_chan_bsp");
     expect(rootNode.pluginId).toBe("plugin.chan.bsp");
+    expect(rootNode).not.toHaveProperty("minConfidence");
+    expect(JSON.stringify(rule)).not.toContain("minConfidence");
+    expect(JSON.stringify(rule)).not.toContain("CONSENSUS");
+  });
+
+  it("supports switching decision flow preset to extractor branch without minConfidence or CONSENSUS", async () => {
+    render(<StrategiesPage />);
+    await screen.findByRole("heading", { name: "突破策略" });
+
+    fireEvent.click(screen.getByRole("button", { name: "特征分支树" }));
+
+    await submitCreateForm({
+      name: "特征分支策略",
+      targetUniverse: "000001",
+      signalKind: "entry",
+    });
+
+    await waitFor(() => expect(mockedCreateStrategyDefinition).toHaveBeenCalledTimes(1));
+    await awaitCreateSettled();
+    const payload = mockedCreateStrategyDefinition.mock.calls[0][0] as StrategyDefinitionPayload;
+    const rule = payload.rule as Record<string, unknown>;
+    const rootNode = rule.rootNode as Record<string, unknown>;
+    expect(rootNode.type).toBe("EXTRACTOR");
+    expect((rootNode.next as Record<string, unknown>).type).toBe("BRANCH");
+    expect(JSON.stringify(rule)).not.toContain("minConfidence");
+    expect(JSON.stringify(rule)).not.toContain("CONSENSUS");
   });
 
   it("disables create button when strategy name is empty", async () => {
@@ -272,7 +306,7 @@ describe("StrategiesPage", () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
-    fireEvent.change(await screen.findByPlaceholderText("如：双因子共识动量突破策略"), {
+    fireEvent.change(await screen.findByPlaceholderText("如：基本面门禁与动量突破策略"), {
       target: { value: "新策略" },
     });
     fireEvent.change(screen.getByPlaceholderText("逗号分隔，如 000001"), {
@@ -311,7 +345,7 @@ describe("StrategiesPage", () => {
     await waitFor(() => expect(mockedEnableStrategyDefinition).toHaveBeenCalledWith(3));
   });
 
-  it("renders canonical live signal identity, confidence badge, and opens white-box drawer", async () => {
+  it("renders canonical live signal identity without confidence badge and opens white-box drawer", async () => {
     render(<StrategiesPage />);
     await screen.findByRole("heading", { name: "突破策略" });
 
@@ -319,14 +353,16 @@ describe("StrategiesPage", () => {
 
     expect(await screen.findByText("000001")).toBeInTheDocument();
     expect(screen.getByText("上证指数")).toBeInTheDocument();
-    expect(screen.getByText("HIGH 88.5%")).toBeInTheDocument();
     expect(screen.getByText("买入 (BUY)")).toBeInTheDocument();
+    expect(screen.queryByText("置信度")).not.toBeInTheDocument();
+    expect(screen.queryByText(/HIGH|MEDIUM|LOW|88\.5%|85\.0%/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "白盒归因" }));
 
     expect(await screen.findByRole("dialog", { name: "白盒决策归因与轨迹诊断" })).toBeInTheDocument();
-    expect(screen.getByText("放量突破且外资加仓综合达标")).toBeInTheDocument();
+    expect(screen.getByText("财务安全门禁通过，放量突破确立买点")).toBeInTheDocument();
     expect(screen.getByText("放量突破20日高点")).toBeInTheDocument();
+    expect(screen.queryByText(/CONSENSUS|确信度|HIGH|88\.5%/)).not.toBeInTheDocument();
   });
 
   it("browses factor plugin catalog in the catalog tab", async () => {

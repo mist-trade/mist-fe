@@ -122,8 +122,6 @@ export interface StrategySignal {
   signalTime: string;
   signalSource: StrategySignalSource;
   signalKind: StrategySignalKind;
-  confidence?: number | null;
-  confidenceLevel?: 'HIGH' | 'MEDIUM' | 'LOW' | null;
   decisionTrace?: Record<string, unknown> | null;
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
@@ -196,8 +194,6 @@ export interface StrategyBacktestSignalResult {
   signalTime: string;
   signalType?: string;
   badgeText?: string;
-  confidence?: number | null;
-  confidenceLevel?: 'HIGH' | 'MEDIUM' | 'LOW' | null;
   decisionTrace?: Record<string, unknown> | null;
   contextSnapshot: Record<string, unknown>;
   ruleSnapshot: Record<string, unknown>;
@@ -1183,7 +1179,6 @@ export interface SimulationSignalVo {
   signalType: string;
   badgeText: string;
   isBuy: boolean;
-  confidence: number;
   decisionTrace: Record<string, unknown> | null;
   securityCode: string;
   period: number;

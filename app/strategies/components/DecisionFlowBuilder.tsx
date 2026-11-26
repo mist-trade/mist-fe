@@ -3,34 +3,121 @@
 import { useState, useEffect } from "react";
 import type { FactorPluginVo } from "@/app/api/client";
 
+export type DecisionFlowNodeType = "GUARD" | "BRANCH" | "EXTRACTOR" | "TERMINAL";
+
+export interface GuardFlowNode {
+  id: string;
+  type: "GUARD";
+  name: string;
+  pluginId: string;
+  params?: Record<string, unknown>;
+  requiredAction: "BUY" | "SELL" | "BOTH" | "ANY";
+  onPass: DecisionFlowNode;
+  onFail?: DecisionFlowNode;
+}
+
+export interface BranchFlowNode {
+  id: string;
+  type: "BRANCH";
+  name: string;
+  condition: {
+    attributeKey?: string;
+    pluginId?: string;
+    operator: "eq" | "ne" | "gt" | "gte" | "lt" | "lte" | "in";
+    value: unknown;
+  };
+  branches: {
+    true: DecisionFlowNode;
+    false: DecisionFlowNode;
+  };
+}
+
+export interface ExtractorFlowNode {
+  id: string;
+  type: "EXTRACTOR";
+  name: string;
+  pluginId: string;
+  params?: Record<string, unknown>;
+  exportAttributeKey: string;
+  next: DecisionFlowNode;
+}
+
+export interface TerminalFlowNode {
+  id: string;
+  type: "TERMINAL";
+  action: "BUY" | "SELL" | "ABORT" | "INHERIT";
+  signalTag?: string;
+  reason?: string;
+}
+
+export type DecisionFlowNode =
+  | GuardFlowNode
+  | BranchFlowNode
+  | ExtractorFlowNode
+  | TerminalFlowNode;
+
 export interface DecisionFlowBuilderProps {
   plugins: FactorPluginVo[];
   onChange: (flowRule: Record<string, unknown>) => void;
 }
 
-export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderProps) {
-  const [selectedPreset, setSelectedPreset] = useState<string>("breakout_guard");
+type FlowPreset = "standard_guard" | "chan_bsp" | "extractor_branch";
 
-  // 门禁配置
+const DEFAULT_GUARD_OPTIONS: ReadonlyArray<{ id: string; name: string }> = [
+  { id: "plugin.fundamental.safety-guard", name: "基本面财务安全门禁 (ROE & 杠杆)" },
+  { id: "plugin.capital.northbound", name: "北向外资资金流向门禁" },
+];
+
+const DEFAULT_PRIMARY_OPTIONS: ReadonlyArray<{ id: string; name: string }> = [
+  { id: "plugin.technical.fibonacci", name: "斐波那契黄金分割回撤因子" },
+  { id: "plugin.capital.northbound", name: "北向外资加仓异动因子" },
+  { id: "plugin.chan.bsp", name: "缠论形态买卖点因子" },
+];
+
+function buildDefaultPluginParams(pluginId: string): Record<string, unknown> {
+  switch (pluginId) {
+    case "plugin.fundamental.safety-guard":
+      return { minRoe: 8.0, maxDebtRatio: 70.0 };
+    case "plugin.capital.northbound":
+      return { minInflowWan: 1000 };
+    case "plugin.technical.fibonacci":
+      return { units: "bi", direction: "pullback" };
+    case "plugin.chan.bsp":
+      return {
+        units: "bi",
+        direction: "buy",
+        points: { first: true, second: true, third: true },
+        deduplicate: true,
+      };
+    default:
+      return {};
+  }
+}
+
+export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderProps) {
+  const [selectedPreset, setSelectedPreset] = useState<FlowPreset>("standard_guard");
+
+  // 前置门禁配置 (GUARD)
   const [enableGuard, setEnableGuard] = useState<boolean>(true);
   const [guardPluginId, setGuardPluginId] = useState<string>("plugin.fundamental.safety-guard");
-  const [guardMinConf, setGuardMinConf] = useState<number>(0.8);
 
-  // 共识打分配置
-  const [consensusThreshold, setConsensusThreshold] = useState<number>(75.0);
-  const [techWeight, setTechWeight] = useState<number>(60);
-  const [capitalWeight, setCapitalWeight] = useState<number>(40);
-  const [enableVeto, setEnableVeto] = useState<boolean>(true);
+  // 主信号门禁配置 (GUARD -> TERMINAL)
+  const [primaryPluginId, setPrimaryPluginId] = useState<string>("plugin.technical.fibonacci");
+  const [primaryAction, setPrimaryAction] = useState<"BUY" | "SELL">("BUY");
+
+  // 特征提取 + 条件分支配置 (EXTRACTOR -> BRANCH -> TERMINAL)
+  const [branchThreshold, setBranchThreshold] = useState<number>(1000);
 
   // 缠论参数
-  const [chanUnits, setChanUnits] = useState<string>("bi");
-  const [chanDirection, setChanDirection] = useState<string>("buy");
+  const [chanUnits, setChanUnits] = useState<"bi" | "duan">("bi");
+  const [chanDirection, setChanDirection] = useState<"buy" | "sell">("buy");
 
-  // 生成决策树 AST
+  // 生成严格合法的决策树 AST（仅允许 GUARD / BRANCH / EXTRACTOR / TERMINAL 四类节点）
   useEffect(() => {
-    let rootNode: Record<string, unknown>;
+    let rootNode: DecisionFlowNode;
 
     if (selectedPreset === "chan_bsp") {
+      const action = chanDirection === "sell" ? "SELL" : "BUY";
       rootNode = {
         id: "guard_chan_bsp",
         type: "GUARD",
@@ -42,12 +129,11 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
           points: { first: true, second: true, third: true },
           deduplicate: true,
         },
-        requiredAction: chanDirection === "sell" ? "SELL" : "BUY",
-        minConfidence: 0.8,
+        requiredAction: action,
         onPass: {
           id: "term_chan_pass",
           type: "TERMINAL",
-          action: chanDirection === "sell" ? "SELL" : "BUY",
+          action,
           signalTag: "CHAN_BSP_CONFIRMED",
           reason: `缠论${chanUnits === "duan" ? "线段" : "笔"}级买卖点确立`,
         },
@@ -58,38 +144,61 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
           reason: "缠论形态未确认",
         },
       };
-    } else {
-      // 默认/复合决策树：门禁 -> 加权共识 -> 终结节点
-      const consensusNode: Record<string, unknown> = {
-        id: "consensus_factors",
-        type: "CONSENSUS",
-        name: "多因子加权共识打分",
-        threshold: consensusThreshold,
-        plugins: [
-          {
-            pluginId: "plugin.technical.volume-breakout",
-            weight: techWeight,
-            params: { lookback: 20, volumeMultiple: 1.8 },
+    } else if (selectedPreset === "extractor_branch") {
+      rootNode = {
+        id: "extract_capital_flow",
+        type: "EXTRACTOR",
+        name: "北向资金净流入特征提取",
+        pluginId: "plugin.capital.northbound",
+        params: { minInflowWan: branchThreshold },
+        exportAttributeKey: "capital.flow",
+        next: {
+          id: "branch_capital_threshold",
+          type: "BRANCH",
+          name: "资金流入阈值条件分支",
+          condition: {
+            attributeKey: "capital.flow.netInflowWan",
+            operator: "gte",
+            value: branchThreshold,
           },
-          {
-            pluginId: "plugin.capital.northbound",
-            weight: capitalWeight,
-            isVeto: enableVeto,
-            params: { minInflowWan: 1000 },
+          branches: {
+            true: {
+              id: "term_branch_buy",
+              type: "TERMINAL",
+              action: "BUY",
+              signalTag: "CAPITAL_INFLOW_CONFIRMED",
+              reason: `资金净流入达到 ${branchThreshold} 万元阈值`,
+            },
+            false: {
+              id: "term_branch_abort",
+              type: "TERMINAL",
+              action: "ABORT",
+              reason: "资金流入条件未命中，分支短路终止",
+            },
           },
-        ],
-        onSuccess: {
-          id: "term_signal_buy",
-          type: "TERMINAL",
-          action: "BUY",
-          signalTag: "RESONANCE_BREAKOUT",
-          reason: "财务安全通过，放量突破与外资加仓综合达标",
         },
-        onFailure: {
+      };
+    } else {
+      // 标准串联门禁决策树：可选前置门禁 (GUARD) -> 核心信号门禁 (GUARD) -> 终结节点 (TERMINAL)
+      const primaryGateNode: GuardFlowNode = {
+        id: "guard_primary_signal",
+        type: "GUARD",
+        name: "核心信号因子门禁",
+        pluginId: primaryPluginId,
+        params: buildDefaultPluginParams(primaryPluginId),
+        requiredAction: primaryAction,
+        onPass: {
+          id: "term_signal_emit",
+          type: "TERMINAL",
+          action: primaryAction,
+          signalTag: "FACTOR_CONFIRMED",
+          reason: "前置安全与核心信号门禁均通过，确立信号",
+        },
+        onFail: {
           id: "term_signal_abort",
           type: "TERMINAL",
           action: "ABORT",
-          reason: "综合加权得分未达门槛",
+          reason: "核心信号门禁未通过",
         },
       };
 
@@ -99,10 +208,9 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
           type: "GUARD",
           name: "财务与基本面安全防线",
           pluginId: guardPluginId,
-          params: { minRoe: 8.0, maxDebtRatio: 70.0 },
-          requiredAction: "BUY",
-          minConfidence: guardMinConf,
-          onPass: consensusNode,
+          params: buildDefaultPluginParams(guardPluginId),
+          requiredAction: primaryAction,
+          onPass: primaryGateNode,
           onFail: {
             id: "term_guard_fail",
             type: "TERMINAL",
@@ -111,7 +219,7 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
           },
         };
       } else {
-        rootNode = consensusNode;
+        rootNode = primaryGateNode;
       }
     }
 
@@ -124,15 +232,16 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
     selectedPreset,
     enableGuard,
     guardPluginId,
-    guardMinConf,
-    consensusThreshold,
-    techWeight,
-    capitalWeight,
-    enableVeto,
+    primaryPluginId,
+    primaryAction,
+    branchThreshold,
     chanUnits,
     chanDirection,
     onChange,
   ]);
+
+  const guardOptions = plugins && plugins.length > 0 ? plugins : DEFAULT_GUARD_OPTIONS;
+  const primaryOptions = plugins && plugins.length > 0 ? plugins : DEFAULT_PRIMARY_OPTIONS;
 
   return (
     <div
@@ -147,25 +256,25 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
         gap: 16,
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
         <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
           决策流树状架构编排器 (Factor Tree Studio)
         </h4>
         <div style={{ display: "flex", gap: 8 }}>
           <button
             type="button"
-            onClick={() => setSelectedPreset("breakout_guard")}
+            onClick={() => setSelectedPreset("standard_guard")}
             style={{
               padding: "4px 10px",
               borderRadius: 6,
               fontSize: 12,
               cursor: "pointer",
-              border: selectedPreset === "breakout_guard" ? "1px solid var(--brand)" : "1px solid var(--border-subtle)",
-              background: selectedPreset === "breakout_guard" ? "rgba(43, 169, 192, 0.15)" : "transparent",
-              color: selectedPreset === "breakout_guard" ? "var(--brand)" : "var(--text-secondary)",
+              border: selectedPreset === "standard_guard" ? "1px solid var(--brand)" : "1px solid var(--border-subtle)",
+              background: selectedPreset === "standard_guard" ? "rgba(43, 169, 192, 0.15)" : "transparent",
+              color: selectedPreset === "standard_guard" ? "var(--brand)" : "var(--text-secondary)",
             }}
           >
-            突破 + 安全门禁
+            门禁信号树
           </button>
           <button
             type="button"
@@ -181,6 +290,21 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
             }}
           >
             缠论买卖点树
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedPreset("extractor_branch")}
+            style={{
+              padding: "4px 10px",
+              borderRadius: 6,
+              fontSize: 12,
+              cursor: "pointer",
+              border: selectedPreset === "extractor_branch" ? "1px solid var(--brand)" : "1px solid var(--border-subtle)",
+              background: selectedPreset === "extractor_branch" ? "rgba(43, 169, 192, 0.15)" : "transparent",
+              color: selectedPreset === "extractor_branch" ? "var(--brand)" : "var(--text-secondary)",
+            }}
+          >
+            特征分支树
           </button>
         </div>
       </div>
@@ -201,7 +325,7 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
             <span>结构级别:</span>
             <select
               value={chanUnits}
-              onChange={(e) => setChanUnits(e.target.value)}
+              onChange={(e) => setChanUnits(e.target.value as "bi" | "duan")}
               style={{
                 padding: "4px 8px",
                 background: "var(--surface-raised)",
@@ -219,7 +343,7 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
             <span>买卖方向:</span>
             <select
               value={chanDirection}
-              onChange={(e) => setChanDirection(e.target.value)}
+              onChange={(e) => setChanDirection(e.target.value as "buy" | "sell")}
               style={{
                 padding: "4px 8px",
                 background: "var(--surface-raised)",
@@ -233,9 +357,46 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
             </select>
           </label>
         </div>
+      ) : selectedPreset === "extractor_branch" ? (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            padding: 12,
+            background: "var(--surface-base)",
+            borderRadius: 6,
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+              特征提取与分支路由 (EXTRACTOR → BRANCH → TERMINAL)
+            </span>
+            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>写入黑板 attributeKey 后执行条件分流</span>
+          </div>
+          <label style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 10, color: "var(--text-secondary)" }}>
+            <span>北向净流入分支阈值 (万元):</span>
+            <input
+              type="number"
+              min={0}
+              step={100}
+              value={branchThreshold}
+              onChange={(e) => setBranchThreshold(Number(e.target.value) || 0)}
+              style={{
+                padding: "4px 8px",
+                width: 120,
+                background: "var(--surface-raised)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text-primary)",
+                borderRadius: 4,
+              }}
+            />
+          </label>
+        </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {/* 门禁节点配置 */}
+          {/* 前置门禁节点配置 */}
           <div
             style={{
               padding: 12,
@@ -261,7 +422,7 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
                   checked={enableGuard}
                   onChange={(e) => setEnableGuard(e.target.checked)}
                 />
-                前置短路门禁节点 (Guard Node)
+                前置短路门禁节点 (GUARD)
               </label>
               <span style={{ fontSize: 11, color: "var(--text-muted)" }}>未通过时直接剪枝，零后续开销</span>
             </div>
@@ -269,6 +430,7 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
             {enableGuard ? (
               <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 8 }}>
                 <select
+                  aria-label="前置门禁插件"
                   value={guardPluginId}
                   onChange={(e) => setGuardPluginId(e.target.value)}
                   style={{
@@ -280,39 +442,17 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
                     flex: 1,
                   }}
                 >
-                  {plugins && plugins.length > 0 ? (
-                    plugins.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.id})
-                      </option>
-                    ))
-                  ) : (
-                    <>
-                      <option value="plugin.fundamental.safety-guard">基本面财务安全门禁 (ROE & 杠杆)</option>
-                      <option value="plugin.regime.market-safety">大盘多空环境门禁</option>
-                    </>
-                  )}
+                  {guardOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.id})
+                    </option>
+                  ))}
                 </select>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>最低置信度:</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={guardMinConf}
-                    onChange={(e) => setGuardMinConf(Number(e.target.value))}
-                  />
-                  <span className="tnum" style={{ fontSize: 12, color: "var(--text-primary)", width: 36 }}>
-                    {(guardMinConf * 100).toFixed(0)}%
-                  </span>
-                </div>
               </div>
             ) : null}
           </div>
 
-          {/* 共识打分节点配置 */}
+          {/* 核心信号门禁节点配置 (GUARD -> TERMINAL) */}
           <div
             style={{
               padding: 12,
@@ -323,89 +463,50 @@ export function DecisionFlowBuilder({ plugins, onChange }: DecisionFlowBuilderPr
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
-                局部加权共识打分节点 (Consensus Node)
+                核心信号门禁节点 (GUARD → TERMINAL)
               </span>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>触发阈值:</span>
-                <input
-                  type="range"
-                  min="50"
-                  max="95"
-                  step="5"
-                  value={consensusThreshold}
-                  onChange={(e) => setConsensusThreshold(Number(e.target.value))}
-                />
-                <span
-                  className="tnum"
-                  style={{ fontSize: 12, color: "var(--sem-success)", fontWeight: 600, width: 36 }}
-                >
-                  {consensusThreshold}分
-                </span>
-              </div>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>确定性规则动作匹配通过后发射信号</span>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>放量突破因子权重:</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input
-                    type="range"
-                    min="10"
-                    max="90"
-                    step="5"
-                    value={techWeight}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      setTechWeight(v);
-                      setCapitalWeight(100 - v);
-                    }}
-                  />
-                  <span className="tnum" style={{ fontSize: 12, color: "var(--text-primary)", width: 32 }}>
-                    {techWeight}%
-                  </span>
-                </div>
-              </div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <select
+                aria-label="核心信号因子"
+                value={primaryPluginId}
+                onChange={(e) => setPrimaryPluginId(e.target.value)}
+                style={{
+                  padding: "4px 8px",
+                  background: "var(--surface-raised)",
+                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-primary)",
+                  borderRadius: 4,
+                  flex: 1,
+                }}
+              >
+                {primaryOptions.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.id})
+                  </option>
+                ))}
+              </select>
 
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>北向资金因子权重:</span>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input
-                    type="range"
-                    min="10"
-                    max="90"
-                    step="5"
-                    value={capitalWeight}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      setCapitalWeight(v);
-                      setTechWeight(100 - v);
-                    }}
-                  />
-                  <span className="tnum" style={{ fontSize: 12, color: "var(--text-primary)", width: 32 }}>
-                    {capitalWeight}%
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 4 }}>
-                <label
+              <label style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 8, color: "var(--text-secondary)" }}>
+                <span>目标动作:</span>
+                <select
+                  aria-label="目标动作"
+                  value={primaryAction}
+                  onChange={(e) => setPrimaryAction(e.target.value as "BUY" | "SELL")}
                   style={{
-                    fontSize: 12,
-                    color: "var(--sem-warn)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    cursor: "pointer",
+                    padding: "4px 8px",
+                    background: "var(--surface-raised)",
+                    border: "1px solid var(--border-subtle)",
+                    color: "var(--text-primary)",
+                    borderRadius: 4,
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={enableVeto}
-                    onChange={(e) => setEnableVeto(e.target.checked)}
-                  />
-                  开启外资净流出一票否决权 (Veto Right)
-                </label>
-              </div>
+                  <option value="BUY">买入 (BUY)</option>
+                  <option value="SELL">卖出 (SELL)</option>
+                </select>
+              </label>
             </div>
           </div>
         </div>

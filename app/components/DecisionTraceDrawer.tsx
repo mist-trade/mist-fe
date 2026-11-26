@@ -11,24 +11,6 @@ export interface DecisionTraceDrawerProps {
   onOpenLiveKLine?: (securityCode: string, timestamp: string) => void;
 }
 
-const CONFIDENCE_BADGES: Record<string, { bg: string; text: string; border: string }> = {
-  HIGH: {
-    bg: "rgba(74, 222, 128, 0.12)",
-    text: "var(--sem-success)",
-    border: "var(--sem-success)",
-  },
-  MEDIUM: {
-    bg: "rgba(251, 191, 36, 0.12)",
-    text: "var(--sem-warn)",
-    border: "var(--sem-warn)",
-  },
-  LOW: {
-    bg: "rgba(248, 113, 113, 0.12)",
-    text: "var(--sem-danger)",
-    border: "var(--sem-danger)",
-  },
-};
-
 export function DecisionTraceDrawer({
   signal,
   onClose,
@@ -47,12 +29,6 @@ export function DecisionTraceDrawer({
       : "";
 
   const signalTimeStr = formatShanghaiDateTime(signal.signalTime);
-
-  // 提取置信度与轨迹快照
-  const confidence = signal.confidence ?? 85.0;
-  const confidenceLevel =
-    signal.confidenceLevel ?? (confidence >= 80 ? "HIGH" : confidence >= 65 ? "MEDIUM" : "LOW");
-  const confStyle = CONFIDENCE_BADGES[confidenceLevel] ?? CONFIDENCE_BADGES.HIGH;
 
   const traceObj = (signal.decisionTrace || {}) as Record<string, unknown>;
   const ctx = (signal.contextSnapshot || {}) as Record<string, unknown>;
@@ -110,20 +86,6 @@ export function DecisionTraceDrawer({
               <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
                 {securityCode} {securityName}
               </h2>
-              <span
-                className="tnum"
-                style={{
-                  padding: "2px 8px",
-                  borderRadius: 4,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  backgroundColor: confStyle.bg,
-                  color: confStyle.text,
-                  border: `1px solid ${confStyle.border}`,
-                }}
-              >
-                {confidenceLevel} {Number(confidence).toFixed(1)}%
-              </span>
             </div>
             <span style={{ fontSize: 12, color: "var(--text-muted)" }}>触发时刻: {signalTimeStr}</span>
           </div>
@@ -209,7 +171,10 @@ export function DecisionTraceDrawer({
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {traceItems.map((item, idx) => {
                   const nodeType = String(item.type || "");
-                  const isPass = item.action !== "ABORT";
+                  const isPass =
+                    item.passed !== undefined
+                      ? Boolean(item.passed)
+                      : item.action !== "ABORT";
                   return (
                     <div
                       key={idx}
@@ -231,9 +196,11 @@ export function DecisionTraceDrawer({
                               background:
                                 nodeType === "GUARD"
                                   ? "var(--sem-excess)"
-                                  : nodeType === "CONSENSUS"
-                                    ? "var(--sem-benchmark)"
-                                    : "var(--brand)",
+                                  : nodeType === "BRANCH"
+                                    ? "var(--sem-warn)"
+                                    : nodeType === "EXTRACTOR"
+                                      ? "var(--sem-benchmark)"
+                                      : "var(--brand)",
                               color: "#ffffff",
                             }}
                           >
@@ -260,40 +227,16 @@ export function DecisionTraceDrawer({
                         </p>
                       ) : null}
 
-                      {/* 若为共识节点，渲染插件投票分解表 */}
-                      {Array.isArray(item.breakdown) && item.breakdown.length > 0 ? (
-                        <div style={{ marginTop: 8, borderTop: "1px solid var(--border-subtle)", paddingTop: 8 }}>
-                          <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>
-                            加权因子投票明细:
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            {item.breakdown.map((b: Record<string, unknown>, bIdx: number) => {
-                              const weight = typeof b.weight === "number" || typeof b.weight === "string" ? b.weight : 0;
-                              const conf = typeof b.confidence === "number" ? b.confidence : 0;
-                              const actionStr = String(b.action || "");
-                              return (
-                                <div
-                                  key={bIdx}
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    fontSize: 11,
-                                    color: "var(--text-secondary)",
-                                    background: "var(--surface-raised)",
-                                    border: "1px solid var(--border-subtle)",
-                                    padding: "4px 8px",
-                                    borderRadius: 4,
-                                  }}
-                                >
-                                  <span>{String(b.pluginId || "").replace("plugin.", "")} (权重 {String(weight)}%)</span>
-                                  <span className="tnum">
-                                    {actionStr === "BUY" ? "看多" : actionStr === "SELL" ? "看空" : "弃权"} (确信度: {(conf * 100).toFixed(0)}%)
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
+                      {item.exportedKey ? (
+                        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "4px 0 0 0" }}>
+                          写入特征键: <code>{String(item.exportedKey)}</code>
+                        </p>
+                      ) : null}
+
+                      {typeof item.conditionResult === "boolean" ? (
+                        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "4px 0 0 0" }}>
+                          分支条件判定: {item.conditionResult ? "True (命中)" : "False (未命中)"}
+                        </p>
                       ) : null}
                     </div>
                   );

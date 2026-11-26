@@ -336,7 +336,7 @@ export default function StrategiesWorkspace() {
                     策略名称
                     <input
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="如：双因子共识动量突破策略"
+                      placeholder="如：基本面门禁与动量突破策略"
                       value={name}
                     />
                   </label>
@@ -432,7 +432,6 @@ export default function StrategiesWorkspace() {
                         <th>标的代码</th>
                         <th>标的名称</th>
                         <th>信号类型</th>
-                        <th>置信度</th>
                         <th>周期/来源</th>
                         <th>信号时间</th>
                         <th>操作</th>
@@ -442,8 +441,6 @@ export default function StrategiesWorkspace() {
                       {signals.map((item, idx) => {
                         const code = item.security?.code ?? String(item.securityId);
                         const secName = item.security?.name ?? "-";
-                        const conf = item.confidence ?? 85.0;
-                        const confLevel = item.confidenceLevel ?? (conf >= 80 ? "HIGH" : conf >= 65 ? "MEDIUM" : "LOW");
                         return (
                           <tr
                             key={item.id}
@@ -458,31 +455,6 @@ export default function StrategiesWorkspace() {
                             <td>
                               <span className={`bsp-tag ${item.signalKind === "entry" ? "bsp-buy" : "bsp-sell"}`}>
                                 {item.signalKind === "entry" ? "买入 (BUY)" : "卖出 (SELL)"}
-                              </span>
-                            </td>
-                            <td>
-                              <span
-                                className="tnum"
-                                style={{
-                                  padding: "2px 6px",
-                                  borderRadius: 4,
-                                  fontSize: 11,
-                                  fontWeight: 600,
-                                  background:
-                                    confLevel === "HIGH"
-                                      ? "rgba(74, 222, 128, 0.12)"
-                                      : confLevel === "MEDIUM"
-                                        ? "rgba(251, 191, 36, 0.12)"
-                                        : "rgba(248, 113, 113, 0.12)",
-                                  color:
-                                    confLevel === "HIGH"
-                                      ? "var(--sem-success)"
-                                      : confLevel === "MEDIUM"
-                                        ? "var(--sem-warn)"
-                                        : "var(--sem-danger)",
-                                }}
-                              >
-                                {confLevel} {Number(conf).toFixed(1)}%
                               </span>
                             </td>
                             <td className="tnum">

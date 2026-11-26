@@ -34,16 +34,11 @@ function parseSignalInfo(sig: StrategyBacktestSignalResult) {
   const rawPrice = ctx.triggerPrice ?? ctx.price;
   const price = typeof rawPrice === "number" ? rawPrice : Number(rawPrice ?? 0);
 
-  const confidence = sig.confidence ?? 85.0;
-  const confidenceLevel = sig.confidenceLevel ?? (confidence >= 80 ? "HIGH" : confidence >= 65 ? "MEDIUM" : "LOW");
-
   return {
     rawType,
     label,
     isBuy,
     price: price > 0 ? price.toFixed(2) : "-",
-    confidence: Number(confidence).toFixed(1),
-    confidenceLevel,
   };
 }
 
@@ -53,7 +48,7 @@ export const BacktestSignalTable = memo(function BacktestSignalTable({
   onSelectSignal,
   onOpenLiveKLine,
 }: BacktestSignalTableProps) {
-  const [filterType, setFilterType] = useState<"all" | "buy" | "sell" | "high_conf">("all");
+  const [filterType, setFilterType] = useState<"all" | "buy" | "sell">("all");
   const [keyword, setKeyword] = useState("");
 
   const parsedSignals = useMemo(() => {
@@ -70,7 +65,6 @@ export const BacktestSignalTable = memo(function BacktestSignalTable({
       }
       if (filterType === "buy" && !parsed.isBuy) return false;
       if (filterType === "sell" && parsed.isBuy) return false;
-      if (filterType === "high_conf" && parsed.confidenceLevel !== "HIGH") return false;
       return true;
     });
   }, [parsedSignals, filterType, keyword]);
@@ -126,13 +120,6 @@ export const BacktestSignalTable = memo(function BacktestSignalTable({
             >
               卖点 ({sellCount})
             </button>
-            <button
-              type="button"
-              className={`filter-pill ${filterType === "high_conf" ? "active" : ""}`}
-              onClick={() => setFilterType("high_conf")}
-            >
-              高置信度 (HIGH)
-            </button>
           </div>
         </div>
       </div>
@@ -144,7 +131,6 @@ export const BacktestSignalTable = memo(function BacktestSignalTable({
               <th style={{ width: "45px" }}>#</th>
               <th>标的代码</th>
               <th>信号类型</th>
-              <th>置信度</th>
               <th>触发价格</th>
               <th>信号时间</th>
               <th style={{ width: "160px" }}>操作</th>
@@ -153,7 +139,7 @@ export const BacktestSignalTable = memo(function BacktestSignalTable({
           <tbody>
             {filteredSignals.map(({ rawSignal, parsed }, idx) => {
               const isSelected = rawSignal.id === selectedSignalId;
-              const { label, isBuy, price, confidence, confidenceLevel } = parsed;
+              const { label, isBuy, price } = parsed;
 
               return (
                 <tr
@@ -172,31 +158,6 @@ export const BacktestSignalTable = memo(function BacktestSignalTable({
                     >
                       <span className="bsp-arrow">{isBuy ? "▲" : "▼"}</span>
                       {label}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className="tnum"
-                      style={{
-                        padding: "2px 6px",
-                        borderRadius: 4,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background:
-                          confidenceLevel === "HIGH"
-                            ? "rgba(74, 222, 128, 0.12)"
-                            : confidenceLevel === "MEDIUM"
-                              ? "rgba(251, 191, 36, 0.12)"
-                              : "rgba(248, 113, 113, 0.12)",
-                        color:
-                          confidenceLevel === "HIGH"
-                            ? "var(--sem-success)"
-                            : confidenceLevel === "MEDIUM"
-                              ? "var(--sem-warn)"
-                              : "var(--sem-danger)",
-                      }}
-                    >
-                      {confidenceLevel} {confidence}%
                     </span>
                   </td>
                   <td className="tnum">{price}</td>

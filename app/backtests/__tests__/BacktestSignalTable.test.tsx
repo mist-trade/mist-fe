@@ -56,6 +56,9 @@ describe("BacktestSignalTable", () => {
     expect(screen.getByText("1卖")).toBeInTheDocument();
     expect(screen.getByText("1买")).toBeInTheDocument();
     expect(screen.getByText("3850.50")).toBeInTheDocument();
+    expect(screen.queryByText("置信度")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /HIGH|高置信度/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(/85\.0%/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText("3810.00"));
     expect(handleSelect).toHaveBeenCalledWith(mockSignals[1]);

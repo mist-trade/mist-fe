@@ -19,8 +19,6 @@ export function toBacktestSignalResult(
     signalTime: sig.signalTime,
     signalType: sig.signalType,
     badgeText: sig.badgeText,
-    confidence: sig.confidence,
-    confidenceLevel: "HIGH",
     decisionTrace: sig.decisionTrace,
     contextSnapshot: {
       type: sig.signalType,
